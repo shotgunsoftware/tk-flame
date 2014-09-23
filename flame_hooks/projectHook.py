@@ -26,9 +26,11 @@ def appInitialized( projectName ):
     import os
     
     # todo - add exception handling
+    print "Starting up toolkit engine..."
     engine_name = os.environ.get("TOOLKIT_ENGINE_NAME") 
     context = sgtk.context.deserialize(os.environ.get("TOOLKIT_CONTEXT"))
-    sgtk.platform.start_engine(engine_name, context.sgtk, context)
+    e = sgtk.platform.start_engine(engine_name, context.sgtk, context)
+    print "toolkit engine running! %s" % e 
     
 
 # Hook called after a project has been saved
