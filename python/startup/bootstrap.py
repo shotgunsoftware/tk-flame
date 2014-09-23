@@ -14,7 +14,7 @@ import os
 
 FLAME_HOOKS_FOLDER = "flame_hooks"
 
-def bootstrap(tk, engine_instance_name, context):
+def bootstrap(engine_instance_name, context):
     """
     Entry point for starting this engine.
     This is typically called from something like tk-multi-launchapp
@@ -25,24 +25,41 @@ def bootstrap(tk, engine_instance_name, context):
     :param context: The context to launch
     """
     
-    # for now, force enable debug. later on, read from engine settings    
-    os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
+    # first create a version of the flame engine!
+    # this is so that we can introspect it and extract and validate settings
+    #
+    # todo: add get_engine() method (or similar) to core
+    current_engine = sgtk.platform.current_engine()
+    sgtk.platform.engine.set_current_engine(None)
+    
+    flame_engine = sgtk.platform.start_engine(engine_instance_name, context.sgtk, context)
+    
+    
+    if flame_engine.get_setting("debug_logging"):
+        # enable flame hooks debug
+        os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
+        
+    flame_engine.log_debug("Started flame engine for introspection: %s" % flame_engine)
         
     # add flame hooks for this engine
-    # note - this is currently using some private core methods - replace with official ones!
-    engine_path = sgtk.platform.get_engine_path(engine_instance_name, tk, context)
-    flame_hooks_folder = os.path.join(engine_path, FLAME_HOOKS_FOLDER)
+    flame_hooks_folder = os.path.join(flame_engine.disk_location, FLAME_HOOKS_FOLDER)
     sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
+    flame_engine.log_debug("Added to hook path: %s" % flame_hooks_folder)
     
-    # go through and add flame hooks for all apps registered with this engine
-    # note - this is currently using some private core methods - replace with official ones!
-    env = sgtk.platform.engine.get_environment_from_context(tk, context)    
-    for app in env.get_apps(engine_instance_name):
-        descriptor = env.get_app_descriptor(engine_instance_name, app)
-        flame_hooks_folder = os.path.join(descriptor.get_path(), FLAME_HOOKS_FOLDER)
-        print flame_hooks_folder
+    # go through and add flame hooks for all apps registered with this engine    
+    for app_obj in flame_engine.apps.values():        
+        flame_hooks_folder = os.path.join(app_obj.disk_location, FLAME_HOOKS_FOLDER)
         if os.path.exists(flame_hooks_folder):
             sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
+            flame_engine.log_debug("Added to hook path: %s" % flame_hooks_folder)
     
+    # deallocate the engine
+    flame_engine.destroy()
+    
+    # put the currently running engine back again
+    sgtk.platform.engine.set_current_engine(current_engine)
+    
+    # serialize engine parameters. Once flame has started, the project hook 
+    # will run and start up the engine (again) inside of flame.
     os.environ["TOOLKIT_ENGINE_NAME"] = engine_instance_name
     os.environ["TOOLKIT_CONTEXT"] = sgtk.context.serialize(context)
