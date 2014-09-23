@@ -19,8 +19,17 @@ def projectChanged(projectName):
 #
 # projectName: the project that was loaded -- String
 def appInitialized( projectName ):
-   pass
-
+    """
+    Try to start up the flame engine at this point
+    """
+    import sgtk
+    import os
+    
+    # todo - add exception handling
+    engine_name = os.environ.get("TOOLKIT_ENGINE_NAME") 
+    context = sgtk.context.deserialize(os.environ.get("TOOLKIT_CONTEXT"))
+    sgtk.platform.start_engine(engine_name, context.sgtk, context)
+    
 
 # Hook called after a project has been saved
 #

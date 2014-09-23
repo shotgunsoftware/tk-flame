@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 
-import tank
+import sgtk
 import os
 
 FLAME_HOOKS_FOLDER = "flame_hooks"
@@ -30,17 +30,19 @@ def bootstrap(tk, engine_instance_name, context):
         
     # add flame hooks for this engine
     # note - this is currently using some private core methods - replace with official ones!
-    engine_path = tank.platform.get_engine_path(engine_instance_name, tk, context)
+    engine_path = sgtk.platform.get_engine_path(engine_instance_name, tk, context)
     flame_hooks_folder = os.path.join(engine_path, FLAME_HOOKS_FOLDER)
-    tank.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
+    sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
     
     # go through and add flame hooks for all apps registered with this engine
     # note - this is currently using some private core methods - replace with official ones!
-    env = tank.platform.engine.get_environment_from_context(tk, context)    
+    env = sgtk.platform.engine.get_environment_from_context(tk, context)    
     for app in env.get_apps(engine_instance_name):
         descriptor = env.get_app_descriptor(engine_instance_name, app)
         flame_hooks_folder = os.path.join(descriptor.get_path(), FLAME_HOOKS_FOLDER)
         print flame_hooks_folder
         if os.path.exists(flame_hooks_folder):
-            tank.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
+            sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
     
+    os.environ["TOOLKIT_ENGINE_NAME"] = engine_instance_name
+    os.environ["TOOLKIT_CONTEXT"] = sgtk.context.serialize(context)
