@@ -22,7 +22,7 @@ class FlameEngine(sgtk.platform.Engine):
     def pre_app_init(self):
         """
         Engine construction/setup done before any apps are initialized
-        """
+        """        
         self.log_debug("%s: Initializing..." % self)
         
     def post_app_init(self):
@@ -45,15 +45,13 @@ class FlameEngine(sgtk.platform.Engine):
 #         # todo: detect batch mode
 #         return True
 # 
-#     def log_debug(self, msg):
-#         """
-#         Log a debug message
-#         :param msg:    The debug message to log
-#         """
-#         if not hasattr(self, "_debug_logging"):
-#             self._debug_logging = self.get_setting("debug_logging", False)
-#         if self._debug_logging:
-#             print 'Shotgun Debug: %s' % msg
+    def log_debug(self, msg):
+        """
+        Log a debug message
+        :param msg:    The debug message to log
+        """
+        if self.get_setting("debug_logging", False):
+            print "Shotgun Debug: %s" % msg
 # 
 #     def log_info(self, msg):
 #         """

@@ -10,7 +10,9 @@
 
 
 import sgtk
+from sgtk import TankError
 import os
+import sys
 
 FLAME_HOOKS_FOLDER = "flame_hooks"
 
@@ -52,6 +54,29 @@ def bootstrap(engine_instance_name, context):
         if os.path.exists(flame_hooks_folder):
             sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
             flame_engine.log_debug("Added to hook path: %s" % flame_hooks_folder)
+    
+    # add and validate the wiretap API
+    # first, see if the wiretap API already exists - in that case, we use that version
+    try:
+        import libwiretapPythonClientAPI
+        flame_engine.log_debug("Wiretap API was already in the pythonpath. "
+                               "Will not try to add one in from the engine.")
+    except:
+        flame_engine.log_debug("Wiretap API not detected. Will add it to the pythonpath.")
+        wiretap_path = os.path.join(flame_engine.disk_location, 
+                                    "resources", 
+                                    "wiretap_%s_py%s%s" % (sys.platform, sys.version_info[0], sys.version_info[1]))
+        
+        flame_engine.log_debug("The wiretap API for the current session would be here: %s" % wiretap_path)
+        
+        if not os.path.exists(wiretap_path):
+            raise TankError("The flame engine does not support the version of python (%s) "
+                            "you are currently running!" % sys.version)
+    
+        sys.append(0, wiretap_path)
+        import libwiretapPythonClientAPI
+    
+    flame_engine.log_debug("Using wiretap API %s from %s" % (libwiretapPythonClientAPI, libwiretapPythonClientAPI.__file__))
     
     # deallocate the engine
     flame_engine.destroy()
