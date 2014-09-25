@@ -100,51 +100,45 @@ class FlameEngine(sgtk.platform.Engine):
             wiretap_handler.close()
         
         return app_args
-        
-        
-        
-        
-        
-        
-        
-        
-#     @property
-#     def has_ui(self):
-#         """
-#         Detect and return if mari is not running in terminal mode
-#         """        
-#         # todo: detect batch mode
-#         return True
-# 
+                
+    @property
+    def has_ui(self):
+        """
+        Detect and return if flame is not running in terminal mode
+        """        
+        # todo: detect batch mode?
+        return True
+ 
     def log_debug(self, msg):
         """
         Log a debug message
-        :param msg:    The debug message to log
+        
+        :param msg: The debug message to log
         """
         if self.get_setting("debug_logging", False):
             print "Shotgun Debug: %s" % msg
-# 
-#     def log_info(self, msg):
-#         """
-#         Log some info
-#         :param msg:    The info message to log
-#         """
-#         print 'Shotgun Info: %s' % msg
-# 
-#     def log_warning(self, msg):
-#         """
-#         Log a warning
-#         :param msg:    The warning message to log
-#         """        
-#         msg = 'Shotgun Warning: %s' % msg
-#         print msg
-# 
-#     def log_error(self, msg):
-#         """
-#         Log an error
-#         :param msg:    The error message to log
-#         """        
-#         msg = 'Shotgun Error: %s' % msg
-#         print msg
-
+ 
+    def log_info(self, msg):
+        """
+        Log some info
+        
+        :param msg: The info message to log
+        """
+        print "Shotgun Info: %s" % msg
+ 
+    def log_warning(self, msg):
+        """
+        Log a warning
+        
+        :param msg: The warning message to log
+        """        
+        print "Shotgun Warning: %s" % msg
+ 
+    def log_error(self, msg):
+        """
+        Log an error
+        
+        :param msg: The error message to log
+        """        
+        print "Shotgun Error: %s" % msg
 
