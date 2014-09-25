@@ -61,7 +61,7 @@ class FlameEngine(sgtk.platform.Engine):
         
         # go through and add flame hooks for all apps registered with this engine    
         for app_obj in self.apps.values():        
-            flame_hooks_folder = os.path.join(self.disk_location, self.FLAME_HOOKS_FOLDER)
+            flame_hooks_folder = os.path.join(app_obj.disk_location, self.FLAME_HOOKS_FOLDER)
             if os.path.exists(flame_hooks_folder):
                 sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
                 self.log_debug("Added to hook path: %s" % flame_hooks_folder)
