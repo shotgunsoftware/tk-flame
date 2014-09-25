@@ -18,11 +18,40 @@ import os
 HookBaseClass = sgtk.get_hook_baseclass()
 
 class ProjectStartupActions(HookBaseClass):
+    """
+    Toolkit hook to control the behavior of how new projects are created.
+    
+    As part of the toolkit Flame launch process, a new flame project is automatically
+    created if it doesn't already exist. Toolkit will then jump directly into that project
+    as part of the launch process. 
+    
+    This hooks allows a project to customize the behaviour for new projects and jumping into 
+    projects:
+    
+    - The user which should be used when launching Flame and starting the project
+    - The naming of a new project
+    - The project parameters used with new projects
+    - The storage volume to store a new project on
+    - The workspace to use when launching the project
+    
+    It is possible to introspect Shotgun inside this hook, making it straight
+    forward to make this entire process driven from field values within Shotgun.
+    
+    - The engine instance can be fetched via self.parent
+    - A shotgun API handle is available via engine_obj.shotgun.
+    - The project id can be retrieved via engine_obj.context.project["id"]
+    """
     
     
     def get_project(self):
         """
-        Return the project name
+        Return the project name that should be used for the current context.
+        Please note that flame doesn't allow all types of characters in Project names.
+        
+        The flame engine will try to find this project in Flame and start it.
+        If it doesn't exist, it will be automatically created.
+        
+        :returns: project name string 
         """
         engine = self.parent
         
@@ -39,7 +68,24 @@ class ProjectStartupActions(HookBaseClass):
             
     def get_project_settings(self):
         """
-        Returns project settings
+        Returns project settings for when creating new projects.
+        
+        The following parameters need to be supplied:
+        
+         - FrameWidth
+         - FrameHeight
+         - FrameDepth
+         - AspectRatio
+         - FrameRate
+         - ProxyEnable
+         - ProxyWidthHint
+         - ProxyDepthMode
+         - ProxyMinFrameSize
+         - ProxyAbove8bits
+         - ProxyQuality
+         - FieldDominance
+        
+        :returns: dictionary of standard wiretap style project setup parameters.
         """
         settings = {}
         settings["FrameWidth"] = "1280"
@@ -60,7 +106,14 @@ class ProjectStartupActions(HookBaseClass):
             
     def get_volume(self, volumes):
         """
-        Return the volume to use
+        When a new project is created, this allows to control
+        which volume should be associated with the new project.
+        
+        The return value needs to be one of the strings passed in 
+        via the volumes parameter.
+        
+        :param volumes: List of existing volumes (list of string)
+        :returns: One of the volumes in the list (str)
         """
         return volumes[0]
     
@@ -69,18 +122,15 @@ class ProjectStartupActions(HookBaseClass):
         Return the name of the workspace to use when opening a project.
         The system will create it if it doesn't already exist.
         
+        :returns: A flame workspace Name
         """
         return "my-workspace"
 
     def get_user(self):
         """
-        Execute a given action. The data sent to this be method will
-        represent one of the actions enumerated by the generate_actions method.
+        Return the name of the flame user to be used when launching this project.
         
-        :param name: Action name string representing one of the items returned by generate_actions.
-        :param params: Params data, as specified by generate_actions.
-        :param sg_publish_data: Shotgun data dictionary with all the standard publish fields.
-        :returns: No return value expected.
+        :returns: A user name as a string
         """
         engine = self.parent
 
@@ -93,6 +143,4 @@ class ProjectStartupActions(HookBaseClass):
             user_name = shotgun_user["name"] 
 
         return user_name
-        
-                        
         
