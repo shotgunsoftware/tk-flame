@@ -42,6 +42,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         self.log_debug("%s: Destroying..." % self)
         
+    
     def bootstrap(self):
         """
         Special bootstrap method used to set up the flame environment.
@@ -100,6 +101,49 @@ class FlameEngine(sgtk.platform.Engine):
             wiretap_handler.close()
         
         return app_args
+                
+    ################################################################################################################
+                
+                
+    def __get_wiretap_central_binary(self, binary_name):
+        """
+        Returns the path to a binary in the wiretap central binary collection.
+        This is standard on all flame installations.
+        
+        :param binary_name: Name of desired binary
+        :returns: Absolute path as a string  
+        """
+        if sys.platform == "darwin":
+            wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
+        elif sys.platform == "linux2":
+            wtc_path = "/var/www/cgi-bin/WiretapCentral"
+        else:    
+            raise TankError("Your operating system does not support wiretap central!")
+        
+        path = os.path.join(wtc_path, binary_name)
+        if not os.path.exists(path):
+            raise TankError("Cannot find binary '%s'!" % path)
+        
+        return path
+
+    def get_ffmpeg_path(self):
+        """
+        Returns the path to the ffmpeg executable that ships with flame.
+        
+        :returns: Absolute path as a string
+        """
+        return self.__get_wiretap_central_binary("ffmpeg")
+                
+    def get_read_frame_path(self):
+        """
+        Returns the path to the read_frame utility that ships with flame.
+        
+        :returns: Absolute path as a string
+        """
+        return self.__get_wiretap_central_binary("read_frame")    
+
+    ################################################################################################################
+    # standard engine interface
                 
     @property
     def has_ui(self):
