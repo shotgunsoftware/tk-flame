@@ -60,11 +60,12 @@ class ProjectStartupActions(HookBaseClass):
         
         project_name = engine.context.project["name"]
         
-        # spaces don't seem to be supported
-        # TODO: probably more aggressive cleanup needed here)
-        project_name = project_name.replace(" ", "_")
+        # sanity check the project name, convert to alphanumeric.
+        # flame is restrictive with special characters, so adopt 
+        # a conservative approach
+        sanitized_project_name = re.sub(r'\W+', '_', project_name)
         
-        return project_name
+        return sanitized_project_name
             
     def get_project_settings(self):
         """
