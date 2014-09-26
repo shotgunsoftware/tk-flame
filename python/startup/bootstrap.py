@@ -42,7 +42,7 @@ def bootstrap(engine_instance_name, context):
     # start up flame engine
     flame_engine = sgtk.platform.start_engine(engine_instance_name, context.sgtk, context)
     
-    # run boot strap and init!
+    # run bootstrap and init!
     app_args = flame_engine.bootstrap()
     
     # deallocate the engine

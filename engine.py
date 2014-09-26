@@ -28,7 +28,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Engine construction/setup done before any apps are initialized
         """        
-        self.log_debug("%s: Initializing..." % self)        
+        self.log_debug("%s: Initializing..." % self)       
         
     def post_app_init(self):
         """
@@ -41,7 +41,11 @@ class FlameEngine(sgtk.platform.Engine):
         Called when the engine is being destroyed
         """
         self.log_debug("%s: Destroying..." % self)
-        
+    
+    
+    ################################################################################################################
+    # Bootstrap code
+    # NOTE! This is executed *outside* of Flame, prior to launch.
     
     def bootstrap(self):
         """
@@ -101,9 +105,47 @@ class FlameEngine(sgtk.platform.Engine):
             wiretap_handler.close()
         
         return app_args
-                
+    
+    
     ################################################################################################################
+    # standard engine interface
                 
+    def log_debug(self, msg):
+        """
+        Log a debug message
+        
+        :param msg: The debug message to log
+        """
+        if self.get_setting("debug_logging", False):
+            print "Shotgun Debug: %s" % msg
+ 
+    def log_info(self, msg):
+        """
+        Log some info
+        
+        :param msg: The info message to log
+        """
+        print "Shotgun Info: %s" % msg
+ 
+    def log_warning(self, msg):
+        """
+        Log a warning
+        
+        :param msg: The warning message to log
+        """        
+        print "Shotgun Warning: %s" % msg
+ 
+    def log_error(self, msg):
+        """
+        Log an error
+        
+        :param msg: The error message to log
+        """        
+        print "Shotgun Error: %s" % msg
+
+
+    ################################################################################################################
+    # wiretap accessors                
                 
     def __get_wiretap_central_binary(self, binary_name):
         """
@@ -141,48 +183,3 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Absolute path as a string
         """
         return self.__get_wiretap_central_binary("read_frame")    
-
-    ################################################################################################################
-    # standard engine interface
-                
-    @property
-    def has_ui(self):
-        """
-        Detect and return if flame is not running in terminal mode
-        """        
-        # todo: detect batch mode?
-        return True
- 
-    def log_debug(self, msg):
-        """
-        Log a debug message
-        
-        :param msg: The debug message to log
-        """
-        if self.get_setting("debug_logging", False):
-            print "Shotgun Debug: %s" % msg
- 
-    def log_info(self, msg):
-        """
-        Log some info
-        
-        :param msg: The info message to log
-        """
-        print "Shotgun Info: %s" % msg
- 
-    def log_warning(self, msg):
-        """
-        Log a warning
-        
-        :param msg: The warning message to log
-        """        
-        print "Shotgun Warning: %s" % msg
- 
-    def log_error(self, msg):
-        """
-        Log an error
-        
-        :param msg: The error message to log
-        """        
-        print "Shotgun Error: %s" % msg
-
