@@ -14,6 +14,7 @@ Hook that handles logic and automation around automatic Flame project setup
 import sgtk
 from sgtk import TankError
 import os
+import re
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -41,7 +42,6 @@ class ProjectStartupActions(HookBaseClass):
     - A shotgun API handle is available via engine_obj.shotgun.
     - The project id can be retrieved via engine_obj.context.project["id"]
     """
-    
     
     def get_project(self):
         """
