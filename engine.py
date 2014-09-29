@@ -42,6 +42,10 @@ class FlameEngine(sgtk.platform.Engine):
         """
         self.log_debug("%s: Destroying..." % self)
     
+    @property
+    def has_ui(self):
+        return False
+    
     
     ################################################################################################################
     # Bootstrap code
