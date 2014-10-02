@@ -123,9 +123,12 @@ class ProjectStartupActions(HookBaseClass):
         Return the name of the workspace to use when opening a project.
         The system will create it if it doesn't already exist.
         
-        :returns: A flame workspace Name
+        If None is return, flame will create a default workspace according
+        to its standard workspace creation logic.
+        
+        :returns: A flame workspace Name or None for a default workspace
         """
-        return "my-workspace"
+        return None
 
     def get_user(self):
         """

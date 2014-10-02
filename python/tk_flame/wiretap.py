@@ -72,9 +72,18 @@ class WiretapHandler(object):
         self._ensure_project_exists(project_name)
         
         workspace_name = self._engine.execute_hook_method("project_startup_hook", "get_workspace")
-        self._ensure_workspace_exists(project_name, workspace_name)
-        
-        app_args = "--start-project='%s' --start-user='%s' --create-workspace --start-workspace='%s'" % (project_name, user_name, workspace_name)
+        if workspace_name:
+            self._engine.log_debug("Using a custom workspace '%s'" % workspace_name)
+            # an explicit workspace is used. Ensure it exists
+            self._ensure_workspace_exists(project_name, workspace_name)
+            # and pass it to the startup
+            app_args = "--start-project='%s' --start-user='%s' --create-workspace --start-workspace='%s'" % (project_name, 
+                                                                                                             user_name, 
+                                                                                                             workspace_name)
+        else:
+            # use flame's default workspace
+            self._engine.log_debug("Using the flame default workspace")
+            app_args = "--start-project='%s' --start-user='%s' --create-workspace" % (project_name, user_name)
         
         return app_args
     
