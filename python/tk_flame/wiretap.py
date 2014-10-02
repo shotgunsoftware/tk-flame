@@ -74,7 +74,7 @@ class WiretapHandler(object):
         workspace_name = self._engine.execute_hook_method("project_startup_hook", "get_workspace")
         self._ensure_workspace_exists(project_name, workspace_name)
         
-        app_args = "--start-project='%s' --start-user='%s' --start-workspace='%s'" % (project_name, user_name, workspace_name)
+        app_args = "--start-project='%s' --start-user='%s' --create-workspace --start-workspace='%s'" % (project_name, user_name, workspace_name)
         
         return app_args
     
