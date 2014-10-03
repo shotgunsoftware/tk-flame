@@ -28,16 +28,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Engine construction/setup done before any apps are initialized
         """        
-        self.log_debug("%s: Initializing..." % self)    
-        
-        # check if there is a UI. With Flame, we may run the engine in bootstrap
-        # mode or on the farm - in this case, there is no access to UI. If inside the
-        # DCC UI environment, pyside support is available.
-        try:
-            import PySide
-            self._has_ui = True
-        except:
-            self._has_ui = False
+        self.log_debug("%s: Initializing..." % self)        
         
     def post_app_init(self):
         """
@@ -56,8 +47,14 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Property to determine if the current environment has access to a UI or not
         """
-        return self._has_ui
-        
+        # check if there is a UI. With Flame, we may run the engine in bootstrap
+        # mode or on the farm - in this case, there is no access to UI. If inside the
+        # DCC UI environment, pyside support is available.
+        try:
+            import PySide
+            self._has_ui = True
+        except:
+            self._has_ui = False
     
     
     ################################################################################################################
