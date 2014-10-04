@@ -30,6 +30,11 @@ class FlameEngine(sgtk.platform.Engine):
         """        
         self.log_debug("%s: Initializing..." % self)        
         
+        if self.has_ui:
+            # tell QT to interpret C strings as utf-8
+            utf8 = QtCore.QTextCodec.codecForName("utf-8")
+            QtCore.QTextCodec.setCodecForCStrings(utf8)        
+        
     def post_app_init(self):
         """
         Do any initialization after apps have been loaded
