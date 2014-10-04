@@ -93,9 +93,20 @@ class FlameEngine(sgtk.platform.Engine):
                            "Will not try to add one in from the engine.")
         except:
             self.log_debug("Wiretap API not detected. Will add it to the pythonpath.")
-            wiretap_path = os.path.join(self.disk_location, 
-                                        "resources", 
-                                        "wiretap_%s_py%s%s" % (sys.platform, sys.version_info[0], sys.version_info[1]))
+            
+            if sys.platform == "linux2":
+                # todo - see if we need additional binary versions on linux!
+                wiretap_path = os.path.join(self.disk_location, 
+                                            "resources", 
+                                            "wiretap_linux_py%s%s_gcc446" % (sys.version_info[0], sys.version_info[1]))                
+                
+            elif sys.platform == "darwin":
+                wiretap_path = os.path.join(self.disk_location, 
+                                            "resources", 
+                                            "wiretap_mac_py%s%s" % (sys.version_info[0], sys.version_info[1]))                
+            else:
+                raise TankError("Unsupported operating system!")
+            
             
             self.log_debug("The wiretap API for the current session would be here: %s" % wiretap_path)
             
