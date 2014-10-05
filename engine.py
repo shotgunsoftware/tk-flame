@@ -32,6 +32,7 @@ class FlameEngine(sgtk.platform.Engine):
         
         if self.has_ui:
             # tell QT to interpret C strings as utf-8
+            from PySide import QtGui, QtCore
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)        
         
@@ -55,11 +56,16 @@ class FlameEngine(sgtk.platform.Engine):
         # check if there is a UI. With Flame, we may run the engine in bootstrap
         # mode or on the farm - in this case, there is no access to UI. If inside the
         # DCC UI environment, pyside support is available.
+        has_ui = False
         try:
-            import PySide
-            self._has_ui = True
+            from PySide import QtGui, QtCore
+            if QtCore.QCoreApplication.instance():
+                # there is an active application
+                has_ui = True
         except:
-            self._has_ui = False
+            pass
+        
+        return has_ui
     
     
     ################################################################################################################
