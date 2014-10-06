@@ -14,6 +14,7 @@ A Toolkit engine for Flame
 
 import os
 import sys
+import uuid
 import sgtk
 from sgtk import TankError
 
@@ -29,6 +30,10 @@ class FlameEngine(sgtk.platform.Engine):
         Engine construction/setup done before any apps are initialized
         """        
         self.log_debug("%s: Initializing..." % self)        
+        
+        # maintain a list of export options
+        self._registered_export_instances = {}
+        self._export_sessions = {}
         
         if self.has_ui:
             # tell QT to interpret C strings as utf-8
@@ -69,6 +74,68 @@ class FlameEngine(sgtk.platform.Engine):
     
     
     ################################################################################################################
+    # hooks registration
+    
+    def register_export_hook(self, menu_caption, callbacks):
+        """
+        Allows an app to register an export hook
+        """
+        if menu_caption in self._registered_export_instances:
+            raise TankError("There is already a menu export preset named '%s'! " 
+                            "Please ensure your preset names are unique" % menu_caption)
+    
+        self._registered_export_instances[menu_caption] = callbacks
+    
+    
+    def get_export_presets(self):
+        """
+        Returns all export presets registered by apps.
+        
+        :returns: List of preset titles
+        """
+        return self._registered_export_instances.keys()
+
+    
+    def create_export_session(self, preset_name):
+        """
+        Start a new export session.
+        Creates a session object which represents a single export session in flame.
+        
+        :param preset_name: The name of the preset which should be executed.
+        :returns: session id string which is later passed into various methods
+        """
+        if preset_name not in self._registered_export_instances:
+            raise TankError("The export preset '%s' is not registered with the current engine. "
+                            "Current presets are: %s" % (preset_name, self._registered_export_instances.keys()))
+        
+        session_id = "tk_%s" % uuid.uuid4().hex
+        
+        # set up an export session
+        self._export_sessions[session_id] = preset_name
+        
+        return session_id
+
+
+    def trigger_export_callback(self, session_id, callback_name, info):
+        """
+        Dispatch method called from the flame export hook
+        """
+        
+        if session_id not in self._export_sessions:
+            self.log_debug("Ignoring request for unknown session %s..." % session_id)
+            return
+        
+        # get the preset
+        preset_name = self._export_sessions[session_id]
+        callbacks = self._registered_export_instances[preset_name]
+        
+        # call the callback in the preset
+        if callback_name in callbacks:
+            # the app has registered interest in this!
+            callbacks[callback_name](session_id, info)
+        
+    
+    ################################################################################################################
     # Bootstrap code
     # NOTE! This is executed *outside* of Flame, prior to launch.
     
@@ -88,14 +155,7 @@ class FlameEngine(sgtk.platform.Engine):
         flame_hooks_folder = os.path.join(self.disk_location, self.FLAME_HOOKS_FOLDER)
         sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
         self.log_debug("Added to hook path: %s" % flame_hooks_folder)
-        
-        # go through and add flame hooks for all apps registered with this engine    
-        for app_obj in self.apps.values():        
-            flame_hooks_folder = os.path.join(app_obj.disk_location, self.FLAME_HOOKS_FOLDER)
-            if os.path.exists(flame_hooks_folder):
-                sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
-                self.log_debug("Added to hook path: %s" % flame_hooks_folder)
-        
+                
         # add and validate the wiretap API
         # first, see if the wiretap API already exists - in that case, we use that version
         try:
