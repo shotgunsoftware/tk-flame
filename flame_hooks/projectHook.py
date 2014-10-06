@@ -24,8 +24,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
     default exception handling is also carried out.
     """
     
-    # careful about infinite loops here - 
-    # MUST NOT RAISE EXCEPTIONS :)
+    # careful about infinite loops here - we mustn't raise exceptions.
     
     # assemble message
     error_message = "Critical: Could not format error message."
@@ -45,7 +44,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
         pass
     
     # in addition to the ui popup, also defer to the default mechanism
-    sys.__excepthook__(type, value, tb)
+    sys.__excepthook__(type, ex, tb)
         
 def appInitialized(projectName):
     """
