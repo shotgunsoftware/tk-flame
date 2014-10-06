@@ -14,7 +14,14 @@ import traceback
 def sgtk_exception_trap(ex_cls, ex, tb):
     """
     Standard exception trap override.
-    Attempts to display exceptions as QMessagebox popups
+    
+    This method is used to override the default exception reporting behaviour
+    inside the embedded flame python interpreter to make errors more visible 
+    to the user.
+    
+    It attempts to create a QT messagebox with a formatted error message to
+    alert the user that something has gong wrong. In addition to this, the
+    default exception handling is also carried out.
     """
     
     # careful about infinite loops here - 
@@ -24,15 +31,15 @@ def sgtk_exception_trap(ex_cls, ex, tb):
     error_message = "Critical: Could not format error message."
     try:
         tb_str = "\n".join(traceback.format_tb(tb))
-        error_message = "A general Shotgun error message was reported:\n%s\n\nError Type: %s\n\nTraceback:\n%s" % (ex, ex_cls, tb_str)
+        error_message = "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s" % (ex, ex_cls, tb_str)
     except:
         pass
 
-    # now output it    
+    # now try to output it    
     try:
         from PySide import QtGui, QtCore
         if QtCore.QCoreApplication.instance():
-            # there is a qapplication running - so pop up a message!
+            # there is an application running - so pop up a message!
             QtGui.QMessageBox.critical(None, "Shotgun General Error", error_message)
     except:
         pass
