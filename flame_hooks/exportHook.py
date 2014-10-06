@@ -38,7 +38,7 @@ def preCustomExport(info, userData):
     userData["session_id"] = session_id
 
     # tell the engine to dispatch the request to the correct toolkit app
-    engine.trigger_export_callback(session_id, "preCustomExport", info)
+    engine.trigger_export_callback("preCustomExport", session_id, info)
 
    
  
@@ -71,7 +71,7 @@ def preExportSequence(info, userData):
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
-        engine.trigger_export_callback(session_id, "preExportSequence", info)        
+        engine.trigger_export_callback("preExportSequence", session_id, info)        
 
 
 def preExportAsset(info, userData):
@@ -119,7 +119,7 @@ def preExportAsset(info, userData):
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
-        engine.trigger_export_callback(session_id, "preExportAsset", info)        
+        engine.trigger_export_callback("preExportAsset", session_id, info)        
 
 
  
@@ -170,7 +170,7 @@ def postExportAsset(info, userData):
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
-        engine.trigger_export_callback(session_id, "postExportAsset", info)        
+        engine.trigger_export_callback("postExportAsset", session_id, info)        
    
  
 def postCustomExport(info, userData):
@@ -195,7 +195,7 @@ def postCustomExport(info, userData):
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
-        engine.trigger_export_callback(session_id, "postCustomExport", info)
+        engine.trigger_export_callback("postCustomExport", session_id, info)
 
 def getCustomExportProfiles(profiles):
     """

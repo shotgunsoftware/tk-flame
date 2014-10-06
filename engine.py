@@ -23,6 +23,8 @@ class FlameEngine(sgtk.platform.Engine):
     The engine class
     """
     
+    # the name of the folder in the engine which we should register
+    # with flame to trigger various hooks to run.
     FLAME_HOOKS_FOLDER = "flame_hooks"
     
     def pre_app_init(self):
@@ -72,72 +74,51 @@ class FlameEngine(sgtk.platform.Engine):
         
         return has_ui
     
-    
+    def log_debug(self, msg):
+        """
+        Log a debug message
+        
+        :param msg: The debug message to log
+        """
+        if self.get_setting("debug_logging", False):
+            print "Shotgun Debug: %s" % msg
+ 
+    def log_info(self, msg):
+        """
+        Log some info
+        
+        :param msg: The info message to log
+        """
+        print "Shotgun Info: %s" % msg
+ 
+    def log_warning(self, msg):
+        """
+        Log a warning
+        
+        :param msg: The warning message to log
+        """        
+        print "Shotgun Warning: %s" % msg
+ 
+    def log_error(self, msg):
+        """
+        Log an error
+        
+        :param msg: The error message to log
+        """        
+        print "Shotgun Error: %s" % msg
+
+
     ################################################################################################################
-    # hooks registration
-    
-    def register_export_hook(self, menu_caption, callbacks):
-        """
-        Allows an app to register an export hook
-        """
-        if menu_caption in self._registered_export_instances:
-            raise TankError("There is already a menu export preset named '%s'! " 
-                            "Please ensure your preset names are unique" % menu_caption)
-    
-        self._registered_export_instances[menu_caption] = callbacks
-    
-    
-    def get_export_presets(self):
-        """
-        Returns all export presets registered by apps.
-        
-        :returns: List of preset titles
-        """
-        return self._registered_export_instances.keys()
-
-    
-    def create_export_session(self, preset_name):
-        """
-        Start a new export session.
-        Creates a session object which represents a single export session in flame.
-        
-        :param preset_name: The name of the preset which should be executed.
-        :returns: session id string which is later passed into various methods
-        """
-        if preset_name not in self._registered_export_instances:
-            raise TankError("The export preset '%s' is not registered with the current engine. "
-                            "Current presets are: %s" % (preset_name, self._registered_export_instances.keys()))
-        
-        session_id = "tk_%s" % uuid.uuid4().hex
-        
-        # set up an export session
-        self._export_sessions[session_id] = preset_name
-        
-        return session_id
-
-
-    def trigger_export_callback(self, session_id, callback_name, info):
-        """
-        Dispatch method called from the flame export hook
-        """
-        
-        if session_id not in self._export_sessions:
-            self.log_debug("Ignoring request for unknown session %s..." % session_id)
-            return
-        
-        # get the preset
-        preset_name = self._export_sessions[session_id]
-        callbacks = self._registered_export_instances[preset_name]
-        
-        # call the callback in the preset
-        if callback_name in callbacks:
-            # the app has registered interest in this!
-            callbacks[callback_name](session_id, info)
-        
-    
-    ################################################################################################################
-    # Bootstrap code
+    # Engine Bootstrap
+    #
     # NOTE! This is executed *outside* of Flame, prior to launch.
+    # 
+    # In order to launch the engine, a launch app (such as the tk-multi-launchapp)
+    # will call tk-flame/python/startup/bootstrap.py and execute the bootstrap method.
+    #
+    # This in turn will create an engine instance and then execute the bootstrap() method
+    # below which will register environment variables and perform the various tweaks
+    # necessary prior to launching the actual Flame/Flare system. 
     
     def bootstrap(self):
         """
@@ -204,40 +185,74 @@ class FlameEngine(sgtk.platform.Engine):
     
     
     ################################################################################################################
-    # standard engine interface
-                
-    def log_debug(self, msg):
+    # export callbacks handling
+    #
+    # Any apps which are interested in register custom exporters with flame should use the methods
+    # below. The register_export_hook() is called by apps in order to create a menu entry
+    # on the flame export menu. The remaining methods are used to call out from the actual flame hook
+    # to the relevant app code.
+    #
+    
+    def register_export_hook(self, menu_caption, callbacks):
         """
-        Log a debug message
+        Allows an app to register an export hook
+        """
+        if menu_caption in self._registered_export_instances:
+            raise TankError("There is already a menu export preset named '%s'! " 
+                            "Please ensure your preset names are unique" % menu_caption)
+    
+        self._registered_export_instances[menu_caption] = callbacks
+    
+    
+    def get_export_presets(self):
+        """
+        Internal engine method. Do not use outside of the engine.
+        Returns all export presets registered by apps.
         
-        :param msg: The debug message to log
+        :returns: List of preset titles
         """
-        if self.get_setting("debug_logging", False):
-            print "Shotgun Debug: %s" % msg
- 
-    def log_info(self, msg):
+        return self._registered_export_instances.keys()
+
+    
+    def create_export_session(self, preset_name):
         """
-        Log some info
+        Start a new export session.
+        Creates a session object which represents a single export session in flame.
         
-        :param msg: The info message to log
+        :param preset_name: The name of the preset which should be executed.
+        :returns: session id string which is later passed into various methods
         """
-        print "Shotgun Info: %s" % msg
- 
-    def log_warning(self, msg):
-        """
-        Log a warning
+        if preset_name not in self._registered_export_instances:
+            raise TankError("The export preset '%s' is not registered with the current engine. "
+                            "Current presets are: %s" % (preset_name, self._registered_export_instances.keys()))
         
-        :param msg: The warning message to log
-        """        
-        print "Shotgun Warning: %s" % msg
- 
-    def log_error(self, msg):
-        """
-        Log an error
+        session_id = "tk_%s" % uuid.uuid4().hex
         
-        :param msg: The error message to log
-        """        
-        print "Shotgun Error: %s" % msg
+        # set up an export session
+        self._export_sessions[session_id] = preset_name
+        
+        return session_id
+
+
+    def trigger_export_callback(self, callback_name, session_id, info):
+        """
+        Dispatch method called from the flame export hook
+        """
+        
+        if session_id not in self._export_sessions:
+            self.log_debug("Ignoring request for unknown session %s..." % session_id)
+            return
+        
+        # get the preset
+        preset_name = self._export_sessions[session_id]
+        callbacks = self._registered_export_instances[preset_name]
+        
+        # call the callback in the preset
+        if callback_name in callbacks:
+            # the app has registered interest in this!
+            callbacks[callback_name](session_id, info)
+        
+    
 
 
     ################################################################################################################
