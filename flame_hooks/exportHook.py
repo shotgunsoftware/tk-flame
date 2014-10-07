@@ -122,6 +122,7 @@ def preExportAsset(info, userData):
         engine.trigger_export_callback("preExportAsset", session_id, info)        
 
 
+
  
 def postExportAsset(info, userData):
     """    
@@ -162,6 +163,7 @@ def postExportAsset(info, userData):
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
+    
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
@@ -211,3 +213,10 @@ def getCustomExportProfiles(profiles):
     for preset_title in engine.get_export_presets(): 
         profiles[preset_title] = {"preset_title": preset_title}
     
+
+def useBackburnerPostExportAsset():
+    """
+    Use this method to instruct Flame to run all post-export callbacks
+    directly, even the ones where the export is happening in a backburner job.
+    """
+    return False

@@ -16,6 +16,9 @@ import os
 import sys
 import uuid
 import sgtk
+import socket
+import pickle
+import tempfile
 from sgtk import TankError
 
 class FlameEngine(sgtk.platform.Engine):
@@ -238,7 +241,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Dispatch method called from the flame export hook
         """
-        
+        self.log_debug("Flame engine callback dispatch for %s" % callback_name)
         if session_id not in self._export_sessions:
             self.log_debug("Ignoring request for unknown session %s..." % session_id)
             return
@@ -250,9 +253,61 @@ class FlameEngine(sgtk.platform.Engine):
         # call the callback in the preset
         if callback_name in callbacks:
             # the app has registered interest in this!
+            self.log_debug("Executing callback %s" % callbacks[callback_name])
             callbacks[callback_name](session_id, info)
         
     
+    ################################################################################################################
+    # backburner integration
+    #
+    
+    def create_local_backburner_job(self, job_name, description, run_after_job_id, app, method_name, args):
+        """
+        Run a method in the local backburner queue
+        """
+        
+        # the backburner executable
+        BACKBURNER_JOB_CMD = "/usr/discreet/backburner/cmdjob"
+
+        # pass some args - most importantly tell it to run on the local host
+        backburner_args = []
+        backburner_args.append("-userRights")
+        backburner_args.append("-jobName:\"%s\"" % job_name.replace("\"", ""))
+        backburner_args.append("-description:\"%s\"" % description.replace("\"", ""))
+        backburner_args.append("-servers:%s" % socket.gethostname())
+        
+        if run_after_job_id:
+            backburner_args.append("-dependencies:%s" % run_after_job_id)
+        
+        # call the bootstrap script
+        backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")
+        farm_cmd = "%s %s" % ("/usr/discreet/Python-2.6.9/bin/python", backburner_bootstrap)
+        
+        # now we need to capture all of the environment and everything in a file
+        # (thanks backburner!) so that we can replay it later when the task wakes up
+        session_file = os.path.join(tempfile.gettempdir(), "tk_backburner_%s.pickle" % uuid.uuid4().hex)
+
+        data = {}
+        data["engine_instance"] = self.instance_name
+        data["serialized_context"] = sgtk.context.serialize(self.context)
+        data["app_instance"] = app.instance_name
+        data["method_to_execute"] = method_name
+        data["args"] = args
+        data["sgtk_core_location"] = os.path.dirname(sgtk.__path__[0])
+        
+        fh = open(session_file, "wb")
+        pickle.dump(data, fh)
+        fh.close()
+        
+        full_cmd = "%s %s %s %s" % (BACKBURNER_JOB_CMD, " ".join(args), farm_cmd, session_file)
+
+        self.log_debug("Starting backburner job '%s'" % job_name)
+        self.log_debug("Command line: %s" % full_cmd)
+        self.log_debug("App: %s" % app)
+        self.log_debug("Method: %s with args %s" % (method_name, args))
+
+        # kick it off        
+        os.system(full_cmd)
 
 
     ################################################################################################################
