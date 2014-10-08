@@ -270,10 +270,11 @@ class FlameEngine(sgtk.platform.Engine):
         BACKBURNER_JOB_CMD = "/usr/discreet/backburner/cmdjob"
 
         # pass some args - most importantly tell it to run on the local host
+        # looks like : chars are not valid so replace those
         backburner_args = []
         backburner_args.append("-userRights")
-        backburner_args.append("-jobName:\"%s\"" % job_name.replace("\"", ""))
-        backburner_args.append("-description:\"%s\"" % description.replace("\"", ""))
+        backburner_args.append("-jobName:\"%s\"" % job_name.replace("\"", "").replace(":", " "))
+        backburner_args.append("-description:\"%s\"" % description.replace("\"", "").replace(":", " "))
         backburner_args.append("-servers:%s" % socket.gethostname())
         
         if run_after_job_id:
@@ -307,7 +308,8 @@ class FlameEngine(sgtk.platform.Engine):
         self.log_debug("Method: %s with args %s" % (method_name, args))
 
         # kick it off        
-        os.system(full_cmd)
+        if os.system(full_cmd) != 0:
+            raise TankError("Shotgun backburner job could not be created. Please see log for details.")
 
 
     ################################################################################################################
