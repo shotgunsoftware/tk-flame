@@ -13,6 +13,10 @@ import sys
 import pickle
 
 pickle_file = sys.argv[1]
+
+if not os.path.exists(pickle_file):
+    raise TankError("Cannot find backburner command file '%s'!" % pickle_file)
+
 fh = open(pickle_file, "rb")
 data = pickle.load(fh)
 fh.close()
@@ -45,4 +49,11 @@ method(**method_args)
 # all done
 engine.log_debug("Backburner execution complete.")
 
-# TODO: delete pickle helper script file?
+# clean up
+try:
+    self.log_debug("Trying to remove temporary pickle job file...")
+    os.remove(pickle_file)
+    self.log_debug("Temporary pickle job successfully deleted.")
+except Exception, e:
+    self.log_warning("Could not remove temporary file '%s': %s" % (pickle_file, e))
+    
