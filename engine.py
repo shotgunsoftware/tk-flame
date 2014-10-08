@@ -326,7 +326,6 @@ class FlameEngine(sgtk.platform.Engine):
         backburner_args.append("-userRights") # run as current user, not as root
         backburner_args.append("-jobName:\"%s\"" % job_name.replace("\"", "").replace(":", " "))
         backburner_args.append("-description:\"%s\"" % description.replace("\"", "").replace(":", " "))
-        backburner_args.append("-servers:%s" % socket.gethostname()) # run a local job
         
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
