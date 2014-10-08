@@ -51,9 +51,9 @@ engine.log_debug("Backburner execution complete.")
 
 # clean up
 try:
-    self.log_debug("Trying to remove temporary pickle job file...")
+    engine.log_debug("Trying to remove temporary pickle job file...")
     os.remove(pickle_file)
-    self.log_debug("Temporary pickle job successfully deleted.")
+    engine.log_debug("Temporary pickle job successfully deleted.")
 except Exception, e:
-    self.log_warning("Could not remove temporary file '%s': %s" % (pickle_file, e))
+    engine.log_warning("Could not remove temporary file '%s': %s" % (pickle_file, e))
     
