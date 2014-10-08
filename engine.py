@@ -198,7 +198,37 @@ class FlameEngine(sgtk.platform.Engine):
     
     def register_export_hook(self, menu_caption, callbacks):
         """
-        Allows an app to register an export hook
+        Allows an app to register an interest in one of the flame export hooks.
+        
+        This one of the interaction entry points in the system and this is how apps
+        typically have their business logic executed. At app init, an app typically
+        calls this method with a syntax like this:
+        
+            # set up callback map
+            callbacks = {}
+            callbacks["preCustomExport"] = self.pre_custom_export
+            callbacks["preExportAsset"] = self.adjust_path
+            callbacks["postExportAsset"] = self.register_post_asset_job
+            
+            # register with the engine
+            self.engine.register_export_hook("Menu Caption", callbacks)
+ 
+        The engine will keep track of things automatically, and whenever the user
+        clicks the "Menu Caption" entry on the menu, the corresponding chain of callbacks
+        will be called.
+        
+        All methods should have the following method signature:
+        
+            def export_callback(self, session_id, info)
+            
+        Where session_id is a unique session identifier (typically only used in advanced scenarios)
+        and info reflects the info passed from Flame (varies for different callbacks).
+        
+        For information which export can currently be registered against, see the
+        flame_hooks/exportHook.py file.
+        
+        :param menu_caption: Text to appear on the Flame export menu
+        :param callbacks: Dictionary of callbacks, see above for details.
         """
         if menu_caption in self._registered_export_instances:
             raise TankError("There is already a menu export preset named '%s'! " 
@@ -219,6 +249,7 @@ class FlameEngine(sgtk.platform.Engine):
     
     def create_export_session(self, preset_name):
         """
+        Internal engine method. Do not use outside of the engine.
         Start a new export session.
         Creates a session object which represents a single export session in flame.
         
@@ -239,7 +270,15 @@ class FlameEngine(sgtk.platform.Engine):
 
     def trigger_export_callback(self, callback_name, session_id, info):
         """
-        Dispatch method called from the flame export hook
+        Internal engine method. Do not use outside of the engine.
+        
+        Dispatch method called from the various flame hooks. 
+        This method will ensure that the flame callbacks will be 
+        dispatched to the appropriate registered app callbacks.
+        
+        :param callback_name: Name of the flame callback method
+        :param session_id: Unique session identifier
+        :param info: Metadata dictionary from Flame
         """
         self.log_debug("Flame engine callback dispatch for %s" % callback_name)
         if session_id not in self._export_sessions:
@@ -263,7 +302,19 @@ class FlameEngine(sgtk.platform.Engine):
     
     def create_local_backburner_job(self, job_name, description, run_after_job_id, app, method_name, args):
         """
-        Run a method in the local backburner queue
+        Run a method in the local backburner queue.
+        
+        :param job_name: Name of the backburner job
+        :param description: Description of the backburner job
+        :param run_after_job_id: None if the backburner job should execute arbitrarily. If you 
+                                 want to set the job up so that it executes after another known task, pass
+                                 the backburner id here. This is typically used in conjunction with a postExportAsset
+                                 hook where the export task runs on backburner. In this case, the hook will return
+                                 the backburner id. By passing that id into this method, you can create a job which 
+                                 only executes after the main export task has completed.
+        :param app: App to remotely call up
+        :param method_name: Name of method to remotely execute
+        :param args: dictionary or args (**argv style) to pass to method at remote execution
         """
         
         # the backburner executable
@@ -272,13 +323,13 @@ class FlameEngine(sgtk.platform.Engine):
         # pass some args - most importantly tell it to run on the local host
         # looks like : chars are not valid so replace those
         backburner_args = []
-        backburner_args.append("-userRights")
+        backburner_args.append("-userRights") # run as current user, not as root
         backburner_args.append("-jobName:\"%s\"" % job_name.replace("\"", "").replace(":", " "))
         backburner_args.append("-description:\"%s\"" % description.replace("\"", "").replace(":", " "))
-        backburner_args.append("-servers:%s" % socket.gethostname())
+        backburner_args.append("-servers:%s" % socket.gethostname()) # run a local job
         
         if run_after_job_id:
-            backburner_args.append("-dependencies:%s" % run_after_job_id)
+            backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
         
         # call the bootstrap script
         backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")

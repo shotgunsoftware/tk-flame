@@ -8,6 +8,26 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+# This script is called from the engine method create_local_backburner_job().
+# It is executed by the backburner farm dispatcher and assumes only a basic
+# python environment is present. All other data is pulled up from a 
+# pickle inside a temporary file which is passed as the single argument when
+# this script is called.
+
+# typically, the following sort of command line is generated in create_local_backburner_job():
+# /usr/discreet/backburner/cmdjob 
+# -userRights 
+# -jobName:"Sequence 'aa002' - Uploading media to Shotgun" 
+# -description:"Creates a new version record in Shotgun and uploads the associated Quicktime." 
+# -servers:Mannes-MacBook-Pro-2.local 
+# -dependencies:1587902041 
+# /usr/discreet/Python-2.6.9/bin/python 
+# /Users/manne/git/tk-flame/python/startup/backburner.py 
+# /var/folders/fq/65bs7wwx3mz7jdsh4vxm34xc0000gn/T/tk_backburner_f6a70d85fecf420a979357c9d9dd9278.pickle
+ 
+# this script will unpack the pickle parameters file, add sgtk to the pythonpath, 
+# start an engine and finally run an app method.
+
 import os
 import sys
 import pickle
