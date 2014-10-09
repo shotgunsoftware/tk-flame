@@ -24,6 +24,13 @@ configuration:
         description: Contains the logic for determining and creating the workspace and 
                      users to use when launching into a Flame project. 
     
+    backburner_shared_tmp:
+        type: str
+        default_value: "/tmp"
+        description: A folder where the flame engine can put temporary files. This folder 
+                     needs to be accessible from all backburner nodes, so if you are running
+                     a larger backburner setup, this path must be some sort of shared network
+                     location. 
 
 
 # the Shotgun fields that this engine needs in order to operate correctly

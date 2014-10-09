@@ -234,6 +234,7 @@ class FlameEngine(sgtk.platform.Engine):
             raise TankError("There is already a menu export preset named '%s'! " 
                             "Please ensure your preset names are unique" % menu_caption)
     
+        self.log_debug("Registered export preset '%s' with engine." % menu_caption)
         self._registered_export_instances[menu_caption] = callbacks
     
     
@@ -300,6 +301,19 @@ class FlameEngine(sgtk.platform.Engine):
     # backburner integration
     #
     
+    def get_backburner_tmp(self):
+        """
+        Return a location on disk, guaranteed to exist
+        where temporary data can be put in such a way that
+        it will be accessible for all backburner jobs, regardless of 
+        which host they execute on.
+        
+        :returns: path
+        """
+        return self.get_setting("backburner_shared_tmp")
+        
+        
+    
     def create_local_backburner_job(self, job_name, description, run_after_job_id, app, method_name, args):
         """
         Run a method in the local backburner queue.
@@ -323,20 +337,24 @@ class FlameEngine(sgtk.platform.Engine):
         # pass some args - most importantly tell it to run on the local host
         # looks like : chars are not valid so replace those
         backburner_args = []
-        backburner_args.append("-userRights") # run as current user, not as root
+        
+        # run as current user, not as root
+        backburner_args.append("-userRights")
+        
+        # add basic job info
         backburner_args.append("-jobName:\"%s\"" % job_name.replace("\"", "").replace(":", " "))
         backburner_args.append("-description:\"%s\"" % description.replace("\"", "").replace(":", " "))
-        
+
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
-        
+
         # call the bootstrap script
         backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")
         farm_cmd = "%s %s" % ("/usr/discreet/Python-2.6.9/bin/python", backburner_bootstrap)
         
         # now we need to capture all of the environment and everything in a file
         # (thanks backburner!) so that we can replay it later when the task wakes up
-        session_file = os.path.join(tempfile.gettempdir(), "tk_backburner_%s.pickle" % uuid.uuid4().hex)
+        session_file = os.path.join(self.get_backburner_tmp(), "tk_backburner_%s.pickle" % uuid.uuid4().hex)
 
         data = {}
         data["engine_instance"] = self.instance_name
