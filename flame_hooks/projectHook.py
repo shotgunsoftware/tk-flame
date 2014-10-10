@@ -26,11 +26,20 @@ def sgtk_exception_trap(ex_cls, ex, tb):
     
     # careful about infinite loops here - we mustn't raise exceptions.
     
-    # assemble message
+    # like in other environments and scripts, for TankErrors, we assume that the 
+    # error message is already a nice descriptive, crafted message and try to present
+    # this in a user friendly fashion
+    # 
+    # for other exception types, we give a full call stack.
+    
     error_message = "Critical: Could not format error message."
+    
     try:
-        tb_str = "\n".join(traceback.format_tb(tb))
-        error_message = "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s" % (ex, ex_cls, tb_str)
+        if "TankError" in str(ex_cls): # avoid importing sgtk at this point
+            error_message = "A Shotgun error was reported:\n\n%s" % ex
+        else:
+            tb_str = "\n".join(traceback.format_tb(tb))
+            error_message = "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s" % (ex, ex_cls, tb_str)
     except:
         pass
 
