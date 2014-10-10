@@ -40,7 +40,8 @@ def preCustomExport(info, userData):
     # tell the engine to dispatch the request to the correct toolkit app
     engine.trigger_export_callback("preCustomExport", session_id, info)
 
-   
+# tell flame not to display the fish cursor while we process the hook
+preCustomExport.func_dict["waitCursor"] = False  
  
 def preExportSequence(info, userData):
     """
