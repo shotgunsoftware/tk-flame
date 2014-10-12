@@ -13,6 +13,7 @@ A Toolkit engine for Flame
 """
 
 import os
+import re
 import sys
 import uuid
 import sgtk
@@ -342,8 +343,10 @@ class FlameEngine(sgtk.platform.Engine):
         backburner_args.append("-userRights")
         
         # add basic job info
-        backburner_args.append("-jobName:\"%s\"" % job_name.replace("\"", "").replace(":", " "))
-        backburner_args.append("-description:\"%s\"" % description.replace("\"", "").replace(":", " "))
+        # backburner does not do any kind of sanitaion itself, so ensure that job
+        # info doesn't contain any strange characters etc
+        backburner_args.append("-jobName:\"%s\"" % re.sub('[^0-9a-zA-Z_\-,\. ]+', '_', job_name))
+        backburner_args.append("-description:\"%s\"" % re.sub('[^0-9a-zA-Z_\-,\. ]+', '_', description))
 
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
