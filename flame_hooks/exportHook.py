@@ -8,6 +8,20 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+def getCustomExportProfiles(profiles):
+    """
+    Hook returning the custom export profiles to display to the user in the
+    contextual menu.
+
+    :param profiles: A dictionary of userData dictionaries where 
+                     the keys are the name of the profiles to show in contextual menus.
+    """
+    import sgtk
+    engine = sgtk.platform.current_engine()
+    
+    for preset_title in engine.get_export_presets(): 
+        profiles[preset_title] = {"preset_title": preset_title}
+
 def preCustomExport(info, userData):
     """
     Hook called before a custom export begins. The export will be blocked
@@ -43,6 +57,80 @@ def preCustomExport(info, userData):
 # tell flame not to display the fish cursor while we process the hook
 preCustomExport.func_dict["waitCursor"] = False  
  
+def postCustomExport(info, userData):
+    """
+    Hook called after a custom export ends. The export will be blocked
+    until this function returns.
+    
+    :param info: Information about the export. Contains the keys      
+                 - destinationHost: Host name where the exported files will be written to.
+                 - destinationPath: Export path root.
+                 - presetPath: Path to the preset used for the export.
+    
+    :param userData: Dictionary that could have been populated by previous export hooks and that
+                     will be carried over into the subsequent export hooks.
+                     This can be used by the hook to pass black box data around.
+    """
+    # first, get the toolkit engine
+    import sgtk
+    engine = sgtk.platform.current_engine()
+
+    # check if there is a toolkit export session currently 
+    # progressing - in that case dispatch it to the appropriate app
+    session_id = userData.get("session_id")
+    if session_id:
+        engine.trigger_export_callback("postCustomExport", session_id, info)
+
+def preExport(info, userData):
+    """
+    Hook called before an export begins. The export will be blocked
+    until this function returns.
+    
+    :param info: Dictionary with info about the export. Contains the keys
+                 - destinationHost: Host name where the exported files will be written to.
+                 - destinationPath: Export path root.
+                 - abort: Pass True back to flame if you want to abort
+                 - abortMessage: Abort message to feed back to client
+                 
+    :param userData: Dictionary that could have been populated by previous export hooks and that
+                     will be carried over into the subsequent export hooks.
+                     This can be used by the hook to pass black box data around.
+    """
+    # first, get the toolkit engine
+    import sgtk
+    engine = sgtk.platform.current_engine()
+
+    # check if there is a toolkit export session currently 
+    # progressing - in that case dispatch it to the appropriate app
+    session_id = userData.get("session_id")
+    if session_id:
+        engine.trigger_export_callback("preExport", session_id, info)
+
+
+def postExport(info, userData):
+    """
+    Hook called after an export ends. The export will be blocked
+    until this function returns.
+    
+    :param info: Information about the export. Contains the keys      
+                 - destinationHost: Host name where the exported files will be written to.
+                 - destinationPath: Export path root.
+    
+    :param userData: Dictionary that could have been populated by previous export hooks and that
+                     will be carried over into the subsequent export hooks.
+                     This can be used by the hook to pass black box data around.
+    """
+    # first, get the toolkit engine
+    import sgtk
+    engine = sgtk.platform.current_engine()
+
+    # check if there is a toolkit export session currently 
+    # progressing - in that case dispatch it to the appropriate app
+    session_id = userData.get("session_id")
+    if session_id:
+        engine.trigger_export_callback("postExport", session_id, info)
+
+
 def preExportSequence(info, userData):
     """
     Hook called before a sequence export begins. The export will be blocked
@@ -74,6 +162,31 @@ def preExportSequence(info, userData):
     if session_id:
         engine.trigger_export_callback("preExportSequence", session_id, info)        
 
+def postExportSequence(info, userData):
+    """
+    Hook called after a sequence export ends. The export will be blocked
+    until this function returns.
+    
+    :param info: Information about the export. Contains the keys      
+                 - destinationHost: Host name where the exported files will be written to.
+                 - destinationPath: Export path root.
+                 - sequenceName: Name of the exported sequence.
+                 - shotNames: Tuple of all shot names in the exported sequence. 
+                              Multiple segments could have the same shot name.
+    
+    :param userData: Dictionary that could have been populated by previous export hooks and that
+                     will be carried over into the subsequent export hooks.
+                     This can be used by the hook to pass black box data around.    
+    """
+    # first, get the toolkit engine
+    import sgtk
+    engine = sgtk.platform.current_engine()
+
+    # check if there is a toolkit export session currently 
+    # progressing - in that case dispatch it to the appropriate app
+    session_id = userData.get("session_id")
+    if session_id:
+        engine.trigger_export_callback("postExportSequence", session_id, info)        
 
 def preExportAsset(info, userData):
     """    
@@ -110,7 +223,6 @@ def preExportAsset(info, userData):
     :param userData: Dictionary that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
-
     """
     # first, get the toolkit engine
     import sgtk
@@ -122,9 +234,6 @@ def preExportAsset(info, userData):
     if session_id:
         engine.trigger_export_callback("preExportAsset", session_id, info)        
 
-
-
- 
 def postExportAsset(info, userData):
     """    
     Hook called after an asset export ends. The export will be blocked
@@ -164,7 +273,6 @@ def postExportAsset(info, userData):
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
-    
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
@@ -176,43 +284,7 @@ def postExportAsset(info, userData):
         engine.trigger_export_callback("postExportAsset", session_id, info)        
    
  
-def postCustomExport(info, userData):
-    """
-    Hook called after a custom export ends. The export will be blocked
-    until this function returns.
-    
-    :param info: Information about the export. Contains the keys      
-                 - destinationHost: Host name where the exported files will be written to.
-                 - destinationPath: Export path root.
-                 - presetPath: Path to the preset used for the export.
-    
-    :param userData: Dictionary that could have been populated by previous export hooks and that
-                     will be carried over into the subsequent export hooks.
-                     This can be used by the hook to pass black box data around.
-    """
-    # first, get the toolkit engine
-    import sgtk
-    engine = sgtk.platform.current_engine()
 
-    # check if there is a toolkit export session currently 
-    # progressing - in that case dispatch it to the appropriate app
-    session_id = userData.get("session_id")
-    if session_id:
-        engine.trigger_export_callback("postCustomExport", session_id, info)
-
-def getCustomExportProfiles(profiles):
-    """
-    Hook returning the custom export profiles to display to the user in the
-    contextual menu.
-
-    :param profiles: A dictionary of userData dictionaries where 
-                     the keys are the name of the profiles to show in contextual menus.
-    """
-    import sgtk
-    engine = sgtk.platform.current_engine()
-    
-    for preset_title in engine.get_export_presets(): 
-        profiles[preset_title] = {"preset_title": preset_title}
     
 
 def useBackburnerPostExportAsset():
