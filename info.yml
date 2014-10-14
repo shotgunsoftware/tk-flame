@@ -24,6 +24,12 @@ configuration:
         description: Contains the logic for determining and creating the workspace and 
                      users to use when launching into a Flame project. 
     
+    flame_batch_publish_type:
+        type: tank_type
+        description: The publish type associated with Flame batch scripts. This parameter is used
+                     to help the flare launch process auto-load a batch script from Shotgun at startup.
+        default_value: "Flame Batch File"
+    
     backburner_shared_tmp:
         type: str
         default_value: "/tmp"
