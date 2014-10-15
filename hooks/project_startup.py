@@ -91,7 +91,7 @@ class ProjectStartupActions(HookBaseClass):
         settings = {}
         settings["FrameWidth"] = "1280"
         settings["FrameHeight"] = "1080"
-        settings["FrameDepth"] = "16-bit fp"
+        settings["FrameDepth"] = "10-bit"
         settings["AspectRatio"] = "1.7778"
         settings["FrameRate"] = "29.9699"
         settings["ProxyEnable"] = "29.9699"
