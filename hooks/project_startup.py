@@ -43,6 +43,15 @@ class ProjectStartupActions(HookBaseClass):
     - The project id can be retrieved via engine_obj.context.project["id"]
     """
     
+    def get_server_hostname(self):
+        """
+        Return the hostname of the machine which hosts the main flame server,
+        including storage and wiretap server access point.
+        
+        :returns: server hostname
+        """
+        return "localhost"
+    
     def get_project(self):
         """
         Return the project name that should be used for the current context.

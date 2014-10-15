@@ -43,8 +43,8 @@ class WiretapHandler(object):
         WireTapClientInit()
         
         # Instantiate a server handle
-        host_name = "localhost:IFFFS"
-        self._server = WireTapServerHandle(host_name)
+        host_name = self._engine.execute_hook_method("project_startup_hook", "get_server_hostname")
+        self._server = WireTapServerHandle("%s:IFFFS" % host_name)
         self._engine.log_debug("Connected to wiretap host '%s'..." % host_name)
     
     def close(self):

@@ -340,6 +340,16 @@ class FlameEngine(sgtk.platform.Engine):
     # backburner integration
     #
     
+    def get_server_hostname(self):
+        """
+        Return the hostname for the server which hosts this flame setup.
+        This is an accessor into the engine hook settings, allowing apps
+        to query which host the closest flame server is running on.
+        
+        :returns: hostname string 
+        """
+        return self.execute_hook_method("project_startup_hook", "get_server_hostname")
+    
     def get_backburner_tmp(self):
         """
         Return a location on disk, guaranteed to exist
