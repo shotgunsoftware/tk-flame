@@ -40,6 +40,7 @@ class FlameEngine(sgtk.platform.Engine):
         # maintain a list of export options
         self._registered_export_instances = {}
         self._export_sessions = {}
+        self._registered_batch_instances = []
         
         if self.has_ui:
             # tell QT to interpret C strings as utf-8
@@ -320,7 +321,7 @@ class FlameEngine(sgtk.platform.Engine):
         :param session_id: Unique session identifier
         :param info: Metadata dictionary from Flame
         """
-        self.log_debug("Flame engine callback dispatch for %s" % callback_name)
+        self.log_debug("Flame engine export callback dispatch for %s" % callback_name)
         if session_id not in self._export_sessions:
             self.log_debug("Ignoring request for unknown session %s..." % session_id)
             return
@@ -335,6 +336,70 @@ class FlameEngine(sgtk.platform.Engine):
             self.log_debug("Executing callback %s" % callbacks[callback_name])
             callbacks[callback_name](session_id, info)
         
+    
+    ################################################################################################################
+    # batch callbacks handling
+    #
+    # Any apps which are interested in register custom batch exporters with flame should use the methods
+    # below. The register_batch_hook() is called by apps in order to register an interest in pre and post
+    # export callbacks when in batch mode. The flame engine will ensure that the app's callbacks will get 
+    # called at the right time.
+    #
+    
+    def register_batch_hook(self, callbacks):
+        """
+        Allows an app to register an interest in one of the flame batch hooks.
+        
+        This one of the interaction entry points in the system and this is how apps
+        typically have their business logic executed. At app init, an app typically
+        calls this method with a syntax like this:
+        
+            # set up callback map
+            callbacks = {}
+            callbacks["batchExportBegin"] = self.before_export
+            callbacks["batchExportEnd"] = self.after_export
+            
+            # register with the engine
+            self.engine.register_batch_hook(callbacks)
+ 
+        The engine will keep track of things automatically, and whenever a batch render executes, 
+        the corresponding chain of callbacks will be called.
+        
+        All methods should have the following method signature:
+        
+            def export_callback(self, info)
+            
+        For information which export can currently be registered against, see the
+        flame_hooks/batchHook.py file.
+        
+        :param callbacks: Dictionary of callbacks, see above for details.
+        """
+        self.log_debug("Registered batch callbaks with engine: %s" % callbacks)
+        self._registered_batch_instances.append(callbacks)
+        
+    def trigger_batch_callback(self, callback_name, info):
+        """
+        Internal engine method. Do not use outside of the engine.
+        
+        Dispatch method called from the various flame hooks. 
+        This method will ensure that the flame callbacks will be 
+        dispatched to the appropriate registered app callbacks.
+        
+        :param callback_name: Name of the flame callback method
+        :param session_id: Unique session identifier
+        :param info: Metadata dictionary from Flame
+        """
+        self.log_debug("Flame engine batch callback dispatch for %s" % callback_name)
+
+        # dispatch to all callbacks
+        for registered_batch_instance in self._registered_batch_instances:
+            if callback_name in registered_batch_instance:
+                # the app has registered interest in this!
+                self.log_debug("Executing callback %s" % registered_batch_instance[callback_name])
+                registered_batch_instance[callback_name](info)
+        
+
+    
     
     ################################################################################################################
     # backburner integration
