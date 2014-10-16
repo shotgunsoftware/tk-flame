@@ -35,7 +35,7 @@ import pickle
 pickle_file = sys.argv[1]
 
 if not os.path.exists(pickle_file):
-    raise TankError("Cannot find backburner command file '%s'!" % pickle_file)
+    raise IOError("Cannot find backburner command file '%s'!" % pickle_file)
 
 fh = open(pickle_file, "rb")
 data = pickle.load(fh)
