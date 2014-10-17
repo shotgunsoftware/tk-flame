@@ -374,7 +374,7 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param callbacks: Dictionary of callbacks, see above for details.
         """
-        self.log_debug("Registered batch callbaks with engine: %s" % callbacks)
+        self.log_debug("Registered batch callbacks with engine: %s" % callbacks)
         self._registered_batch_instances.append(callbacks)
         
     def trigger_batch_callback(self, callback_name, info):
@@ -392,7 +392,9 @@ class FlameEngine(sgtk.platform.Engine):
         self.log_debug("Flame engine batch callback dispatch for %s" % callback_name)
 
         # dispatch to all callbacks
+        
         for registered_batch_instance in self._registered_batch_instances:
+            self.log_debug("checking %s" % registered_batch_instance)
             if callback_name in registered_batch_instance:
                 # the app has registered interest in this!
                 self.log_debug("Executing callback %s" % registered_batch_instance[callback_name])
