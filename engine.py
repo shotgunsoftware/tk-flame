@@ -226,6 +226,47 @@ class FlameEngine(sgtk.platform.Engine):
         
         return app_args
     
+    def _define_qt_base(self):
+        """
+        Define QT behaviour. Subclassed from base class.
+        """
+        if "TK_ENGINE_BOOTSTRAP" not in os.environ:
+            # we are running the engine inside of the Flame Application.
+            # in this state, no special QT init is necesssary. Defer
+            # to default implementation
+            return super(FlameEngine, self)._define_qt_base()
+        
+        else:
+            # we are running the engine outside of flame.
+            # initialize QT.
+            from PySide import QtCore, QtGui
+            import PySide
+    
+            # a simple dialog proxy that pushes the window forward
+            class ProxyDialogPySide(QtGui.QDialog):
+                def show(self):
+                    QtGui.QDialog.show(self)
+                    self.activateWindow()
+                    self.raise_()
+    
+                def exec_(self):
+                    self.activateWindow()
+                    self.raise_()
+                    # the trick of activating + raising does not seem to be enough for
+                    # modal dialogs. So force put them on top as well.
+                    self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | self.windowFlags())
+                    return QtGui.QDialog.exec_(self)
+                    
+            base = {}
+            base["qt_core"] = QtCore
+            base["qt_gui"] = QtGui
+            base["dialog_base"] = ProxyDialogPySide
+            self.log_debug("Successfully initialized PySide '%s' located in %s." 
+                           % (PySide.__version__, PySide.__file__))
+            
+            return base
+    
+    
     
     ################################################################################################################
     # export callbacks handling
@@ -428,8 +469,6 @@ class FlameEngine(sgtk.platform.Engine):
         """
         return self.get_setting("backburner_shared_tmp")
         
-        
-    
     def create_local_backburner_job(self, job_name, description, run_after_job_id, app, method_name, args):
         """
         Run a method in the local backburner queue.
@@ -499,7 +538,7 @@ class FlameEngine(sgtk.platform.Engine):
 
 
     ################################################################################################################
-    # wiretap accessors                
+    # accessors to various core settings and functions                
                 
     def __get_wiretap_central_binary(self, binary_name):
         """

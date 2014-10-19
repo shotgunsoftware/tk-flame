@@ -40,9 +40,13 @@ def bootstrap(engine_instance_name, context):
     sgtk.platform.engine.set_current_engine(None)
     
     # start up flame engine
+    # set a special environment varialbe to help hint to the engine
+    # that when it is started this time, it is part of the bootstrap
+    # and happening *outside* of flame
+    os.environ["TK_ENGINE_BOOTSTRAP"] = "1"
     flame_engine = sgtk.platform.start_engine(engine_instance_name, context.sgtk, context)
+    del os.environ["TK_ENGINE_BOOTSTRAP"]
     
-    # run bootstrap and init!
     app_args = flame_engine.bootstrap()
     
     # deallocate the engine

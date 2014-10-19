@@ -43,6 +43,14 @@ class ProjectStartupActions(HookBaseClass):
     - The project id can be retrieved via engine_obj.context.project["id"]
     """
     
+    def use_project_settings_ui(self):
+        """
+        Control if a project settings UI should appear for new projects.
+        
+        :returns: True if UI should show, false if not
+        """
+        return True
+        
     def get_server_hostname(self):
         """
         Return the hostname of the machine which hosts the main flame server,
@@ -52,7 +60,7 @@ class ProjectStartupActions(HookBaseClass):
         """
         return "localhost"
     
-    def get_project(self):
+    def get_project_name(self):
         """
         Return the project name that should be used for the current context.
         Please note that flame doesn't allow all types of characters in Project names.
@@ -75,45 +83,7 @@ class ProjectStartupActions(HookBaseClass):
         sanitized_project_name = re.sub(r'\W+', '_', project_name)
         
         return sanitized_project_name
-            
-    def get_project_settings(self):
-        """
-        Returns project settings for when creating new projects.
-        
-        The following parameters need to be supplied:
-        
-         - FrameWidth
-         - FrameHeight
-         - FrameDepth
-         - AspectRatio
-         - FrameRate
-         - ProxyEnable
-         - ProxyWidthHint
-         - ProxyDepthMode
-         - ProxyMinFrameSize
-         - ProxyAbove8bits
-         - ProxyQuality
-         - FieldDominance
-        
-        :returns: dictionary of standard wiretap style project setup parameters.
-        """
-        settings = {}
-        settings["FrameWidth"] = "1280"
-        settings["FrameHeight"] = "1080"
-        settings["FrameDepth"] = "10-bit"
-        settings["AspectRatio"] = "1.7778"
-        settings["FrameRate"] = "29.9699"
-        settings["ProxyEnable"] = "29.9699"
-        settings["ProxyWidthHint"] = "0.2"
-        settings["ProxyDepthMode"] = "8-bit"
-        settings["ProxyMinFrameSize"] = "720"
-        settings["ProxyAbove8bits"] = "false"
-        settings["ProxyQuality"] = "medium"
-        settings["FieldDominance"] = "PROGRESSIVE"
 
-        return settings
-        
-            
     def get_volume(self, volumes):
         """
         When a new project is created, this allows to control
@@ -157,3 +127,40 @@ class ProjectStartupActions(HookBaseClass):
 
         return user_name
         
+    def get_project_settings(self):
+        """
+        Returns project settings for when creating new projects.
+        
+        The following parameters need to be supplied:
+        
+         - FrameWidth (e.g. "1280")
+         - FrameHeight (e.g. "1080")
+         - FrameDepth (16-bit fp, 12-bit, 12-bit u, 10-bit, 8-bit) 
+         - FieldDominance (PROGRESSIVE, FIELD_1, FIELD_2)
+         - AspectRatio (4:3, 16:9, or floating point value as string)
+         
+         For proxy settings see http://images.autodesk.com/adsk/files/wiretap2011_sdk_guide.pdf
+         - ProxyEnable ("true" or "false")
+         - ProxyWidthHint
+         - ProxyDepthMode
+         - ProxyMinFrameSize
+         - ProxyAbove8bits
+         - ProxyQuality
+        
+        :returns: dictionary of standard wiretap style project setup parameters.
+        """
+        settings = {}
+        settings["FrameWidth"] = "1280"
+        settings["FrameHeight"] = "1080"
+        settings["FrameDepth"] = "10-bit"
+        settings["AspectRatio"] = "1.7778"
+        settings["FieldDominance"] = "PROGRESSIVE"
+        
+        settings["ProxyEnable"] = "false"
+        settings["ProxyDepthMode"] = "8-bit"
+        settings["ProxyQuality"] = "medium"
+        settings["ProxyWidthHint"] = "720"
+        settings["ProxyMinFrameSize"] = "0"
+        settings["ProxyAbove8bits"] = "false"
+
+        return settings

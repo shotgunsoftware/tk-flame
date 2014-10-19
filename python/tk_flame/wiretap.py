@@ -25,6 +25,8 @@ class WiretapError(TankError):
 # WireTap, hence the dropping of the namespace.
 from libwiretapPythonClientAPI import *
 
+from .project_create_dialog import ProjectCreateDialog 
+
 class WiretapHandler(object):
     """
     Wiretap functionality
@@ -66,13 +68,19 @@ class WiretapHandler(object):
         """
         
         user_name = self._engine.execute_hook_method("project_startup_hook", "get_user")
-        self._ensure_user_exists(user_name)
-
-        project_name = self._engine.execute_hook_method("project_startup_hook", "get_project")
-        self._ensure_project_exists(project_name)
-        
+        project_name = self._engine.execute_hook_method("project_startup_hook", "get_project_name")
         workspace_name = self._engine.execute_hook_method("project_startup_hook", "get_workspace")
-        if workspace_name:
+        
+        
+        self._ensure_project_exists(project_name, user_name, workspace_name)
+        self._ensure_user_exists(user_name)
+        
+        if workspace_name is None:
+            # use flame's default workspace
+            self._engine.log_debug("Using the flame default workspace")
+            app_args = "--start-project='%s' --start-user='%s' --create-workspace" % (project_name, user_name)
+            
+        else:
             self._engine.log_debug("Using a custom workspace '%s'" % workspace_name)
             # an explicit workspace is used. Ensure it exists
             self._ensure_workspace_exists(project_name, workspace_name)
@@ -80,10 +88,6 @@ class WiretapHandler(object):
             app_args = "--start-project='%s' --start-user='%s' --create-workspace --start-workspace='%s'" % (project_name, 
                                                                                                              user_name, 
                                                                                                              workspace_name)
-        else:
-            # use flame's default workspace
-            self._engine.log_debug("Using the flame default workspace")
-            app_args = "--start-project='%s' --start-user='%s' --create-workspace" % (project_name, user_name)
         
         return app_args
     
@@ -127,13 +131,19 @@ class WiretapHandler(object):
  
         self._engine.log_debug("Workspace %s successfully created" % workspace_name)
  
-    def _ensure_project_exists(self, project_name):
+    def _ensure_project_exists(self, project_name, user_name, workspace_name):
         """
         Ensures that the given project exists
         
         :param project_name: Project name to look for
+        :param user_name: User name to use when starting up
+        :param workspace_name: Workspace to use when starting up - if none, then default ws will be used.
         """
+        from PySide import QtGui, QtCore
+        
         if not self._child_node_exists("/projects", project_name, "PROJECT"):
+
+            # we need to create a new project!
 
             # first decide which volume to create the project on.
             # get a list of volumes and pass it to a hook which will 
@@ -145,6 +155,35 @@ class WiretapHandler(object):
             
             # call out to the hook to determine which volume to use
             volume_name = self._engine.execute_hook_method("project_startup_hook", "get_volume", volumes=volumes)
+            
+            host_name = self._engine.execute_hook_method("project_startup_hook", "get_server_hostname")
+            
+            # get project settings from the toolkit hook
+            project_settings = self._engine.execute_hook_method("project_startup_hook", "get_project_settings")            
+            
+            # now check if we should pop up a ui where the user can tweak the default prefs
+            if self._engine.execute_hook_method("project_startup_hook", "use_project_settings_ui"):
+            
+                (return_code, widget) = self._engine.show_modal("Create Flame Project", 
+                                                                self._engine, 
+                                                                ProjectCreateDialog,
+                                                                project_name,
+                                                                user_name,
+                                                                workspace_name,
+                                                                volume_name,
+                                                                host_name,
+                                                                project_settings
+                                                                )
+                
+                if return_code == QtGui.QDialog.Rejected:
+                    # user pressed cancel
+                    raise TankError("Flame project creation aborted. Will not launch Flame.")
+                
+                # read updated settings back from the UI.
+                project_settings = widget.get_settings()                
+                
+            else:
+                self._engine.log_debug("Project settings ui will be bypassed.")            
             
             # sanity check :)
             if volume_name not in volumes:
@@ -160,30 +199,45 @@ class WiretapHandler(object):
                 raise WiretapError("Unable to create project %s: %s" %  (project_name, volume.lastError()))
  
             # create project settings
-            # first get settings from the toolkit hook
-            settings = self._engine.execute_hook_method("project_startup_hook", "get_project_settings") 
 
             self._engine.log_debug("A new project '%s' will be created." % project_name)
             self._engine.log_debug("The following settings will be used:")
-            for (k,v) in settings.iteritems():
+            for (k,v) in project_settings.iteritems():
                 self._engine.log_debug("%s: %s" % (k, v))
 
             # create xml structure
             xml  = "<Project>"
-            xml += "<Description>%s</Description>"             % "Created by Shotgun Pipeline Toolkit"
-            xml += "<FrameWidth>%s</FrameWidth>"               % settings.get("FrameWidth")
-            xml += "<FrameHeight>%s</FrameHeight>"             % settings.get("FrameHeight")
-            xml += "<FrameDepth>%s</FrameDepth>"               % settings.get("FrameDepth")
-            xml += "<AspectRatio>%s</AspectRatio>"             % settings.get("AspectRatio")
-            xml += "<FrameRate>%s</FrameRate>"                 % settings.get("FrameRate")
-            xml += "<ProxyEnable>%s</ProxyEnable>"             % settings.get("ProxyEnable")
-            xml += "<ProxyWidthHint>%s</ProxyWidthHint>"       % settings.get("ProxyWidthHint")
-            xml += "<ProxyDepthMode>%s</ProxyDepthMode>"       % settings.get("ProxyDepthMode")
-            xml += "<ProxyMinFrameSize>%s</ProxyMinFrameSize>" % settings.get("ProxyMinFrameSize")
-            xml += "<ProxyAbove8bits>%s</ProxyAbove8bits>"     % settings.get("ProxyAbove8bits")
-            xml += "<ProxyQuality>%s</ProxyQuality>"           % settings.get("ProxyQuality")
-            xml += "<FieldDominance>%s</FieldDominance>"       % settings.get("FieldDominance")
+            xml += "<Description>%s</Description>"             % "Created by the Shotgun Flame Integration"
+            xml += "<FrameWidth>%s</FrameWidth>"               % project_settings.get("FrameWidth")
+            xml += "<FrameHeight>%s</FrameHeight>"             % project_settings.get("FrameHeight")
+            xml += "<FrameDepth>%s</FrameDepth>"               % project_settings.get("FrameDepth")
+            xml += "<AspectRatio>%s</AspectRatio>"             % project_settings.get("AspectRatio")
+            xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
+            xml += "<ProxyEnable>%s</ProxyEnable>"             % project_settings.get("ProxyEnable")
+            xml += "<FieldDominance>%s</FieldDominance>"       % project_settings.get("FieldDominance")
+            
+            # some proxy settings are optional depending on other settings
+            if project_settings.get("ProxyWidthHint"):
+                xml += "<ProxyWidthHint>%s</ProxyWidthHint>"       % project_settings.get("ProxyWidthHint")
+            
+            if project_settings.get("ProxyDepthMode"):
+                xml += "<ProxyDepthMode>%s</ProxyDepthMode>"       % project_settings.get("ProxyDepthMode")
+            
+            if project_settings.get("ProxyMinFrameSize"):
+                xml += "<ProxyMinFrameSize>%s</ProxyMinFrameSize>" % project_settings.get("ProxyMinFrameSize")
+            
+            if project_settings.get("ProxyAbove8bits"):
+                xml += "<ProxyAbove8bits>%s</ProxyAbove8bits>"     % project_settings.get("ProxyAbove8bits")
+            
+            if project_settings.get("ProxyQuality"):
+                xml += "<ProxyQuality>%s</ProxyQuality>"           % project_settings.get("ProxyQuality")
+            
             xml += "</Project>"
+    
+            # force cast to string - values coming from qt are unicode...
+            xml = str(xml)
+    
+            self._engine.log_debug("The following xml will be emitted: %s" % xml)
     
             # Set the project meta data
             if not project_node.setMetaData("XML", xml):
