@@ -150,7 +150,7 @@ class ProjectStartupActions(HookBaseClass):
         :returns: dictionary of standard wiretap style project setup parameters.
         """
         settings = {}
-        settings["FrameWidth"] = "1280"
+        settings["FrameWidth"] = "1920"
         settings["FrameHeight"] = "1080"
         settings["FrameDepth"] = "10-bit"
         settings["AspectRatio"] = "1.7778"
