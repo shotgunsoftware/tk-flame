@@ -58,8 +58,11 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     # by adjusting the LD_LIBRARY_PATH. Note that this cannot be done
     # inside an executing script as the dynamic loader sets up the load
     # order prior to the execution of any payload. This is why we need to 
-    # set this before we run the app launch script.     
-    sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/lib64/2015.2") 
+    # set this before we run the app launch script.
+    if sys.platform == "darwin":
+        sgtk.util.prepend_path_to_env_var("DYLD_LIBRARY_PATH", "/usr/discreet/lib64/2015.2/framework")
+    elif sys.platform == "linux2":
+        sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/lib64/2015.2")
     
     # finally, reroute the executable and args
     new_app_path = launch_script
