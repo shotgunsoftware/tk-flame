@@ -26,6 +26,7 @@ class WiretapError(TankError):
 from libwiretapPythonClientAPI import *
 
 from .project_create_dialog import ProjectCreateDialog 
+from .qt_task import start_qt_app_and_show_modal
 
 class WiretapHandler(object):
     """
@@ -163,17 +164,20 @@ class WiretapHandler(object):
             
             # now check if we should pop up a ui where the user can tweak the default prefs
             if self._engine.execute_hook_method("project_startup_hook", "use_project_settings_ui"):
-            
-                (return_code, widget) = self._engine.show_modal("Create Flame Project", 
-                                                                self._engine, 
-                                                                ProjectCreateDialog,
-                                                                project_name,
-                                                                user_name,
-                                                                workspace_name,
-                                                                volume_name,
-                                                                host_name,
-                                                                project_settings
-                                                                )
+
+                # at this point we don't have a QT application running, because we are still
+                # in the pre-DCC launch phase, so need to wrap our modal dialog call
+                # in a helper method which also creates a QApplication.        
+                (return_code, widget) = start_qt_app_and_show_modal("Create Flame Project", 
+                                                                    self._engine, 
+                                                                    ProjectCreateDialog,
+                                                                    project_name,
+                                                                    user_name,
+                                                                    workspace_name,
+                                                                    volume_name,
+                                                                    host_name,
+                                                                    project_settings
+                                                                    )
                 
                 if return_code == QtGui.QDialog.Rejected:
                     # user pressed cancel

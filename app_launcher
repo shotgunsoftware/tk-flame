@@ -59,7 +59,7 @@ def launch_flame(dcc_path, dcc_args):
     flame_engine.log_debug("Dcc      path: '%s'" % dcc_path)
     flame_engine.log_debug("App      args: '%s'" % app_args)
     flame_engine.log_debug("External args: '%s'" % dcc_args)
-    cmd_line = "%s %s %s" % (dcc_path, app_args, " ".join(dcc_args))
+    cmd_line = "%s %s %s &" % (dcc_path, app_args, " ".join(dcc_args))
     flame_engine.log_debug("Full command line '%s'" % cmd_line)
     flame_engine.log_debug("-" * 60)
     
