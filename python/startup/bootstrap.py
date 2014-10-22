@@ -60,7 +60,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     # order prior to the execution of any payload. This is why we need to 
     # set this before we run the app launch script.
     if sys.platform == "darwin":
-        sgtk.util.prepend_path_to_env_var("DYLD_LIBRARY_PATH", "/usr/discreet/lib64/2015.2/framework")
+        sgtk.util.prepend_path_to_env_var("DYLD_FRAMEWORK_PATH", "/usr/discreet/lib64/2015.2/framework")
     elif sys.platform == "linux2":
         sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/lib64/2015.2")
     
