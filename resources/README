@@ -1,6 +1,0 @@
-This location contains different versions of the Python Wiretap Client API compiled for different targets.
-
-- The mac version in wiretap_darwin_py26 was compiled on macosx 10.8.5 with GCC 4.2
-- The mac version in wiretap_darwin_py27 was compiled on macosx 10.8.5 with GCC 4.2
-- The linux version in wiretap_linux2_py26_gcc412 was compiled for x86_64, RHEL5 and GCC4.1.2
-- The linux version in wiretap_linux2_py26_gcc446 was compiled for x86_64, RHEL6 and GCC4.4.6

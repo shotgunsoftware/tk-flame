@@ -116,20 +116,23 @@ class FlameEngine(sgtk.platform.Engine):
     ################################################################################################################
     # Engine Bootstrap
     #
-    # NOTE! This is executed *outside* of Flame, prior to launch.
-    # 
-    # In order to launch the engine, a launch app (such as the tk-multi-launchapp)
-    # will call tk-flame/python/startup/bootstrap.py and execute the bootstrap method.
-    #
-    # This in turn will create an engine instance and then execute the bootstrap() method
-    # below which will register environment variables and perform the various tweaks
-    # necessary prior to launching the actual Flame/Flare system. 
     
     def bootstrap(self):
         """
         Special bootstrap method used to set up the flame environment.
         This is designed to execute before flame has launched, as part of the 
         bootstrapping process.
+
+        This method assumes that it is being executed inside a flame python
+        and is called from the app_launcher script which ensures such an environment.
+        
+        The bootstrapper will first import the wiretap API and setup other settings.
+        
+        It then attempts to execute the pre-DCC project creation process, utilizing
+        both wiretap and QT (setup project UI) for this.
+        
+        Finally, it will return the command line args to pass to flame as it is being
+        launched.
         
         :returns: arguments to pass to the app launch process
         """
@@ -190,24 +193,15 @@ class FlameEngine(sgtk.platform.Engine):
             self.log_debug("Wiretap API not detected. Will add it to the pythonpath.")
             
             if sys.platform == "linux2":
-                # todo - see if we need additional binary versions on linux!
-                wiretap_path = os.path.join(self.disk_location, 
-                                            "resources", 
-                                            "wiretap_linux_py%s%s_gcc446" % (sys.version_info[0], sys.version_info[1]))                
-                
+                wiretap_path = os.path.join(self.disk_location, "resources", "wiretap", "linux")                
+            
             elif sys.platform == "darwin":
-                wiretap_path = os.path.join(self.disk_location, 
-                                            "resources", 
-                                            "wiretap_mac_py%s%s" % (sys.version_info[0], sys.version_info[1]))                
+                wiretap_path = os.path.join(self.disk_location, "resources", "wiretap", "macosx")
+            
             else:
-                raise TankError("Unsupported operating system!")
+                raise TankError("Unsupported operating system! Cannot load wiretap API!")
             
-            
-            self.log_debug("The wiretap API for the current session would be here: %s" % wiretap_path)
-            
-            if not os.path.exists(wiretap_path):
-                raise TankError("The flame engine does not support the version of python (%s) "
-                                "you are currently running!" % sys.version)
+            self.log_debug("The wiretap API for the current session would be here: %s" % wiretap_path)            
         
             sys.path.append(wiretap_path)
             import libwiretapPythonClientAPI

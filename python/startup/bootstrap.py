@@ -14,50 +14,55 @@ from sgtk import TankError
 import os
 import sys
 
-def bootstrap(engine_instance_name, context):
+def bootstrap(engine_instance_name, context, app_path, app_args):
     """
     Entry point for starting this engine.
     This is typically called from something like tk-multi-launchapp
     prior to starting up the DCC, but could be initialized in other ways too.
     
-    NOTE! When this method is called, Flame is NOT running. This is part of the
-          Flame launch sequence and used to prepare the environment and set up prior 
-          to launch.
+    This method needs to be able to execute from any python version, with 
+    or without QT installed. Since it will typically be executed from within
+    the multi-launch-app, it will be running in the python that was used to 
+    start the engine where the multi-launch-app is running (typically 
+    tk-shell/tk-desktop/tk-shotgun). 
+
+    The purpose of this script is to prepare the launch process for flame,
+    return the executable that the launch app should actually execute. This 
+    process consists of an additional step for Flame because part of the app
+    launch process happens outside of flame. We therefore rewrite the launch
+    arguments as part of this method. For example
+    
+    input: app_path: /usr/discreet/flame_2015.2/bin/startApplication
+           app_args: ""
+    
+    output: app_path: /mnt/software/shotgun/my_project/install/engines/app-store/tk-flame/v1.2.3/launch_app
+            app_args: /usr/discreet/flame_2015.2/bin/startApplication --extra args
     
     :param engine_instance_name: the name of the engine instance in the environment to launch
     :param context: The context to launch
+    :param app_path: The path to the DCC to start
+    :param app_args: External args to pass to the DCC 
 
-    :returns: arguments to pass when launching flame
+    :returns: (app_path, app_args)
     """
+    this_folder = os.path.abspath(os.path.dirname(__file__))
+    engine_root = os.path.abspath(os.path.join(this_folder, "..", ".."))
+    launch_script = os.path.join(engine_root, "app_launcher") 
     
-    # first create a version of the flame engine!
-    # this is so that we can introspect it and extract and validate settings
-    #
-    # TODO: add get_engine() method (or similar) to core
-    #
-    # for now, stash the current engine.
-    current_engine = sgtk.platform.current_engine()
-    sgtk.platform.engine.set_current_engine(None)
-    
-    # start up flame engine
-    # set a special environment varialbe to help hint to the engine
-    # that when it is started this time, it is part of the bootstrap
-    # and happening *outside* of flame
-    os.environ["TK_ENGINE_BOOTSTRAP"] = "1"
-    flame_engine = sgtk.platform.start_engine(engine_instance_name, context.sgtk, context)
-    del os.environ["TK_ENGINE_BOOTSTRAP"]
-    
-    app_args = flame_engine.bootstrap()
-    
-    # deallocate the engine
-    flame_engine.destroy()
-    
-    # put the currently running engine back again
-    sgtk.platform.engine.set_current_engine(current_engine)
-    
-    # serialize engine parameters. Once flame has started, the project hook 
-    # will run and start up the engine (again) inside of flame.
+    # update the environment prior to launch
     os.environ["TOOLKIT_ENGINE_NAME"] = engine_instance_name
     os.environ["TOOLKIT_CONTEXT"] = sgtk.context.serialize(context)
     
-    return app_args
+    # also, in order to ensure that qt is working correctly inside of
+    # the flame python interpreter, we need to hint the library order
+    # by adjusting the LD_LIBRARY_PATH. Note that this cannot be done
+    # inside an executing script as the dynamic loader sets up the load
+    # order prior to the execution of any payload. This is why we need to 
+    # set this before we run the app launch script.     
+    sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/lib64/2015.2") 
+    
+    # finally, reroute the executable and args
+    new_app_path = launch_script
+    new_app_args = "%s %s" % (app_path, app_args)
+        
+    return (new_app_path, new_app_args) 
