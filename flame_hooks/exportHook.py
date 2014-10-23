@@ -283,10 +283,6 @@ def postExportAsset(info, userData):
     if session_id:
         engine.trigger_export_callback("postExportAsset", session_id, info)        
    
- 
-
-    
-
 def useBackburnerPostExportAsset():
     """
     Use this method to instruct Flame to run all post-export callbacks

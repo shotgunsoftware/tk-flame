@@ -65,13 +65,11 @@ class WiretapHandler(object):
         """
         Load and prepare the project represented by the current context
         
-        :returns: arguments to pass to the Flame lauch command line
+        :returns: arguments to pass to the Flame launch command line
         """
-        
         user_name = self._engine.execute_hook_method("project_startup_hook", "get_user")
         project_name = self._engine.execute_hook_method("project_startup_hook", "get_project_name")
         workspace_name = self._engine.execute_hook_method("project_startup_hook", "get_workspace")
-        
         
         self._ensure_project_exists(project_name, user_name, workspace_name)
         self._ensure_user_exists(user_name)

@@ -9,10 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 
-# 
-#
-# setupPath: File path of the setup being loaded.
-#
 def batchSetupLoaded(setupPath):
     """
     Hook called when a batch setup is loaded.

@@ -11,6 +11,31 @@
 # By accessing, using, copying or modifying this work you indicate your 
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
+#
+#
+# This script is a launch wrapper for Flame. It is part of the flame bootstrap.
+# The flame bootstrap happens in three distinct steps:
+#
+# 1. Preparation - The multi-launch-app (for example) executes the 
+#    python/startup/bootstrap.py method (after having imported this file.
+#    This method takes the launch parameters (executable to run, parameters etc).
+#    And returns a re-written set of executables, so that instead of launching 
+#    the DCC (which is what the launch-app is wanting to do) the bootstrap modifies
+#    this and returns the executable to run being this app_launcher script with 
+#    the executable as the command line. It also adjusts certain things that strictly 
+#    need to be defined before any flame related process is launched - on our case
+#    instructions to the dynamic loader via LD_LIBRARY_PATH
+#
+# 2. The launch app will now call *this* script rather than the DCC which it was configured
+#    to launch. This script executes with /usr/discreet/Python-2.6.9/bin/python which is a known
+#    environment with pyside etc. At this point, we start the engine and run a bunch of startup
+#    stuff. Note that this is now happening before flame has actually launched. This startup
+#    includes ensuring that a new project exists. It also sets up the flame envrironment variables,
+#    so that flame can run the right hooks once it has been launched. The last step of this script 
+#    is to actually launch flame.
+#
+# 3. Flame launches, user performs operations. Engine hooks (in the /flame_hooks folder) are executed.
+#
 
 
 import os

@@ -265,7 +265,6 @@ class ProjectCreateDialog(QtGui.QWidget):
             self.ui.proxy_quality_label.setVisible(True)
             self.ui.proxy_width_hint_label.setVisible(True)
             
-        
         if idx == 1:
             # conditional
             self.ui.proxy_min_frame_size.setVisible(True)

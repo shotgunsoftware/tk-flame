@@ -24,7 +24,16 @@ from sgtk import TankError
 
 class FlameEngine(sgtk.platform.Engine):
     """
-    The engine class
+    The engine class. This wraps around a series of callbacks in flame (so called hooks).
+    The Flame engine is a bit different than other engines.
+    
+    Because Flame doesn't have an API, we cannot call flame, but flame will call out 
+    to the toolkit code. This means that the normal register_command approach won't 
+    work inside of Flame - instead, the engine introduces a different scheme of callbacks
+    that apps can register to ensure that they cen do stuff.
+    
+    For apps, the main entry points are register_export_hook and register_batch_hook.
+    For more information, see below.
     """
     
     # the name of the folder in the engine which we should register
@@ -226,7 +235,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         if "TK_ENGINE_BOOTSTRAP" not in os.environ:
             # we are running the engine inside of the Flame Application.
-            # in this state, no special QT init is necesssary. Defer
+            # in this state, no special QT init is necessary. Defer
             # to default implementation
             return super(FlameEngine, self)._define_qt_base()
         
