@@ -62,6 +62,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     if sys.platform == "darwin":
         sgtk.util.prepend_path_to_env_var("DYLD_FRAMEWORK_PATH", "/usr/discreet/lib64/2015.2/framework")
     elif sys.platform == "linux2":
+        sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/Python-2.6.9/lib")
         sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/lib64/2015.2")
     
     # finally, reroute the executable and args
