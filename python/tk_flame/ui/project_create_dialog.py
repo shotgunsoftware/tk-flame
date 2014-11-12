@@ -11,7 +11,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_ProjectCreateDialog(object):
     def setupUi(self, ProjectCreateDialog):
         ProjectCreateDialog.setObjectName("ProjectCreateDialog")
-        ProjectCreateDialog.resize(453, 501)
+        ProjectCreateDialog.resize(453, 484)
         ProjectCreateDialog.setStyleSheet("/* this is to force the combo box dropdowns to show all items rather than displaying only a few items and a scroll bar */\n"
 "QComboBox QListView {\n"
 "height: 100px;\n"
