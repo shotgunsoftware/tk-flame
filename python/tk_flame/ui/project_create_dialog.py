@@ -362,7 +362,7 @@ class Ui_ProjectCreateDialog(object):
         self.proxy_mode.setItemText(2, QtGui.QApplication.translate("ProjectCreateDialog", "Proxies On", None, QtGui.QApplication.UnicodeUTF8))
         self.proxy_depth_label_2.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Mode", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QtGui.QApplication.translate("ProjectCreateDialog", "Proxy", None, QtGui.QApplication.UnicodeUTF8))
-        self.help_link.setText(QtGui.QApplication.translate("ProjectCreateDialog", "<small><a style=\'color: #30A7E3;\' href=\'{DOC}\'>How do I customize project creation?</a></small>", None, QtGui.QApplication.UnicodeUTF8))
+        self.help_link.setText(QtGui.QApplication.translate("ProjectCreateDialog", "<small><a style=\'color: #30A7E3;\' href=\'{DOC}\'>How do I customize Project creation?</a></small>", None, QtGui.QApplication.UnicodeUTF8))
         self.abort.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Abort", None, QtGui.QApplication.UnicodeUTF8))
         self.create_project.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Create Project", None, QtGui.QApplication.UnicodeUTF8))
 

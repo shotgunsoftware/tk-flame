@@ -634,7 +634,7 @@ height: 100px;
      <item>
       <widget class="QLabel" name="help_link">
        <property name="text">
-        <string>&lt;small&gt;&lt;a style='color: #30A7E3;' href='{DOC}'&gt;How do I customize project creation?&lt;/a&gt;&lt;/small&gt;</string>
+        <string>&lt;small&gt;&lt;a style='color: #30A7E3;' href='{DOC}'&gt;How do I customize Project creation?&lt;/a&gt;&lt;/small&gt;</string>
        </property>
       </widget>
      </item>
