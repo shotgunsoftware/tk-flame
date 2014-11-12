@@ -17,9 +17,25 @@ class ProjectCreateDialog(QtGui.QWidget):
     Project setup dialog for flame
     """
     
-    def __init__(self, project_name, user_name, workspace_name, storage_name, host_name, project_settings):
+    def __init__(self, 
+                 project_name, 
+                 user_name, 
+                 workspace_name, 
+                 default_volume_name, 
+                 volume_names, 
+                 host_name, 
+                 project_settings):
         """
         Constructor
+        
+        :param project_name: Name of the project as string
+        :param user_name: Name of the user as string
+        :param workspace_name: Name of the workspace as string, None if default workspace should be used
+        :param default_volume_name: The default volume name, as string
+        :param volume_names: All available volumes, list of strings
+        :param host_name: The host name to create the project on (str)
+        :param project_settings: Project settings. Dictionary as returned by 
+                                 the project_startup_hook's get_project_settings method
         """
         # first, call the base class and let it do its thing.
         QtGui.QWidget.__init__(self)
@@ -27,7 +43,7 @@ class ProjectCreateDialog(QtGui.QWidget):
         self._engine = sgtk.platform.current_bundle()
         
         # now load in the UI that was created in the UI designer
-        self.ui = Ui_ProjectCreateDialog() 
+        self.ui = Ui_ProjectCreateDialog()
         self.ui.setupUi(self) 
         
         # with the tk dialogs, we need to hook up our modal 
@@ -50,8 +66,13 @@ class ProjectCreateDialog(QtGui.QWidget):
             self.ui.workspace_name.setText(workspace_name)
         else:
             self.ui.workspace_name.setText("Will use a Flame Default Workspace")
-        self.ui.storage_name.setText(storage_name)
         self.ui.host_name.setText(host_name)
+        
+        # populate storage volume dropdown
+        self.ui.volume.addItems(volume_names)
+        # now select the default value in combo box
+        idx = self.ui.volume.findText(default_volume_name)
+        self.ui.volume.setCurrentIndex(idx)
         
         # -------------------------------------------------------------------------
         # populate the resolution tab
@@ -115,6 +136,14 @@ class ProjectCreateDialog(QtGui.QWidget):
         else:
             idx = combo_widget.findText(str(value))
             combo_widget.setCurrentIndex(idx)
+         
+    def get_volume_name(self):
+        """
+        Returns the selected storage volume
+        
+        :returns: volume as string
+        """
+        return self.ui.volume.currentText()
          
     def get_settings(self):
         """

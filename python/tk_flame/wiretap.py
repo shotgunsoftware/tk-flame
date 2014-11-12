@@ -154,6 +154,11 @@ class WiretapHandler(object):
             
             # call out to the hook to determine which volume to use
             volume_name = self._engine.execute_hook_method("project_startup_hook", "get_volume", volumes=volumes)
+
+            # sanity check :)
+            if volume_name not in volumes:
+                raise TankError("Volume '%s' specified in hook does not exist in "
+                                "list of current volumes '%s'" % (volume_name, volumes))
             
             host_name = self._engine.execute_hook_method("project_startup_hook", "get_server_hostname")
             
@@ -173,6 +178,7 @@ class WiretapHandler(object):
                                                                     user_name,
                                                                     workspace_name,
                                                                     volume_name,
+                                                                    volumes,
                                                                     host_name,
                                                                     project_settings
                                                                     )
@@ -182,16 +188,12 @@ class WiretapHandler(object):
                     raise TankError("Flame project creation aborted. Will not launch Flame.")
                 
                 # read updated settings back from the UI.
-                project_settings = widget.get_settings()                
+                project_settings = widget.get_settings()
+                volume_name = widget.get_volume_name()
                 
             else:
                 self._engine.log_debug("Project settings ui will be bypassed.")            
-            
-            # sanity check :)
-            if volume_name not in volumes:
-                raise TankError("Volume '%s' specified in hook does not exist in "
-                                "list of current volumes '%s'" % (volume_name, volumes))
-            
+                        
             # resolve this as an object
             volume = WireTapNodeHandle(self._server, "/volumes/%s" % volume_name)
             
