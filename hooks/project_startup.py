@@ -122,6 +122,14 @@ class ProjectStartupActions(HookBaseClass):
 
         if shotgun_user is None:
             user_name = "unknown"
+            engine.log_warning("Toolkit was not able to map your machine user name to a "
+                               "user in Shotgun. Your Flame project will be associated with a "
+                               "default 'unknown' user. In order to correctly connect your Flame "
+                               "user with the current Shotgun user, check that the current operating system "
+                               "user name matches the 'login' field of one of the users in Shotgun. "
+                               "Alternatively, if would like a different naming convention, either "
+                               "reconfigure the Flame project startup hook or the Toolkit Core user " 
+                               "resolve hook.")
         else:
             user_name = shotgun_user["name"] 
 
