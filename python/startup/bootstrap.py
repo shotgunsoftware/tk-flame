@@ -12,6 +12,7 @@
 import sgtk
 from sgtk import TankError
 import os
+import re
 import sys
 
 def bootstrap(engine_instance_name, context, app_path, app_args):
@@ -45,6 +46,29 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
 
     :returns: (app_path, app_args)
     """
+    
+    # do a quick check to ensure that we are running 2015.2 or later
+    re_match = re.search("/fla[mr]e[^_]*_([^/]+)/", app_path)
+    if not re_match:
+        raise TankError("Cannot extract Flame version number from the path '%s'!" % app_path)
+    version_str = re_match.group(1)
+    # Examples:
+    # 2015.2
+    # 2016
+    # 2015.2.pr99
+    chunks = version_str.split(".")
+    major_ver = int(chunks[0])
+    if len(chunks) > 1:
+        minor_ver = int(chunks[1])
+    else:
+        minor_ver = 0
+    
+    if major_ver < 2015:
+        raise TankError("In order to run the Shotgun integration, you need at least Flame 2015, extension 2!")
+    
+    if major_ver == 2015 and minor_ver < 2:
+        raise TankError("In order to run the Shotgun integration, you need at least Flame 2015, extension 2!")
+    
     this_folder = os.path.abspath(os.path.dirname(__file__))
     engine_root = os.path.abspath(os.path.join(this_folder, "..", ".."))
     launch_script = os.path.join(engine_root, "app_launcher") 
