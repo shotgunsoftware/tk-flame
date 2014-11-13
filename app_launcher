@@ -72,9 +72,9 @@ def launch_flame(dcc_path, dcc_args):
     # set a special environment variable to help hint to the engine
     # that when it is started this time, it is part of the bootstrap
     # and happening *outside* of the actual flame DCC
-    os.environ["TK_ENGINE_BOOTSTRAP"] = "1"
+    os.environ["TK_FLAME_ENGINE_MODE"] = "PRE_LAUNCH"
     flame_engine = sgtk.platform.start_engine(engine_instance_name, context.sgtk, context)
-    del os.environ["TK_ENGINE_BOOTSTRAP"]
+    del os.environ["TK_FLAME_ENGINE_MODE"]
     
     app_args = flame_engine.bootstrap()
 
@@ -108,11 +108,6 @@ if __name__ == "__main__":
     exit_code = 1
     try:
         exit_code = launch_flame(dcc_path, dcc_args)
-
-    except TankError, e:
-        # one line report
-        print str(e)
-
     except KeyboardInterrupt, e:
         print "Process cancelled."
 

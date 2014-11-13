@@ -77,14 +77,10 @@ class QtTask(QtCore.QObject):
                                                         self._widget_class, 
                                                         *self._args, 
                                                         **self._kwargs)
-        except tank.TankError, e:
-            self._engine.log_error(str(e))
-
+        
+        
         except KeyboardInterrupt:
             self._engine.log_info("The operation was cancelled by the user.")
-            
-        except Exception:
-            self._engine.log_exception("A general error was reported.")            
             
         finally:
             # broadcast that we have finished this command

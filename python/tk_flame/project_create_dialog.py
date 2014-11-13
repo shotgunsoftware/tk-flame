@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
+from sgtk import TankError
 from sgtk.platform.qt import QtCore, QtGui
 from .ui.project_create_dialog import Ui_ProjectCreateDialog
 
@@ -143,7 +144,7 @@ class ProjectCreateDialog(QtGui.QWidget):
         
         :returns: volume as string
         """
-        return self.ui.volume.currentText()
+        return str(self.ui.volume.currentText())
          
     def get_settings(self):
         """

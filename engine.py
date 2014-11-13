@@ -19,8 +19,17 @@ import uuid
 import sgtk
 import socket
 import pickle
+import logging
+import logging.handlers
 import tempfile
+import traceback
 from sgtk import TankError
+
+
+# std python logging handle. This is globally defined so that the
+# also globally defined exception handler can access it.
+g_log = None
+
 
 class FlameEngine(sgtk.platform.Engine):
     """
@@ -39,11 +48,49 @@ class FlameEngine(sgtk.platform.Engine):
     # the name of the folder in the engine which we should register
     # with flame to trigger various hooks to run.
     FLAME_HOOKS_FOLDER = "flame_hooks"
+    SGTK_LOG_FILE = "/usr/discreet/log/tk-flame.log"
+    
+    # define constants for the various modes the engine can execute in
+    (ENGINE_MODE_DCC, ENGINE_MODE_PRELAUNCH, ENGINE_MODE_BACKBURNER) = range(3)
+    
+    def __init__(self, *args, **kwargs):
+        """
+        Overridden constructor where we init some things which 
+        need to be defined very early on in the engine startup.
+        """
+        # define logger
+        self._initialize_logging()
+
+        # set the current engine mode. The mode contains information about
+        # how the engine was started - it can be executed either before the 
+        # actual DCC starts up (pre-launch), in the DCC itself or on the 
+        # backburner farm. This means that there are three distinct bootstrap
+        # scripts which can launch the engine (all contained within the engine itself).
+        # these bootstrap scripts all set an environment variable called
+        # TK_FLAME_ENGINE_MODE which defines the desired engine mode.
+        engine_mode_str = os.environ.get("TK_FLAME_ENGINE_MODE")
+        if engine_mode_str == "PRE_LAUNCH":
+            self._engine_mode = self.ENGINE_MODE_PRELAUNCH
+        elif engine_mode_str == "BACKBURNER":
+            self._engine_mode = self.ENGINE_MODE_BACKBURNER
+        elif engine_mode_str == "DCC":
+            self._engine_mode = self.ENGINE_MODE_DCC
+        else:
+            raise TankError("Unknown launch mode '%s' defined in "
+                            "environment variable TK_FLAME_ENGINE_MODE!" % os.environ.get("TK_FLAME_ENGINE_MODE") )
+        
+        super(FlameEngine, self).__init__(*args, **kwargs)
     
     def pre_app_init(self):
         """
         Engine construction/setup done before any apps are initialized
-        """        
+        """
+        # set up a custom exception trap for the engine.
+        # it will log the exception and if possible also
+        # display it in a UI
+        sys.excepthook = sgtk_exception_trap
+        
+        # now start the proper init
         self.log_debug("%s: Initializing..." % self)        
         
         # maintain a list of export options
@@ -56,6 +103,23 @@ class FlameEngine(sgtk.platform.Engine):
             from PySide import QtGui, QtCore
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)        
+        
+    def _initialize_logging(self):
+        """
+        Set up logging for the engine
+        """
+        global g_log
+        
+        # Set up a rotating logger with 4MiB max file size
+        rotating = logging.handlers.RotatingFileHandler(self.SGTK_LOG_FILE, maxBytes=4*1024*1024, backupCount=10)
+        rotating.setFormatter(logging.Formatter("%(asctime)s [%(levelname) 8s] %(name)s: %(message)s"))
+        # create a global logging object
+        g_log = logging.getLogger("sgtk")
+        g_log.propagate = False
+        # clear any existing handlers
+        g_log.handlers = []
+        g_log.addHandler(rotating)
+        g_log.setLevel(logging.DEBUG)
         
     def post_app_init(self):
         """
@@ -94,8 +158,9 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param msg: The debug message to log
         """
-        if self.get_setting("debug_logging", False):
-            print "Shotgun Debug: %s" % msg
+        global g_log
+        if g_log and self.get_setting("debug_logging", False):
+            g_log.debug(msg)
  
     def log_info(self, msg):
         """
@@ -103,7 +168,9 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param msg: The info message to log
         """
-        print "Shotgun Info: %s" % msg
+        global g_log
+        if g_log:
+            g_log.info(msg)
  
     def log_warning(self, msg):
         """
@@ -111,7 +178,9 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param msg: The warning message to log
         """        
-        print "Shotgun Warning: %s" % msg
+        global g_log
+        if g_log:
+            g_log.warning(msg)
  
     def log_error(self, msg):
         """
@@ -119,7 +188,9 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param msg: The error message to log
         """        
-        print "Shotgun Error: %s" % msg
+        global g_log
+        if g_log:
+            g_log.error(msg)
 
 
     ################################################################################################################
@@ -233,7 +304,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Define QT behaviour. Subclassed from base class.
         """
-        if "TK_ENGINE_BOOTSTRAP" not in os.environ:
+        if self._engine_mode == self.ENGINE_MODE_DCC:
             # we are running the engine inside of the Flame Application.
             # in this state, no special QT init is necessary. Defer
             # to default implementation
@@ -436,7 +507,6 @@ class FlameEngine(sgtk.platform.Engine):
         self.log_debug("Flame engine batch callback dispatch for %s" % callback_name)
 
         # dispatch to all callbacks
-        
         for registered_batch_instance in self._registered_batch_instances:
             self.log_debug("checking %s" % registered_batch_instance)
             if callback_name in registered_batch_instance:
@@ -618,3 +688,64 @@ class FlameEngine(sgtk.platform.Engine):
         return default_tc_start  
         
         
+def sgtk_exception_trap(ex_cls, ex, tb):
+    """
+    UI Popup and logging exception trap override.
+    
+    This method is used to override the default exception reporting behaviour
+    inside the embedded flame python interpreter to make errors more visible 
+    to the user.
+    
+    It attempts to create a QT messagebox with a formatted error message to
+    alert the user that something has gong wrong. In addition to this, the
+    default exception handling is also carried out and the exception is also
+    written to the log.
+    
+    Note that this is a global object and not an engine-relative thing, so that
+    the exception handler will operate correctly even if the engine instance no
+    longer exists.
+    """
+    global g_log
+    
+    
+    # careful about infinite loops here - we mustn't raise exceptions.
+    
+    # like in other environments and scripts, for TankErrors, we assume that the 
+    # error message is already a nice descriptive, crafted message and try to present
+    # this in a user friendly fashion
+    # 
+    # for other exception types, we give a full call stack.
+    
+    error_message = "Critical: Could not format error message."
+    
+    try:
+        traceback_str = "\n".join(traceback.format_tb(tb))
+        if ex_cls == TankError:
+            # for TankErrors, we don't show the whole stack trace
+            error_message = "A Shotgun error was reported:\n\n%s" % ex
+        else:    
+            error_message = "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s" % (ex, ex_cls, traceback_str)
+    except:
+        pass
+
+    # now try to output it
+    try:
+        from PySide import QtGui, QtCore
+        if QtCore.QCoreApplication.instance():
+            # there is an application running - so pop up a message!
+            QtGui.QMessageBox.critical(None, "Shotgun General Error", error_message)
+    except:
+        pass
+    
+    # and try to log it
+    try:
+        if g_log:
+            error_message = "An exception was raised:\n\n%s (%s)\n\nTraceback:\n%s" % (ex, ex_cls, traceback_str)
+            g_log.error(error_message)
+    except:
+        pass
+    
+    # in addition to the ui popup, also defer to the default mechanism
+    sys.__excepthook__(type, ex, tb)
+
+
