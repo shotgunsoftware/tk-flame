@@ -304,15 +304,22 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Define QT behaviour. Subclassed from base class.
         """
-        if self._engine_mode == self.ENGINE_MODE_DCC:
-            # we are running the engine inside of the Flame Application.
-            # in this state, no special QT init is necessary. Defer
-            # to default implementation
+        if self._engine_mode in (self.ENGINE_MODE_DCC, self.ENGINE_MODE_BACKBURNER):
+            # We are running the engine inside of the Flame Application.
+            # alternatively, we are running the engine in backburner
+            #
+            # in both these states, no special QT init is necessary. 
+            # Defer to default implementation which looks for pyside and 
+            # gracefully fails in case that isn't found.
+            self.log_debug("Initializing default PySide for in-DCC / backburner use")
             return super(FlameEngine, self)._define_qt_base()
         
         else:
             # we are running the engine outside of flame.
-            # initialize QT.
+            # This is special - no QApplication is running at this point -
+            # a state akin to running apps inside the shell engine. 
+            # We assume that in pre-launch mode, PySide is available since
+            # we are running within the flame python.
             from PySide import QtCore, QtGui
             import PySide
     
