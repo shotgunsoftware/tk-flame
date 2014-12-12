@@ -579,8 +579,19 @@ class FlameEngine(sgtk.platform.Engine):
         # add basic job info
         # backburner does not do any kind of sanitaion itself, so ensure that job
         # info doesn't contain any strange characters etc
-        backburner_args.append("-jobName:\"%s\"" % re.sub('[^0-9a-zA-Z_\-,\. ]+', '_', job_name))
-        backburner_args.append("-description:\"%s\"" % re.sub('[^0-9a-zA-Z_\-,\. ]+', '_', description))
+        
+        # remove any non-trivial characters
+        sanitized_job_name = re.sub('[^0-9a-zA-Z_\-,\. ]+', '_', job_name)        
+        sanitized_job_desc = re.sub('[^0-9a-zA-Z_\-,\. ]+', '_', description)
+        
+        # if the job name contains too many characters, backburner submission fails
+        if len(sanitized_job_name) > 70:    
+            sanitized_job_name = "%s..." % sanitized_job_name[:67]
+        if len(sanitized_job_desc) > 70:    
+            sanitized_job_desc = "%s..." % sanitized_job_desc[:67]
+        
+        backburner_args.append("-jobName:\"%s\"" % sanitized_job_name)
+        backburner_args.append("-description:\"%s\"" % sanitized_job_desc)
 
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
