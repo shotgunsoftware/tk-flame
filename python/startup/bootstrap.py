@@ -141,8 +141,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
         # add system libraries
         sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/lib64/%s" % version_str)
     
-    # now because each version of flame above 2016 has its own python installation,
-    # our bootstrap script which we want to kick off must have a dynamically generated shebang
+    # figure out the python location
     if major_ver == 2015:
         python_binary = "/usr/discreet/Python-2.6.9/bin/python"
         
@@ -154,6 +153,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     launch_script = os.path.join(this_folder, "app_launcher.py") 
     
     # finally, reroute the executable and args and return them
+    # (see docstring for details)
     new_app_path = python_binary
     new_app_args = "%s %s %s" % (launch_script, app_path, app_args)
     
