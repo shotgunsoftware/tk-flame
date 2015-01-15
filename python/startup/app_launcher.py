@@ -1,7 +1,3 @@
-#!/usr/discreet/Python-2.6.9/bin/python
-#
-# (shebang note: this script runs in the python distro that comes bundled with flame) 
-# 
 # Copyright (c) 2014 Shotgun Software Inc.
 # 
 # CONFIDENTIAL AND PROPRIETARY
@@ -62,7 +58,6 @@ def launch_flame(dcc_path, dcc_args):
 
     :returns: 0 on success, non-zero on failure
     """
-    
     # pick up environment
     engine_instance_name = os.environ["TOOLKIT_ENGINE_NAME"]
     context_str = os.environ["TOOLKIT_CONTEXT"]
@@ -101,7 +96,7 @@ if __name__ == "__main__":
         
     # the location of the actual tank core installation
     dcc_path = sys.argv[1]
-
+    
     # rest of the arguments are stuff we should pass to the DCC
     dcc_args = sys.argv[2:]
 
