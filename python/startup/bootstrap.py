@@ -117,15 +117,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
         path_chunks.append("python")
         wiretap_path = "/".join(path_chunks)
 
-    print "wirewtap  path: %s" % wiretap_path     
     sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
-    
-    
-    
-    
-    
-    
-    
     
     # also, in order to ensure that QT is working correctly inside of
     # the flame python interpreter, we need to hint the library order
@@ -138,7 +130,6 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
         sgtk.util.prepend_path_to_env_var("DYLD_FRAMEWORK_PATH", "/usr/discreet/lib64/%s/framework" % version_str)
         
     elif sys.platform == "linux2":
-        
         # add python related libraries
         if major_ver == 2015:
             # on flame 2015, this is stored in the python lib location
@@ -149,7 +140,6 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
         
         # add system libraries
         sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/lib64/%s" % version_str)
-    
     
     # now because each version of flame above 2016 has its own python installation,
     # our bootstrap script which we want to kick off must have a dynamically generated shebang
