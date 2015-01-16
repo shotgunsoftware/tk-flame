@@ -23,6 +23,9 @@ def _get_flame_version(flame_path):
     /usr/discreet/flameassist_2015.3/bin/startApplication        --> (2015, 3, "2015.3")
     /usr/discreet/flameassist_2016.0.0.322/bin/startApplication  --> (2016, 0, "2016.0.0.322")
     /usr/discreet/flameassist_2015.2.pr99/bin/startApplication   --> (2015, 2, "2015.2.pr99")
+    /usr/discreet/flameassist_2016.pr50/bin/startApplication     --> (2016, 0, "2016.pr50")
+    
+    If the minor or major version cannot be extracted, it will be set to zero.
     
     :param flame_path: path to executable
     :returns: (major, minor, full_str)
@@ -33,16 +36,24 @@ def _get_flame_version(flame_path):
     if not re_match:
         raise TankError("Cannot extract Flame version number from the path '%s'!" % flame_path)
     version_str = re_match.group(1)
+    
     # Examples:
     # 2015.2
     # 2016
+    # 2016.pr99
     # 2015.2.pr99
+    
+    major_ver = 0
+    minor_ver = 0
+    
     chunks = version_str.split(".")
-    major_ver = int(chunks[0])
+    if len(chunks) > 0:
+        if chunks[0].isdigit():
+            major_ver = int(chunks[0])
+    
     if len(chunks) > 1:
-        minor_ver = int(chunks[1])
-    else:
-        minor_ver = 0
+        if chunks[1].isdigit():
+            minor_ver = int(chunks[1])
 
     return (major_ver, minor_ver, version_str)
     
