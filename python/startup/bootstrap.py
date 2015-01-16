@@ -88,7 +88,11 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     
     if major_ver == 2015 and minor_ver < 2:
         raise TankError("In order to run the Shotgun integration, you need at least Flame 2015, extension 2!")
-        
+    
+    # first of all, check that the executable path to flame exists
+    if not os.path.exists(app_path):
+        raise TankError("Cannot launch Flame - the path '%s' does not exist on disk!" % app_path)
+    
     # update the environment prior to launch
     os.environ["TOOLKIT_ENGINE_NAME"] = engine_instance_name
     os.environ["TOOLKIT_CONTEXT"] = sgtk.context.serialize(context)
