@@ -113,7 +113,15 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
         
     else:
         # grab /usr/discreet/flameassist_2016.0.0.322 part of the path and then append python
-        path_chunks = app_path.split("/")[:4]
+        
+        # do some checks here - in case clients have special launch scripts they want to use
+        # we may have to alter this logic for finding the python libs. But until we get that 
+        # feedback from clients, let's go with the simple approach where we extract the location
+        # from the launch path.
+        if not app_path.startswith("/usr/discreet/"):
+            raise TankError("Invalid application path '%s'. This needs to start with /usr/discreet" % app_path)
+        
+        path_chunks = app_path.split("/")[:4]        
         path_chunks.append("python")
         wiretap_path = "/".join(path_chunks)
 
