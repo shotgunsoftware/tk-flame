@@ -263,31 +263,6 @@ class FlameEngine(sgtk.platform.Engine):
         sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
         self.log_debug("Added to hook path: %s" % flame_hooks_folder)
                 
-        # add and validate the wiretap API
-        # first, see if the wiretap API already exists - in that case, we use that version
-        try:
-            import libwiretapPythonClientAPI
-            self.log_debug("Wiretap API was already in the pythonpath. "
-                           "Will not try to add one in from the engine.")
-        except:
-            self.log_debug("Wiretap API not detected. Will add it to the pythonpath.")
-            
-            if sys.platform == "linux2":
-                wiretap_path = os.path.join(self.disk_location, "resources", "wiretap", "linux")                
-            
-            elif sys.platform == "darwin":
-                wiretap_path = os.path.join(self.disk_location, "resources", "wiretap", "macosx")
-            
-            else:
-                raise TankError("Unsupported operating system! Cannot load wiretap API!")
-            
-            self.log_debug("The wiretap API for the current session would be here: %s" % wiretap_path)            
-        
-            sys.path.append(wiretap_path)
-            import libwiretapPythonClientAPI
-        
-        self.log_debug("Using wiretap API %s from %s" % (libwiretapPythonClientAPI, libwiretapPythonClientAPI.__file__))
-        
         # now that we have a wiretap library, call out and initialize the project 
         # automatically
         tk_flame = self.import_module("tk_flame")
@@ -598,7 +573,9 @@ class FlameEngine(sgtk.platform.Engine):
 
         # call the bootstrap script
         backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")
-        farm_cmd = "%s %s" % ("/usr/discreet/Python-2.6.9/bin/python", backburner_bootstrap)
+        # note how we use the same python executable for the farm process as we use for the 
+        # current python session.
+        farm_cmd = "%s %s" % (sys.executable, backburner_bootstrap)
         
         # now we need to capture all of the environment and everything in a file
         # (thanks backburner!) so that we can replay it later when the task wakes up

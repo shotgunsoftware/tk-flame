@@ -1,4 +1,2 @@
 This location contains different versions of the Python Wiretap Client API.
 
-The versions have been compiled specifically to work with the python version shipped
-with flame itself (v2.6.9) and may not work correctly with other python versions.
