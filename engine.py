@@ -61,6 +61,9 @@ class FlameEngine(sgtk.platform.Engine):
         # define logger
         self._initialize_logging()
 
+        # the path to the associated python executable
+        self._python_executable_path = None 
+
         # set the current engine mode. The mode contains information about
         # how the engine was started - it can be executed either before the 
         # actual DCC starts up (pre-launch), in the DCC itself or on the 
@@ -121,6 +124,15 @@ class FlameEngine(sgtk.platform.Engine):
         g_log.addHandler(rotating)
         g_log.setLevel(logging.DEBUG)
         
+    def set_python_executable(self, python_path):
+        """
+        Specifies the path to the associated python process.
+        This is typically populated as part of the engine startup.
+        
+        :param python_path: path to python, as string 
+        """
+        self._python_executable_path = python_path
+        
     def post_app_init(self):
         """
         Do any initialization after apps have been loaded
@@ -132,6 +144,16 @@ class FlameEngine(sgtk.platform.Engine):
         Called when the engine is being destroyed
         """
         self.log_debug("%s: Destroying..." % self)
+    
+    @property
+    def python_executable(self):
+        """
+        Returns the python executable associated with this engine
+        """
+        if self._python_executable_path is None:
+            raise TankError("Python executable has not been defined for this engine instance!")
+        
+        return self._python_executable_path
     
     @property
     def has_ui(self):
@@ -573,9 +595,9 @@ class FlameEngine(sgtk.platform.Engine):
 
         # call the bootstrap script
         backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")
-        # note how we use the same python executable for the farm process as we use for the 
-        # current python session.
-        farm_cmd = "%s %s" % (sys.executable, backburner_bootstrap)
+        
+        # assemble full cmd
+        farm_cmd = "%s %s" % (self.python_executable, backburner_bootstrap)
         
         # now we need to capture all of the environment and everything in a file
         # (thanks backburner!) so that we can replay it later when the task wakes up

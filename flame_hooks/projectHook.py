@@ -41,5 +41,15 @@ def appInitialized(projectName):
         # set a special environment variable to help hint to the engine
         # that we are running a backburner job
         os.environ["TK_FLAME_ENGINE_MODE"] = "DCC"
-        sgtk.platform.start_engine(engine_name, context.sgtk, context)
+        e = sgtk.platform.start_engine(engine_name, context.sgtk, context)
         del os.environ["TK_FLAME_ENGINE_MODE"]
+        
+        # pass the python executable from the bootstrap to the engine 
+        python_executable = os.environ.get("TOOLKIT_FLAME_PYTHON_BINARY")
+        if not python_executable:
+            e.log_error("Cannot find environment variable TOOLKIT_FLAME_PYTHON_BINARY - this is set "
+                        "during the sgtk bootstrap of Flame.")
+        else:
+            e.set_python_executable(python_executable)
+        
+        

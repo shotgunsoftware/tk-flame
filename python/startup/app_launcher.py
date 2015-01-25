@@ -71,6 +71,14 @@ def launch_flame(dcc_path, dcc_args):
     flame_engine = sgtk.platform.start_engine(engine_instance_name, context.sgtk, context)
     del os.environ["TK_FLAME_ENGINE_MODE"]
     
+    # pass the python executable from the bootstrap to the engine 
+    python_executable = os.environ.get("TOOLKIT_FLAME_PYTHON_BINARY")
+    if not python_executable:
+        flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_PYTHON_BINARY - this is set "
+                               "during the sgtk bootstrap of Flame.")
+    else:
+        flame_engine.set_python_executable(python_executable)    
+        
     app_args = flame_engine.bootstrap()
 
     # now launch flame!

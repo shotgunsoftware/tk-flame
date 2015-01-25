@@ -107,7 +107,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     # update the environment prior to launch
     os.environ["TOOLKIT_ENGINE_NAME"] = engine_instance_name
     os.environ["TOOLKIT_CONTEXT"] = sgtk.context.serialize(context)
-    
+        
     # ensure that we add the right location for the wiretap API.
     # on 2016 and above, we can use the one distributed with flame
     # on 2015 ext2 and ext3, this version is not working and we instead
@@ -170,6 +170,11 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
         
     else:
         python_binary = "/usr/discreet/python/%s/bin/python" % version_str
+        
+    # we need to pass the flame version into the engine so that this
+    # can be picked up at runtime in the flame. This is in order for
+    # the engine to resolve the path to python.
+    os.environ["TOOLKIT_FLAME_PYTHON_BINARY"] = python_binary
     
     # the app_launcher.py script is in the same folder as this file
     this_folder = os.path.abspath(os.path.dirname(__file__))
