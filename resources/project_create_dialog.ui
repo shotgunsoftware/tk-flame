@@ -314,14 +314,14 @@ height: 100px;
            </item>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="label_3">
            <property name="text">
             <string>Depth</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="4" column="1">
           <widget class="QComboBox" name="depth">
            <property name="maxVisibleItems">
             <number>100</number>
@@ -353,14 +353,14 @@ height: 100px;
            </item>
           </widget>
          </item>
-         <item row="4" column="0">
+         <item row="5" column="0">
           <widget class="QLabel" name="label_10">
            <property name="text">
             <string>Field Dominance</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="5" column="1">
           <widget class="QComboBox" name="field_dominance">
            <property name="maxVisibleItems">
             <number>100</number>
@@ -378,6 +378,73 @@ height: 100px;
            <item>
             <property name="text">
              <string>FIELD_2</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_27">
+           <property name="text">
+            <string>Frame Rate</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="frame_rate">
+           <property name="maxVisibleItems">
+            <number>100</number>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>23.976 fps</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>24 fps</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>25 fps</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>29.97 fps DF</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>29.97 fps NDF</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>30 fps</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>50 fps</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>59.94 fps DF</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>59.94 fps NDF</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>60 fps</string>
             </property>
            </item>
           </widget>
