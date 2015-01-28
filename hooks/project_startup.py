@@ -145,9 +145,12 @@ class ProjectStartupActions(HookBaseClass):
          - FrameHeight (e.g. "1080")
          - FrameDepth (16-bit fp, 12-bit, 12-bit u, 10-bit, 8-bit) 
          - FieldDominance (PROGRESSIVE, FIELD_1, FIELD_2)
-         - AspectRatio (4:3, 16:9, or floating point value as string)
+         - AspectRatio (4:3, 16:9, or floating point value as string, e.g. '1.23423')
+         - FrameRate ("23.976 fps", "24 fps", "25 fps", "29.97 fps DF", "29.97 fps NDF", "30 fps", "50 fps",
+                      "59.94 fps DF", "59.94 fps NDF", "60 fps")
          
          For proxy settings see http://images.autodesk.com/adsk/files/wiretap2011_sdk_guide.pdf
+         
          - ProxyEnable ("true" or "false")
          - ProxyWidthHint
          - ProxyDepthMode
@@ -163,6 +166,7 @@ class ProjectStartupActions(HookBaseClass):
         settings["FrameDepth"] = "10-bit"
         settings["AspectRatio"] = "1.7778"
         settings["FieldDominance"] = "PROGRESSIVE"
+        settings["FrameRate"] = "24 fps"
         
         settings["ProxyEnable"] = "false"
         settings["ProxyDepthMode"] = "8-bit"
