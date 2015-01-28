@@ -708,42 +708,6 @@ class FlameEngine(sgtk.platform.Engine):
         """
         return self.__get_wiretap_central_binary("read_frame")    
 
-    def get_default_clip_start_frame(self):
-        """
-        Returns the value of the per-user setting default TC.
-        Returns 0 if this cannot be established.
-        
-        :returns: default offset for clips, in frames
-        """
-        
-        # look for this file:
-        # /usr/discreet/user/{USER}/status/EditingUICurrent.pref
-        # There will be an entry on the following form:
-        # 15 DefaultTCStart, 1800000.000000 50 fps
-        
-        user_name = self.execute_hook_method("project_startup_hook", "get_user")
-        path = "/usr/discreet/user/%s/status/EditingUICurrent.pref" % user_name
-        default_tc_start = 0
-        
-        if not os.path.exists(path):
-            self.log_warning("Cannot find the preferences file %s. Will assume zero time code offset." % path )
-        else:
-            fh = open(path, "rt")
-            try:
-                for line in fh.readlines():
-                    if "DefaultTCStart" in line:
-                        (_, data) = line.split(", ")
-                        # data: "1800000.000000 50 fps"
-                        offset_str = data.split(" ")[0]
-                        # offset_str: "1800000.000000"
-                        default_tc_start = int(float(offset_str))
-            except Exception, e:
-                self.log_warning("Could not read DefaultTCStart token from file '%s'. "
-                                 "Will assume zero offset. Error Reported: %s" (path, e))
-            finally:
-                fh.close()
-        
-        return default_tc_start  
         
         
 def sgtk_exception_trap(ex_cls, ex, tb):

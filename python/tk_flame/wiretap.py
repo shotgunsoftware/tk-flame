@@ -220,6 +220,10 @@ class WiretapHandler(object):
             xml += "<ProxyEnable>%s</ProxyEnable>"             % project_settings.get("ProxyEnable")
             xml += "<FieldDominance>%s</FieldDominance>"       % project_settings.get("FieldDominance")
             
+            # added in v1.2.0 so may not be in all hooks
+            if project_settings.get("FrameRate"):
+                xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
+            
             # some proxy settings are optional depending on other settings
             if project_settings.get("ProxyWidthHint"):
                 xml += "<ProxyWidthHint>%s</ProxyWidthHint>"       % project_settings.get("ProxyWidthHint")

@@ -82,6 +82,7 @@ class ProjectCreateDialog(QtGui.QWidget):
 
         self.__set_combo_value(project_settings, self.ui.depth, "FrameDepth")
         self.__set_combo_value(project_settings, self.ui.field_dominance, "FieldDominance")
+        self.__set_combo_value(project_settings, self.ui.frame_rate, "FrameRate")
         
         aspect_ratio = project_settings.get("AspectRatio")
         
@@ -172,6 +173,7 @@ class ProjectCreateDialog(QtGui.QWidget):
         settings["FrameHeight"] = self.ui.height.text()
         settings["FrameDepth"] = self.ui.depth.currentText()
         settings["FieldDominance"] = self.ui.field_dominance.currentText()
+        settings["FrameRate"] = self.ui.frame_rate.currentText()
         
         # aspect ratio: ["4:3", "16:9", "Based on width/height"]
         
