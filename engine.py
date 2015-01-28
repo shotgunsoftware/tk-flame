@@ -63,6 +63,9 @@ class FlameEngine(sgtk.platform.Engine):
 
         # the path to the associated python executable
         self._python_executable_path = None 
+        
+        # version of flame we are running
+        self._flame_version = None
 
         # set the current engine mode. The mode contains information about
         # how the engine was started - it can be executed either before the 
@@ -132,6 +135,19 @@ class FlameEngine(sgtk.platform.Engine):
         :param python_path: path to python, as string 
         """
         self._python_executable_path = python_path
+        self.log_debug("This engine is running python interpreter '%s'" % self._python_executable_path )
+        
+    def set_version_info(self, major_version_str, minor_version_str, full_version_str):
+        """
+        Specifies which version of flame this engine is running.
+        This is typically populated as part of the engine startup.
+        
+        :param major_version_str: Major version number as string 
+        :param minor_version_str: Minor version number as string
+        :param full_version_str: Full version number as string
+        """
+        self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str}
+        self.log_debug("This engine is running with Flame version '%s'" % full_version_str )
         
     def post_app_init(self):
         """
@@ -149,11 +165,36 @@ class FlameEngine(sgtk.platform.Engine):
     def python_executable(self):
         """
         Returns the python executable associated with this engine
+        
+        :returns: path to python, e.g. '/usr/discreet/python/2016.0.0.322/bin/python'
         """
         if self._python_executable_path is None:
             raise TankError("Python executable has not been defined for this engine instance!")
         
         return self._python_executable_path
+    
+    @property
+    def preset_version(self):
+        """
+        Returns the preset version required for the currently executing 
+        version of flame. Preset xml files in flame all have a version number 
+        to denote which generation of the file format they implement. If you are using
+        an old preset with a new version of flame, a warning message appears. 
+        
+        :returns: Preset version, as string, e.g. '5'
+        """  
+        if self._flame_version is None:
+            raise TankError("Cannot determine preset version - No flame DCC version specified!")
+        
+        if self._flame_version.get("full") == "2015":
+            return "4"
+        elif self._flame_version.get("full") == "2016":
+            return "5"
+        else:
+            # assume this is 2017 or above. Rather than raising an exception, which will
+            # break the flow, we return the highest protocol version we know. This will
+            # generate a warning in the flame ui, but at least it will work.
+            return "5"
     
     @property
     def has_ui(self):

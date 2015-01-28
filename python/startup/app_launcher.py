@@ -77,8 +77,20 @@ def launch_flame(dcc_path, dcc_args):
         flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_PYTHON_BINARY - this is set "
                                "during the sgtk bootstrap of Flame.")
     else:
-        flame_engine.set_python_executable(python_executable)    
+        flame_engine.set_python_executable(python_executable)
+    
+    # and the version number
+    major_version_str = os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION")
+    minor_version_str = os.environ.get("TOOLKIT_FLAME_MINOR_VERSION")
+    full_version_str = os.environ.get("TOOLKIT_FLAME_VERSION")
+    
+    if None in (major_version_str, minor_version_str, full_version_str):
+        flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_x_VERSION - this is set "
+                               "during the sgtk bootstrap of Flame.")
+    else:
+        flame_engine.set_version_info(major_version_str, minor_version_str, full_version_str)
         
+    # and kick off the pre-process - this will ensure that a flame project exists.
     app_args = flame_engine.bootstrap()
 
     # now launch flame!
