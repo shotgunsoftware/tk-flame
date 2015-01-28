@@ -176,6 +176,11 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     # the engine to resolve the path to python.
     os.environ["TOOLKIT_FLAME_PYTHON_BINARY"] = python_binary
     
+    # also pass the version of flame in the same manner
+    os.environ["TOOLKIT_FLAME_MAJOR_VERSION"] = str(major_ver)
+    os.environ["TOOLKIT_FLAME_MINOR_VERSION"] = str(minor_ver)
+    os.environ["TOOLKIT_FLAME_VERSION"] = version_str
+    
     # the app_launcher.py script is in the same folder as this file
     this_folder = os.path.abspath(os.path.dirname(__file__))
     launch_script = os.path.join(this_folder, "app_launcher.py") 
