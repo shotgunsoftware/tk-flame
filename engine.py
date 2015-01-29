@@ -147,7 +147,7 @@ class FlameEngine(sgtk.platform.Engine):
         :param full_version_str: Full version number as string
         """
         self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str}
-        self.log_debug("This engine is running with Flame version '%s'" % full_version_str )
+        self.log_debug("This engine is running with Flame version '%s'" % self._flame_version )
         
     def post_app_init(self):
         """
@@ -186,9 +186,9 @@ class FlameEngine(sgtk.platform.Engine):
         if self._flame_version is None:
             raise TankError("Cannot determine preset version - No flame DCC version specified!")
         
-        if self._flame_version.get("full") == "2015":
+        if self._flame_version.get("major") == "2015":
             return "4"
-        elif self._flame_version.get("full") == "2016":
+        elif self._flame_version.get("major") == "2016":
             return "5"
         else:
             # assume this is 2017 or above. Rather than raising an exception, which will
