@@ -195,6 +195,18 @@ class FlameEngine(sgtk.platform.Engine):
             # break the flow, we return the highest protocol version we know. This will
             # generate a warning in the flame ui, but at least it will work.
             return "5"
+
+    @property
+    def flame_major_version(self):
+        """
+        Returns Flame's major version number as a string.
+        
+        :returns: String (e.g. '2015')
+        """
+        if self._flame_version is None:
+            raise TankError("No flame DCC version specified!")
+        
+        return self._flame_version.get("major")        
     
     @property
     def has_ui(self):
