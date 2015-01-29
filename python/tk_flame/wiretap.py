@@ -187,8 +187,10 @@ class WiretapHandler(object):
                     # user pressed cancel
                     raise TankError("Flame project creation aborted. Will not launch Flame.")
                 
-                # read updated settings back from the UI.
-                project_settings = widget.get_settings()
+                # read updated settings back from the UI and update our settings dict with these
+                for (k, v) in widget.get_settings().iteritems(): 
+                    project_settings[k] = v
+                    
                 volume_name = widget.get_volume_name()
                 
             else:
@@ -220,9 +222,13 @@ class WiretapHandler(object):
             xml += "<ProxyEnable>%s</ProxyEnable>"             % project_settings.get("ProxyEnable")
             xml += "<FieldDominance>%s</FieldDominance>"       % project_settings.get("FieldDominance")
             
+            
             # added in v1.2.0 so may not be in all hooks
             if project_settings.get("FrameRate"):
                 xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
+            if project_settings.get("VisualDepth"):
+                xml += "<VisualDepth>%s</VisualDepth>"             % project_settings.get("VisualDepth")
+            
             
             # some proxy settings are optional depending on other settings
             if project_settings.get("ProxyWidthHint"):
