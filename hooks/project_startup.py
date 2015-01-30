@@ -121,7 +121,7 @@ class ProjectStartupActions(HookBaseClass):
         shotgun_user = sgtk.util.get_current_user(engine.sgtk)
 
         if shotgun_user is None:
-            user_name = "unknown"
+            user_name = "Shotgun Unknown"
             engine.log_warning("Toolkit was not able to map your machine user name to a "
                                "user in Shotgun. Your Flame project will be associated with a "
                                "default 'unknown' user. In order to correctly connect your Flame "
