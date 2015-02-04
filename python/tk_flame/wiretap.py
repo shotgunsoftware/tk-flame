@@ -226,9 +226,14 @@ class WiretapHandler(object):
             # added in v1.2.0 so may not be in all hooks
             if project_settings.get("FrameRate"):
                 xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
-            if project_settings.get("VisualDepth"):
-                xml += "<VisualDepth>%s</VisualDepth>"             % project_settings.get("VisualDepth")
             
+            if project_settings.get("VisualDepth"):
+                # note - visualdepth does not work on flame 2015.2 so only support in higher versions
+                if self._engine.flame_major_version == "2015" and self._engine.flame_minor_version == "2":
+                    self._engine.log_warning("Ignoring VisualDepth directive "
+                                             "since this is not handled by Flame v2015.2")
+                else: 
+                    xml += "<VisualDepth>%s</VisualDepth>"         % project_settings.get("VisualDepth")
             
             # some proxy settings are optional depending on other settings
             if project_settings.get("ProxyWidthHint"):
