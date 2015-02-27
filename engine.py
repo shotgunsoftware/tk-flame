@@ -119,7 +119,7 @@ class FlameEngine(sgtk.platform.Engine):
         
         # Set up a rotating logger with 4MiB max file size
         rotating = logging.handlers.RotatingFileHandler(self.SGTK_LOG_FILE, maxBytes=4*1024*1024, backupCount=10)
-        rotating.setFormatter(logging.Formatter("%(asctime)s [%(levelname) 8s] %(name)s: %(message)s"))
+        rotating.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] PID %(process)d: %(message)s"))
         # create a global logging object
         g_log = logging.getLogger("sgtk")
         g_log.propagate = False
