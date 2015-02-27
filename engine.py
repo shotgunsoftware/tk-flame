@@ -20,6 +20,7 @@ import sgtk
 import socket
 import pickle
 import logging
+import pprint
 import logging.handlers
 import tempfile
 import traceback
@@ -506,6 +507,8 @@ class FlameEngine(sgtk.platform.Engine):
         :param info: Metadata dictionary from Flame
         """
         self.log_debug("Flame engine export callback dispatch for %s" % callback_name)
+        self.log_debug("Info parameters passed from flame: %s" % pprint.pformat(info))
+        
         if session_id not in self._export_sessions:
             self.log_debug("Ignoring request for unknown session %s..." % session_id)
             return
@@ -574,10 +577,11 @@ class FlameEngine(sgtk.platform.Engine):
         :param info: Metadata dictionary from Flame
         """
         self.log_debug("Flame engine batch callback dispatch for %s" % callback_name)
+        self.log_debug("Info parameters passed from flame: %s" % pprint.pformat(info))
 
         # dispatch to all callbacks
         for registered_batch_instance in self._registered_batch_instances:
-            self.log_debug("checking %s" % registered_batch_instance)
+            self.log_debug("Checking %s" % registered_batch_instance)
             if callback_name in registered_batch_instance:
                 # the app has registered interest in this!
                 self.log_debug("Executing callback %s" % registered_batch_instance[callback_name])
