@@ -32,7 +32,7 @@ def preCustomExport(info, userData):
                  - destinationHost: Host name where the exported files will be written to.
                  - destinationPath: Export path root.
                  - presetPath: Path to the preset used for the export.
-                 - abort: Pass True back to flame if you want to abort
+                 - abort: Pass True back to Flame if you want to abort
                  - abortMessage: Abort message to feed back to client
                  
     :param userData: Dictionary that could have been populated by previous export hooks and that
@@ -54,7 +54,7 @@ def preCustomExport(info, userData):
     # tell the engine to dispatch the request to the correct toolkit app
     engine.trigger_export_callback("preCustomExport", session_id, info)
 
-# tell flame not to display the fish cursor while we process the hook
+# tell Flame not to display the fish cursor while we process the hook
 preCustomExport.func_dict["waitCursor"] = False  
  
 def postCustomExport(info, userData):
@@ -89,7 +89,7 @@ def preExport(info, userData):
     :param info: Dictionary with info about the export. Contains the keys
                  - destinationHost: Host name where the exported files will be written to.
                  - destinationPath: Export path root.
-                 - abort: Pass True back to flame if you want to abort
+                 - abort: Pass True back to Flame if you want to abort
                  - abortMessage: Abort message to feed back to client
                  
     :param userData: Dictionary that could have been populated by previous export hooks and that

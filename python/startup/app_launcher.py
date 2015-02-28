@@ -9,8 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 #
 #
-# This script is a launch wrapper for Flame. It is part of the flame bootstrap.
-# The flame bootstrap happens in three distinct steps:
+# This script is a launch wrapper for Flame. It is part of the Flame bootstrap.
+# The Flame bootstrap happens in three distinct steps:
 #
 # 1. Preparation - The multi-launch-app (for example) executes the 
 #    python/startup/bootstrap.py method (after having imported this file.
@@ -19,16 +19,16 @@
 #    the DCC (which is what the launch-app is wanting to do) the bootstrap modifies
 #    this and returns the executable to run being this app_launcher script with 
 #    the executable as the command line. It also adjusts certain things that strictly 
-#    need to be defined before any flame related process is launched - on our case
+#    need to be defined before any Flame related process is launched - on our case
 #    instructions to the dynamic loader via LD_LIBRARY_PATH
 #
 # 2. The launch app will now call *this* script rather than the DCC which it was configured
 #    to launch. This script executes with /usr/discreet/Python-2.6.9/bin/python which is a known
 #    environment with pyside etc. At this point, we start the engine and run a bunch of startup
-#    stuff. Note that this is now happening before flame has actually launched. This startup
-#    includes ensuring that a new project exists. It also sets up the flame envrironment variables,
-#    so that flame can run the right hooks once it has been launched. The last step of this script 
-#    is to actually launch flame.
+#    stuff. Note that this is now happening before Flame has actually launched. This startup
+#    includes ensuring that a new project exists. It also sets up the Flame envrironment variables,
+#    so that Flame can run the right hooks once it has been launched. The last step of this script 
+#    is to actually launch Flame.
 #
 # 3. Flame launches, user performs operations. Engine hooks (in the /flame_hooks folder) are executed.
 #
@@ -46,14 +46,14 @@ except ImportError:
 
 def launch_flame(dcc_path, dcc_args):
     """
-    Run pre-processes and eventually launch flame.
+    Run pre-processes and eventually launch Flame.
     
-    This process is executing inside a flame python environment where
+    This process is executing inside a Flame python environment where
     pyside is guaranteed to exist. It is also assumed that sgtk is already 
     available in the pythonpath, as it would typically be if executed via the 
     multi launch app for example. 
     
-    :param dcc_path: Path to the flame dcc executable or start script
+    :param dcc_path: Path to the Flame dcc executable or start script
     :param dcc_args: Args to pass to dcc
 
     :returns: 0 on success, non-zero on failure
@@ -63,10 +63,10 @@ def launch_flame(dcc_path, dcc_args):
     context_str = os.environ["TOOLKIT_CONTEXT"]
     context = sgtk.context.deserialize(context_str)
     
-    # start up flame engine
+    # start up Flame engine
     # set a special environment variable to help hint to the engine
     # that when it is started this time, it is part of the bootstrap
-    # and happening *outside* of the actual flame DCC
+    # and happening *outside* of the actual Flame DCC
     os.environ["TK_FLAME_ENGINE_MODE"] = "PRE_LAUNCH"
     flame_engine = sgtk.platform.start_engine(engine_instance_name, context.sgtk, context)
     del os.environ["TK_FLAME_ENGINE_MODE"]
@@ -90,10 +90,10 @@ def launch_flame(dcc_path, dcc_args):
     else:
         flame_engine.set_version_info(major_version_str, minor_version_str, full_version_str)
         
-    # and kick off the pre-process - this will ensure that a flame project exists.
+    # and kick off the pre-process - this will ensure that a Flame project exists.
     app_args = flame_engine.bootstrap()
 
-    # now launch flame!
+    # now launch Flame!
     flame_engine.log_debug("-" * 60)
     flame_engine.log_debug("About to launch the actual flame DCC.")
     flame_engine.log_debug("Dcc      path: '%s'" % dcc_path)
@@ -109,7 +109,7 @@ def launch_flame(dcc_path, dcc_args):
 
 if __name__ == "__main__":
 
-    # the first argument is always the path to the flame executable
+    # the first argument is always the path to the Flame executable
     if len(sys.argv) == 1:
         logger.error("Invalid syntax: app_launcher /path/to/flame args!")
         sys.exit(1)

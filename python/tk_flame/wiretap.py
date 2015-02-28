@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
-Wiretap connection with the local flame to carry out common setup operations
+Wiretap connection with the local Flame to carry out common setup operations
 """
 
 import sgtk
@@ -75,8 +75,8 @@ class WiretapHandler(object):
         self._ensure_user_exists(user_name)
         
         if workspace_name is None:
-            # use flame's default workspace
-            self._engine.log_debug("Using the flame default workspace")
+            # use Flame's default workspace
+            self._engine.log_debug("Using the Flame default workspace")
             app_args = "--start-project='%s' --start-user='%s' --create-workspace" % (project_name, user_name)
             
         else:
@@ -228,7 +228,7 @@ class WiretapHandler(object):
                 xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
             
             if project_settings.get("VisualDepth"):
-                # note - visualdepth does not work on flame 2015.2 so only support in higher versions
+                # note - visualdepth does not work on Flame 2015.2 so only support in higher versions
                 if self._engine.flame_major_version == "2015" and self._engine.flame_minor_version == "2":
                     self._engine.log_warning("Ignoring VisualDepth directive "
                                              "since this is not handled by Flame v2015.2")

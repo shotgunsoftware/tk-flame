@@ -27,13 +27,13 @@ configuration:
     flame_batch_publish_type:
         type: tank_type
         description: The publish type associated with Flame batch scripts. This parameter is used
-                     to help the flare launch process auto-load a batch script from Shotgun at startup.
+                     to help the Flare launch process auto-load a batch script from Shotgun at startup.
         default_value: "Flame Batch File"
     
     backburner_shared_tmp:
         type: str
         default_value: "/tmp"
-        description: A folder where the flame engine can put temporary files. This folder 
+        description: A folder where the Flame engine can put temporary files. This folder 
                      needs to be accessible from all backburner nodes, so if you are running
                      a larger backburner setup, this path must be some sort of shared network
                      location. 

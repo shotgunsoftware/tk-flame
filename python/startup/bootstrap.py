@@ -17,7 +17,7 @@ import sys
 
 def _get_flame_version(flame_path):
     """
-    Returns the version string for the given flame path
+    Returns the version string for the given Flame path
     
     /usr/discreet/flameassist_2015.2/bin/startApplication        --> (2015, 2, "2015.2")
     /usr/discreet/flameassist_2015.3/bin/startApplication        --> (2015, 3, "2015.3")
@@ -70,10 +70,10 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     start the engine where the multi-launch-app is running (typically 
     tk-shell/tk-desktop/tk-shotgun). 
 
-    The purpose of this script is to prepare the launch process for flame,
+    The purpose of this script is to prepare the launch process for Flame,
     return the executable that the launch app should actually execute. This 
     process consists of an additional step for Flame because part of the app
-    launch process happens outside of flame. We therefore rewrite the launch
+    launch process happens outside of Flame. We therefore rewrite the launch
     arguments as part of this method. For example
     
     input: app_path: /usr/discreet/flame_2015.2/bin/startApplication
@@ -100,7 +100,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     if major_ver == 2015 and minor_ver < 2:
         raise TankError("In order to run the Shotgun integration, you need at least Flame 2015, extension 2!")
     
-    # first of all, check that the executable path to flame exists
+    # first of all, check that the executable path to Flame exists
     if not os.path.exists(app_path):
         raise TankError("Cannot launch Flame - the path '%s' does not exist on disk!" % app_path)
     
@@ -109,7 +109,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     os.environ["TOOLKIT_CONTEXT"] = sgtk.context.serialize(context)
         
     # ensure that we add the right location for the wiretap API.
-    # on 2016 and above, we can use the one distributed with flame
+    # on 2016 and above, we can use the one distributed with Flame
     # on 2015 ext2 and ext3, this version is not working and we instead
     # use a version specifically distributed with the engine.     
     # in 2016: /usr/discreet/flameassist_2016.0.0.322/python
@@ -143,7 +143,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
     
     # also, in order to ensure that QT is working correctly inside of
-    # the flame python interpreter, we need to hint the library order
+    # the Flame python interpreter, we need to hint the library order
     # by adjusting the LD_LIBRARY_PATH. Note that this cannot be done
     # inside an executing script as the dynamic loader sets up the load
     # order prior to the execution of any payload. This is why we need to 
@@ -155,10 +155,10 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     elif sys.platform == "linux2":
         # add python related libraries
         if major_ver == 2015:
-            # on flame 2015, this is stored in the python lib location
+            # on Flame 2015, this is stored in the python lib location
             sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/Python-2.6.9/lib")
         else:
-            # on flame 2016, each version is managed separately
+            # on Flame 2016, each version is managed separately
             sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "/usr/discreet/python/%s/lib" % version_str)
         
         # add system libraries
@@ -171,12 +171,12 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     else:
         python_binary = "/usr/discreet/python/%s/bin/python" % version_str
         
-    # we need to pass the flame version into the engine so that this
-    # can be picked up at runtime in the flame. This is in order for
+    # we need to pass the Flame version into the engine so that this
+    # can be picked up at runtime in the Flame. This is in order for
     # the engine to resolve the path to python.
     os.environ["TOOLKIT_FLAME_PYTHON_BINARY"] = python_binary
     
-    # also pass the version of flame in the same manner
+    # also pass the version of Flame in the same manner
     os.environ["TOOLKIT_FLAME_MAJOR_VERSION"] = str(major_ver)
     os.environ["TOOLKIT_FLAME_MINOR_VERSION"] = str(minor_ver)
     os.environ["TOOLKIT_FLAME_VERSION"] = version_str

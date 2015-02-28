@@ -34,10 +34,10 @@ g_log = None
 
 class FlameEngine(sgtk.platform.Engine):
     """
-    The engine class. This wraps around a series of callbacks in flame (so called hooks).
+    The engine class. This wraps around a series of callbacks in Flame (so called hooks).
     The Flame engine is a bit different than other engines.
     
-    Because Flame doesn't have an API, we cannot call flame, but flame will call out 
+    Because Flame doesn't have an API, we cannot call Flame, but Flame will call out 
     to the toolkit code. This means that the normal register_command approach won't 
     work inside of Flame - instead, the engine introduces a different scheme of callbacks
     that apps can register to ensure that they cen do stuff.
@@ -47,7 +47,7 @@ class FlameEngine(sgtk.platform.Engine):
     """
     
     # the name of the folder in the engine which we should register
-    # with flame to trigger various hooks to run.
+    # with Flame to trigger various hooks to run.
     FLAME_HOOKS_FOLDER = "flame_hooks"
     SGTK_LOG_FILE = "/usr/discreet/log/tk-flame.log"
     
@@ -65,7 +65,7 @@ class FlameEngine(sgtk.platform.Engine):
         # the path to the associated python executable
         self._python_executable_path = None 
         
-        # version of flame we are running
+        # version of Flame we are running
         self._flame_version = None
 
         # set the current engine mode. The mode contains information about
@@ -140,7 +140,7 @@ class FlameEngine(sgtk.platform.Engine):
         
     def set_version_info(self, major_version_str, minor_version_str, full_version_str):
         """
-        Specifies which version of flame this engine is running.
+        Specifies which version of Flame this engine is running.
         This is typically populated as part of the engine startup.
         
         :param major_version_str: Major version number as string 
@@ -178,14 +178,14 @@ class FlameEngine(sgtk.platform.Engine):
     def preset_version(self):
         """
         Returns the preset version required for the currently executing 
-        version of flame. Preset xml files in flame all have a version number 
+        version of Flame. Preset xml files in Flame all have a version number 
         to denote which generation of the file format they implement. If you are using
-        an old preset with a new version of flame, a warning message appears. 
+        an old preset with a new version of Flame, a warning message appears. 
         
         :returns: Preset version, as string, e.g. '5'
         """  
         if self._flame_version is None:
-            raise TankError("Cannot determine preset version - No flame DCC version specified!")
+            raise TankError("Cannot determine preset version - No Flame DCC version specified!")
         
         if self._flame_version.get("major") == "2015":
             return "4"
@@ -194,7 +194,7 @@ class FlameEngine(sgtk.platform.Engine):
         else:
             # assume this is 2017 or above. Rather than raising an exception, which will
             # break the flow, we return the highest protocol version we know. This will
-            # generate a warning in the flame ui, but at least it will work.
+            # generate a warning in the Flame ui, but at least it will work.
             return "5"
 
     @property
@@ -205,7 +205,7 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: String (e.g. '2015')
         """
         if self._flame_version is None:
-            raise TankError("No flame DCC version specified!")
+            raise TankError("No Flame DCC version specified!")
         
         return self._flame_version.get("major")
     
@@ -217,7 +217,7 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: String (e.g. '2')
         """
         if self._flame_version is None:
-            raise TankError("No flame DCC version specified!")
+            raise TankError("No Flame DCC version specified!")
         
         return self._flame_version.get("minor")
     
@@ -287,11 +287,11 @@ class FlameEngine(sgtk.platform.Engine):
     
     def bootstrap(self):
         """
-        Special bootstrap method used to set up the flame environment.
-        This is designed to execute before flame has launched, as part of the 
+        Special bootstrap method used to set up the Flame environment.
+        This is designed to execute before Flame has launched, as part of the 
         bootstrapping process.
 
-        This method assumes that it is being executed inside a flame python
+        This method assumes that it is being executed inside a Flame python
         and is called from the app_launcher script which ensures such an environment.
         
         The bootstrapper will first import the wiretap API and setup other settings.
@@ -299,22 +299,22 @@ class FlameEngine(sgtk.platform.Engine):
         It then attempts to execute the pre-DCC project creation process, utilizing
         both wiretap and QT (setup project UI) for this.
         
-        Finally, it will return the command line args to pass to flame as it is being
+        Finally, it will return the command line args to pass to Flame as it is being
         launched.
         
         :returns: arguments to pass to the app launch process
         """
         if self.get_setting("debug_logging"):
-            # enable flame hooks debug
+            # enable Flame hooks debug
             os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
         
-        # special logic for flare - see if we can load up a batch file
+        # special logic for Flare - see if we can load up a batch file
         if self.instance_name == "tk-flare":
             
-            self.log_debug("Launching flare!")
+            self.log_debug("Launching Flare!")
         
-            # For flare, try to see if we can seed the session with a particular batch file.
-            # we do this by passing a special environment to the flare startup.
+            # For Flare, try to see if we can seed the session with a particular batch file.
+            # we do this by passing a special environment to the Flare startup.
             # 
             # For now, hard code the logic of how to detect which batch file to load up.
             # TODO: in the future, we may want to expose this in a hook - but it is arguably
@@ -342,11 +342,11 @@ class FlameEngine(sgtk.platform.Engine):
                 if sg_data:
                     # we have a batch file published for this context!
                     batch_file_path = sg_data["path"]["local_path"]
-                    self.log_debug("Setting flare auto startup file '%s'" % batch_file_path)
+                    self.log_debug("Setting Flare auto startup file '%s'" % batch_file_path)
                     os.environ["DL_BATCH_START_WITH_SETUP"] = batch_file_path
         
         
-        # add flame hooks for this engine
+        # add Flame hooks for this engine
         flame_hooks_folder = os.path.join(self.disk_location, self.FLAME_HOOKS_FOLDER)
         sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
         self.log_debug("Added to hook path: %s" % flame_hooks_folder)
@@ -378,11 +378,11 @@ class FlameEngine(sgtk.platform.Engine):
             return super(FlameEngine, self)._define_qt_base()
         
         else:
-            # we are running the engine outside of flame.
+            # we are running the engine outside of Flame.
             # This is special - no QApplication is running at this point -
             # a state akin to running apps inside the shell engine. 
             # We assume that in pre-launch mode, PySide is available since
-            # we are running within the flame python.
+            # we are running within the Flame python.
             from PySide import QtCore, QtGui
             import PySide
     
@@ -415,15 +415,15 @@ class FlameEngine(sgtk.platform.Engine):
     ################################################################################################################
     # export callbacks handling
     #
-    # Any apps which are interested in register custom exporters with flame should use the methods
+    # Any apps which are interested in register custom exporters with Flame should use the methods
     # below. The register_export_hook() is called by apps in order to create a menu entry
-    # on the flame export menu. The remaining methods are used to call out from the actual flame hook
+    # on the Flame export menu. The remaining methods are used to call out from the actual Flame hook
     # to the relevant app code.
     #
     
     def register_export_hook(self, menu_caption, callbacks):
         """
-        Allows an app to register an interest in one of the flame export hooks.
+        Allows an app to register an interest in one of the Flame export hooks.
         
         This one of the interaction entry points in the system and this is how apps
         typically have their business logic executed. At app init, an app typically
@@ -477,7 +477,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Internal engine method. Do not use outside of the engine.
         Start a new export session.
-        Creates a session object which represents a single export session in flame.
+        Creates a session object which represents a single export session in Flame.
         
         :param preset_name: The name of the preset which should be executed.
         :returns: session id string which is later passed into various methods
@@ -498,16 +498,16 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Internal engine method. Do not use outside of the engine.
         
-        Dispatch method called from the various flame hooks. 
-        This method will ensure that the flame callbacks will be 
+        Dispatch method called from the various Flame hooks. 
+        This method will ensure that the Flame callbacks will be 
         dispatched to the appropriate registered app callbacks.
         
-        :param callback_name: Name of the flame callback method
+        :param callback_name: Name of the Flame callback method
         :param session_id: Unique session identifier
         :param info: Metadata dictionary from Flame
         """
         self.log_debug("Flame engine export callback dispatch for %s" % callback_name)
-        self.log_debug("Info parameters passed from flame: %s" % pprint.pformat(info))
+        self.log_debug("Info parameters passed from Flame: %s" % pprint.pformat(info))
         
         if session_id not in self._export_sessions:
             self.log_debug("Ignoring request for unknown session %s..." % session_id)
@@ -527,15 +527,15 @@ class FlameEngine(sgtk.platform.Engine):
     ################################################################################################################
     # batch callbacks handling
     #
-    # Any apps which are interested in register custom batch exporters with flame should use the methods
+    # Any apps which are interested in register custom batch exporters with Flame should use the methods
     # below. The register_batch_hook() is called by apps in order to register an interest in pre and post
-    # export callbacks when in batch mode. The flame engine will ensure that the app's callbacks will get 
+    # export callbacks when in batch mode. The Flame engine will ensure that the app's callbacks will get 
     # called at the right time.
     #
     
     def register_batch_hook(self, callbacks):
         """
-        Allows an app to register an interest in one of the flame batch hooks.
+        Allows an app to register an interest in one of the Flame batch hooks.
         
         This one of the interaction entry points in the system and this is how apps
         typically have their business logic executed. At app init, an app typically
@@ -568,16 +568,16 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Internal engine method. Do not use outside of the engine.
         
-        Dispatch method called from the various flame hooks. 
-        This method will ensure that the flame callbacks will be 
+        Dispatch method called from the various Flame hooks. 
+        This method will ensure that the Flame callbacks will be 
         dispatched to the appropriate registered app callbacks.
         
-        :param callback_name: Name of the flame callback method
+        :param callback_name: Name of the Flame callback method
         :param session_id: Unique session identifier
         :param info: Metadata dictionary from Flame
         """
         self.log_debug("Flame engine batch callback dispatch for %s" % callback_name)
-        self.log_debug("Info parameters passed from flame: %s" % pprint.pformat(info))
+        self.log_debug("Info parameters passed from Flame: %s" % pprint.pformat(info))
 
         # dispatch to all callbacks
         for registered_batch_instance in self._registered_batch_instances:
@@ -596,9 +596,9 @@ class FlameEngine(sgtk.platform.Engine):
     
     def get_server_hostname(self):
         """
-        Return the hostname for the server which hosts this flame setup.
+        Return the hostname for the server which hosts this Flame setup.
         This is an accessor into the engine hook settings, allowing apps
-        to query which host the closest flame server is running on.
+        to query which host the closest Flame server is running on.
         
         :returns: hostname string 
         """
@@ -702,7 +702,7 @@ class FlameEngine(sgtk.platform.Engine):
     def __get_wiretap_central_binary(self, binary_name):
         """
         Returns the path to a binary in the wiretap central binary collection.
-        This is standard on all flame installations.
+        This is standard on all Flame installations.
         
         :param binary_name: Name of desired binary
         :returns: Absolute path as a string  
@@ -722,7 +722,7 @@ class FlameEngine(sgtk.platform.Engine):
 
     def get_ffmpeg_path(self):
         """
-        Returns the path to the ffmpeg executable that ships with flame.
+        Returns the path to the ffmpeg executable that ships with Flame.
         
         :returns: Absolute path as a string
         """
@@ -730,7 +730,7 @@ class FlameEngine(sgtk.platform.Engine):
                 
     def get_read_frame_path(self):
         """
-        Returns the path to the read_frame utility that ships with flame.
+        Returns the path to the read_frame utility that ships with Flame.
         
         :returns: Absolute path as a string
         """
@@ -743,7 +743,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
     UI Popup and logging exception trap override.
     
     This method is used to override the default exception reporting behaviour
-    inside the embedded flame python interpreter to make errors more visible 
+    inside the embedded Flame python interpreter to make errors more visible 
     to the user.
     
     It attempts to create a QT messagebox with a formatted error message to

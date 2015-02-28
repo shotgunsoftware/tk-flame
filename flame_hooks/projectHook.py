@@ -16,7 +16,7 @@ def appInitialized(projectName):
     :param projectName: String containing the name of the project that was loaded
     """
     
-    # attempt to start the flame engine if it hasn't already been started.
+    # attempt to start the Flame engine if it hasn't already been started.
     
     import sgtk
     import os    

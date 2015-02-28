@@ -15,7 +15,7 @@ from .ui.project_create_dialog import Ui_ProjectCreateDialog
 
 class ProjectCreateDialog(QtGui.QWidget):
     """
-    Project setup dialog for flame
+    Project setup dialog for Flame
     """
     
     def __init__(self, 

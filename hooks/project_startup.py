@@ -22,7 +22,7 @@ class ProjectStartupActions(HookBaseClass):
     """
     Toolkit hook to control the behavior of how new projects are created.
     
-    As part of the toolkit Flame launch process, a new flame project is automatically
+    As part of the toolkit Flame launch process, a new Flame project is automatically
     created if it doesn't already exist. Toolkit will then jump directly into that project
     as part of the launch process. 
     
@@ -39,7 +39,7 @@ class ProjectStartupActions(HookBaseClass):
     forward to make this entire process driven from field values within Shotgun.
     
     - The engine instance can be fetched via self.parent
-    - A shotgun API handle is available via engine_obj.shotgun.
+    - A Shotgun API handle is available via engine_obj.shotgun.
     - The project id can be retrieved via engine_obj.context.project["id"]
     """
     
@@ -53,7 +53,7 @@ class ProjectStartupActions(HookBaseClass):
         
     def get_server_hostname(self):
         """
-        Return the hostname of the machine which hosts the main flame server,
+        Return the hostname of the machine which hosts the main Flame server,
         including storage and wiretap server access point.
         
         :returns: server hostname
@@ -63,9 +63,9 @@ class ProjectStartupActions(HookBaseClass):
     def get_project_name(self):
         """
         Return the project name that should be used for the current context.
-        Please note that flame doesn't allow all types of characters in Project names.
+        Please note that Flame doesn't allow all types of characters in Project names.
         
-        The flame engine will try to find this project in Flame and start it.
+        The Flame engine will try to find this project in Flame and start it.
         If it doesn't exist, it will be automatically created.
         
         :returns: project name string 
@@ -78,7 +78,7 @@ class ProjectStartupActions(HookBaseClass):
         project_name = engine.context.project["name"]
         
         # sanity check the project name, convert to alphanumeric.
-        # flame is restrictive with special characters, so adopt 
+        # Flame is restrictive with special characters, so adopt 
         # a conservative approach
         sanitized_project_name = re.sub(r'\W+', '_', project_name)
         
@@ -102,16 +102,16 @@ class ProjectStartupActions(HookBaseClass):
         Return the name of the workspace to use when opening a project.
         The system will create it if it doesn't already exist.
         
-        If None is return, flame will create a default workspace according
+        If None is return, Flame will create a default workspace according
         to its standard workspace creation logic.
         
-        :returns: A flame workspace Name or None for a default workspace
+        :returns: A Flame workspace Name or None for a default workspace
         """
         return None
 
     def get_user(self):
         """
-        Return the name of the flame user to be used when launching this project.
+        Return the name of the Flame user to be used when launching this project.
         
         :returns: A user name as a string
         """
