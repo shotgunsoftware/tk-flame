@@ -58,9 +58,9 @@ context = sgtk.context.deserialize(serialized_context)
 
 # set a special environment variable to help hint to the engine
 # that we are running a backburner job
-os.environ["TK_FLAME_ENGINE_MODE"] = "BACKBURNER"
+os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "BACKBURNER"
 engine = sgtk.platform.start_engine(engine_instance, context.sgtk, context)
-del os.environ["TK_FLAME_ENGINE_MODE"]
+del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
 engine.log_debug("Engine launched for backburner process.")
 
 # execute method

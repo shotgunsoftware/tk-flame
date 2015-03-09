@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+# Note! This file implements the batchHook interface from Flame 2015.2
 
 def batchSetupLoaded(setupPath):
     """
@@ -63,7 +64,6 @@ def batchExportBegin(info, userData):
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
-    # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
     engine.trigger_batch_callback("batchExportBegin", info)        
@@ -103,7 +103,6 @@ def batchExportEnd(info, userData):
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
-    # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
     engine.trigger_batch_callback("batchExportEnd", info)        

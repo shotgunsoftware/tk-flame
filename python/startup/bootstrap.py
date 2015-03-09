@@ -80,7 +80,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
            app_args: --extra args
     
     output: app_path: /usr/discreet/Python-2.6.9/bin/python
-            app_args: /mnt/software/shotgun/my_project/install/engines/app-store/tk-flame/v1.2.3/startup/launch_app.py 
+            app_args: /mnt/software/shotgun/my_project/install/engines/app-store/tk-flame/v1.2.3/python/startup/launch_app.py 
                       /usr/discreet/flame_2015.2/bin/startApplication 
                       --extra args
     

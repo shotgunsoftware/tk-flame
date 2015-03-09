@@ -8,6 +8,8 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+# Note! This file implements the exportHook interface from Flame 2015.2
+
 def getCustomExportProfiles(profiles):
     """
     Hook returning the custom export profiles to display to the user in the
@@ -207,7 +209,7 @@ def preExportAsset(info, userData):
        height:          Frame height of the exported asset.
        aspectRatio:     Frame aspect ratio of the exported asset.
        depth:           Frame depth of the exported asset. ( '8-bits', '10-bits', '12-bits', '16 fp' )
-       scanFormat:      Scan format of the exported asset. ( 'FILED_1', 'FIELD_2', 'PROGRESSIVE' )
+       scanFormat:      Scan format of the exported asset. ( 'FIELD_1', 'FIELD_2', 'PROGRESSIVE' )
        fps:             Frame rate of exported asset.
        sequenceFps:     Frame rate of the sequence the asset is part of.
        sourceIn:        Source in point in frame and asset frame rate.
@@ -256,7 +258,7 @@ def postExportAsset(info, userData):
        height:          Frame height of the exported asset.
        aspectRatio:     Frame aspect ratio of the exported asset.
        depth:           Frame depth of the exported asset. ( '8-bits', '10-bits', '12-bits', '16 fp' )
-       scanFormat:      Scan format of the exported asset. ( 'FILED_1', 'FIELD_2', 'PROGRESSIVE' )
+       scanFormat:      Scan format of the exported asset. ( 'FIELD_1', 'FIELD_2', 'PROGRESSIVE' )
        fps:             Frame rate of exported asset.
        sequenceFps:     Frame rate of the sequence the asset is part of.
        sourceIn:        Source in point in frame and asset frame rate.

@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+# Note! This file implements the projectHook interface from Flame 2015.2
         
 def appInitialized(projectName):
     """
@@ -26,6 +27,8 @@ def appInitialized(projectName):
         # TODO: later on, allow for switching of engines as projects 
         #       are being switched. For now, issue a warning
         
+        # Note - Since Flame is a PySide only environment, we import it directly
+        # rather than going through the sgtk wrappers. 
         from PySide import QtGui     
         QtGui.QMessageBox.warning(None,
                                   "No project switching!",
@@ -40,9 +43,9 @@ def appInitialized(projectName):
         
         # set a special environment variable to help hint to the engine
         # that we are running a backburner job
-        os.environ["TK_FLAME_ENGINE_MODE"] = "DCC"
+        os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "DCC"
         e = sgtk.platform.start_engine(engine_name, context.sgtk, context)
-        del os.environ["TK_FLAME_ENGINE_MODE"]
+        del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
         
         # pass the python executable from the bootstrap to the engine 
         python_executable = os.environ.get("TOOLKIT_FLAME_PYTHON_BINARY")

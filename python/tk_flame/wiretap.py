@@ -138,6 +138,8 @@ class WiretapHandler(object):
         :param user_name: User name to use when starting up
         :param workspace_name: Workspace to use when starting up - if none, then default ws will be used.
         """
+        # Note - Since Flame is a PySide only environment, we import it directly
+        # rather than going through the sgtk wrappers.        
         from PySide import QtGui, QtCore
         
         if not self._child_node_exists("/projects", project_name, "PROJECT"):

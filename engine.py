@@ -24,13 +24,10 @@ import pprint
 import logging.handlers
 import tempfile
 import traceback
+import datetime
 from sgtk import TankError
 
-
-# std python logging handle. This is globally defined so that the
-# also globally defined exception handler can access it.
-g_log = None
-
+LOG_CHANNEL = "sgtk.tk-flame"
 
 class FlameEngine(sgtk.platform.Engine):
     """
@@ -59,9 +56,6 @@ class FlameEngine(sgtk.platform.Engine):
         Overridden constructor where we init some things which 
         need to be defined very early on in the engine startup.
         """
-        # define logger
-        self._initialize_logging()
-
         # the path to the associated python executable
         self._python_executable_path = None 
         
@@ -74,8 +68,8 @@ class FlameEngine(sgtk.platform.Engine):
         # backburner farm. This means that there are three distinct bootstrap
         # scripts which can launch the engine (all contained within the engine itself).
         # these bootstrap scripts all set an environment variable called
-        # TK_FLAME_ENGINE_MODE which defines the desired engine mode.
-        engine_mode_str = os.environ.get("TK_FLAME_ENGINE_MODE")
+        # TOOLKIT_FLAME_ENGINE_MODE which defines the desired engine mode.
+        engine_mode_str = os.environ.get("TOOLKIT_FLAME_ENGINE_MODE")
         if engine_mode_str == "PRE_LAUNCH":
             self._engine_mode = self.ENGINE_MODE_PRELAUNCH
         elif engine_mode_str == "BACKBURNER":
@@ -84,7 +78,7 @@ class FlameEngine(sgtk.platform.Engine):
             self._engine_mode = self.ENGINE_MODE_DCC
         else:
             raise TankError("Unknown launch mode '%s' defined in "
-                            "environment variable TK_FLAME_ENGINE_MODE!" % os.environ.get("TK_FLAME_ENGINE_MODE") )
+                            "environment variable TOOLKIT_FLAME_ENGINE_MODE!" % engine_mode_str)
         
         super(FlameEngine, self).__init__(*args, **kwargs)
     
@@ -92,6 +86,9 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Engine construction/setup done before any apps are initialized
         """
+        # set up logging
+        self._initialize_logging()
+        
         # set up a custom exception trap for the engine.
         # it will log the exception and if possible also
         # display it in a UI
@@ -107,6 +104,8 @@ class FlameEngine(sgtk.platform.Engine):
         
         if self.has_ui:
             # tell QT to interpret C strings as utf-8
+            # Note - Since Flame is a PySide only environment, we import it directly
+            # rather than going through the sgtk wrappers.             
             from PySide import QtGui, QtCore
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)        
@@ -115,18 +114,19 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Set up logging for the engine
         """
-        global g_log
-        
         # Set up a rotating logger with 4MiB max file size
         rotating = logging.handlers.RotatingFileHandler(self.SGTK_LOG_FILE, maxBytes=4*1024*1024, backupCount=10)
         rotating.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] PID %(process)d: %(message)s"))
         # create a global logging object
-        g_log = logging.getLogger("sgtk")
-        g_log.propagate = False
+        logger = logging.getLogger(LOG_CHANNEL)
+        logger.propagate = False
         # clear any existing handlers
-        g_log.handlers = []
-        g_log.addHandler(rotating)
-        g_log.setLevel(logging.DEBUG)
+        logger.handlers = []
+        logger.addHandler(rotating)
+        if self.get_setting("debug_logging"):
+            logger.setLevel(logging.DEBUG)
+        else:
+            logger.setLevel(logging.INFO)
         
     def set_python_executable(self, python_path):
         """
@@ -231,6 +231,8 @@ class FlameEngine(sgtk.platform.Engine):
         # DCC UI environment, pyside support is available.
         has_ui = False
         try:
+            # Note - Since Flame is a PySide only environment, we import it directly
+            # rather than going through the sgtk wrappers.             
             from PySide import QtGui, QtCore
             if QtCore.QCoreApplication.instance():
                 # there is an active application
@@ -246,9 +248,7 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param msg: The debug message to log
         """
-        global g_log
-        if g_log and self.get_setting("debug_logging", False):
-            g_log.debug(msg)
+        logging.getLogger(LOG_CHANNEL).debug(msg)        
  
     def log_info(self, msg):
         """
@@ -256,19 +256,15 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param msg: The info message to log
         """
-        global g_log
-        if g_log:
-            g_log.info(msg)
+        logging.getLogger(LOG_CHANNEL).info(msg)
  
     def log_warning(self, msg):
         """
         Log a warning
         
         :param msg: The warning message to log
-        """        
-        global g_log
-        if g_log:
-            g_log.warning(msg)
+        """
+        logging.getLogger(LOG_CHANNEL).warning(msg)        
  
     def log_error(self, msg):
         """
@@ -276,16 +272,14 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param msg: The error message to log
         """        
-        global g_log
-        if g_log:
-            g_log.error(msg)
+        logging.getLogger(LOG_CHANNEL).error(msg)
 
 
     ################################################################################################################
     # Engine Bootstrap
     #
     
-    def bootstrap(self):
+    def pre_dcc_launch_phase(self):
         """
         Special bootstrap method used to set up the Flame environment.
         This is designed to execute before Flame has launched, as part of the 
@@ -311,7 +305,7 @@ class FlameEngine(sgtk.platform.Engine):
         # special logic for Flare - see if we can load up a batch file
         if self.instance_name == "tk-flare":
             
-            self.log_debug("Launching Flare!")
+            self.log_debug("Environment instance is named '%s': We are launching Flare!" % self.instance_name)
         
             # For Flare, try to see if we can seed the session with a particular batch file.
             # we do this by passing a special environment to the Flare startup.
@@ -415,7 +409,7 @@ class FlameEngine(sgtk.platform.Engine):
     ################################################################################################################
     # export callbacks handling
     #
-    # Any apps which are interested in register custom exporters with Flame should use the methods
+    # Any apps which are interested in registering custom exporters with Flame should use the methods
     # below. The register_export_hook() is called by apps in order to create a menu entry
     # on the Flame export menu. The remaining methods are used to call out from the actual Flame hook
     # to the relevant app code.
@@ -425,7 +419,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Allows an app to register an interest in one of the Flame export hooks.
         
-        This one of the interaction entry points in the system and this is how apps
+        This is one of the interaction entry points in the system and this is how apps
         typically have their business logic executed. At app init, an app typically
         calls this method with a syntax like this:
         
@@ -447,7 +441,7 @@ class FlameEngine(sgtk.platform.Engine):
             def export_callback(self, session_id, info)
             
         Where session_id is a unique session identifier (typically only used in advanced scenarios)
-        and info reflects the info passed from Flame (varies for different callbacks).
+        and info reflects the info parameter passed from Flame (varies for different callbacks).
         
         For information which export can currently be registered against, see the
         flame_hooks/exportHook.py file.
@@ -515,13 +509,13 @@ class FlameEngine(sgtk.platform.Engine):
         
         # get the preset
         preset_name = self._export_sessions[session_id]
-        callbacks = self._registered_export_instances[preset_name]
+        tk_callbacks = self._registered_export_instances[preset_name]
         
         # call the callback in the preset
-        if callback_name in callbacks:
+        if callback_name in tk_callbacks:
             # the app has registered interest in this!
-            self.log_debug("Executing callback %s" % callbacks[callback_name])
-            callbacks[callback_name](session_id, info)
+            self.log_debug("Executing callback %s" % tk_callbacks[callback_name])
+            tk_callbacks[callback_name](session_id, info)
         
     
     ################################################################################################################
@@ -656,6 +650,10 @@ class FlameEngine(sgtk.platform.Engine):
         if len(sanitized_job_desc) > 70:    
             sanitized_job_desc = "%s..." % sanitized_job_desc[:67]
         
+        # there is a convention in flame to append a time stamp to jobs
+        # e.g. 'Export - XXX_YYY_ZZZ (10.02.04)
+        sanitized_job_name += datetime.datetime.now().strftime(" (%H.%M.%S)")
+        
         backburner_args.append("-jobName:\"%s\"" % sanitized_job_name)
         backburner_args.append("-description:\"%s\"" % sanitized_job_desc)
 
@@ -755,9 +753,6 @@ def sgtk_exception_trap(ex_cls, ex, tb):
     the exception handler will operate correctly even if the engine instance no
     longer exists.
     """
-    global g_log
-    
-    
     # careful about infinite loops here - we mustn't raise exceptions.
     
     # like in other environments and scripts, for TankErrors, we assume that the 
@@ -780,6 +775,8 @@ def sgtk_exception_trap(ex_cls, ex, tb):
 
     # now try to output it
     try:
+        # Note - Since Flame is a PySide only environment, we import it directly
+        # rather than going through the sgtk wrappers.         
         from PySide import QtGui, QtCore
         if QtCore.QCoreApplication.instance():
             # there is an application running - so pop up a message!
@@ -788,10 +785,9 @@ def sgtk_exception_trap(ex_cls, ex, tb):
         pass
     
     # and try to log it
-    try:
-        if g_log:
-            error_message = "An exception was raised:\n\n%s (%s)\n\nTraceback:\n%s" % (ex, ex_cls, traceback_str)
-            g_log.error(error_message)
+    try:        
+        error_message = "An exception was raised:\n\n%s (%s)\n\nTraceback:\n%s" % (ex, ex_cls, traceback_str)
+        logging.getLogger(LOG_CHANNEL).error(error_message)
     except:
         pass
     
