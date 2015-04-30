@@ -664,7 +664,7 @@ class FlameEngine(sgtk.platform.Engine):
         backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")
         
         # assemble full cmd
-        farm_cmd = "%s %s" % (self.python_executable, backburner_bootstrap)
+        farm_cmd = "%s '%s'" % (self.python_executable, backburner_bootstrap)
         
         # now we need to capture all of the environment and everything in a file
         # (thanks backburner!) so that we can replay it later when the task wakes up
