@@ -188,6 +188,6 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     # finally, reroute the executable and args and return them
     # (see docstring for details)
     new_app_path = python_binary
-    new_app_args = "%s %s %s" % (launch_script, app_path, app_args)
+    new_app_args = "'%s' %s %s" % (launch_script, app_path, app_args)
     
     return (new_app_path, new_app_args) 
