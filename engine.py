@@ -109,7 +109,7 @@ class FlameEngine(sgtk.platform.Engine):
             from PySide import QtGui, QtCore
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)        
-        
+
     def _initialize_logging(self):
         """
         Set up logging for the engine
@@ -155,6 +155,38 @@ class FlameEngine(sgtk.platform.Engine):
         Do any initialization after apps have been loaded
         """
         self.log_debug("%s: Running post app init..." % self)
+
+        # only run the startup commands when in DCC mode
+        if self._engine_mode != self.ENGINE_MODE_DCC:
+            return
+
+        # group all the commands by instance name
+        commands_by_instance = {}
+        for (name, value) in self.commands.iteritems():
+            app_instance = value["properties"].get("app")
+            if app_instance is None:
+                continue
+            instance_name = app_instance.instance_name
+            commands_by_instance.setdefault(instance_name, []).append((name, value["callback"]))
+
+        # go through the values from the run_at_startup setting and run any matching commands
+        commands_to_start = self.get_setting("run_at_startup", [])
+        for command_to_start in commands_to_start:
+            command_name = command_to_start["name"]
+            instance_name = command_to_start["app_instance"]
+            instance_commands = commands_by_instance.get(instance_name)
+
+            if instance_commands is None:
+                self.log_warning(
+                    "Could not run (%s, %s) at startup.  The specified app instance "
+                    "is not registered." % (instance_name, command_name))
+                continue
+
+            for (name, callback) in instance_commands:
+                # run the command if the name from the settings is '' or the name matches
+                if not command_name or (command_name == name):
+                    self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
+                    callback()
 
     def destroy_engine(self):
         """
@@ -241,7 +273,35 @@ class FlameEngine(sgtk.platform.Engine):
             pass
         
         return has_ui
-    
+
+    def show_panel(self, panel_id, title, bundle, widget_class, *args, **kwargs):
+        """
+        Override the base show_panel to create a non-modal dialog that will stay on
+        top of the Flame interface
+        """
+        if not self.has_ui:
+            self.log_error("Sorry, this environment does not support UI display! Cannot show "
+                           "the requested panel '%s'." % title)
+            return None
+        
+        # Note - Since Flame is a PySide only environment, we import it directly
+        # rather than going through the sgtk wrappers.         
+        from PySide import QtGui, QtCore
+
+        # create the dialog:
+        dialog, widget = self._create_dialog_with_widget(title, bundle, widget_class, *args, **kwargs)
+        dialog.setWindowFlags(
+            dialog.windowFlags() |
+            QtCore.Qt.WindowStaysOnTopHint &
+            ~QtCore.Qt.WindowCloseButtonHint
+        )
+        
+        # show the dialog        
+        dialog.show()
+        
+        # lastly, return the instantiated widget
+        return widget
+
     def log_debug(self, msg):
         """
         Log a debug message
@@ -450,7 +510,7 @@ class FlameEngine(sgtk.platform.Engine):
         :param callbacks: Dictionary of callbacks, see above for details.
         """
         if menu_caption in self._registered_export_instances:
-            raise TankError("There is already a menu export preset named '%s'! " 
+            raise TankError("There is already a menu export preset named '%s'! "
                             "Please ensure your preset names are unique" % menu_caption)
     
         self.log_debug("Registered export preset '%s' with engine." % menu_caption)
