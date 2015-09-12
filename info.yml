@@ -54,6 +54,22 @@ configuration:
                 name: { type: str }
                 app_instance: { type: str }
 
+    context_menu_commands:
+        type: list
+        description: "Controls the commands that show up in Flame's context menu. This is a list
+                     where each element is a dictionary with two keys: 'app_instance' and 'name'.
+                     The app_instance value connects this entry to a particular app instance defined
+                     in the environment configuration file.  The name is the menu name of the
+                     command to run when flame starts up.  If name is '' then all commands from the
+                     given app instance are started."
+        allows_empty: True                     
+        default_value: []
+        values:
+            type: dict
+            items:
+                name: { type: str }
+                app_instance: { type: str }
+
 # the Shotgun fields that this engine needs in order to operate correctly
 requires_shotgun_fields:
 
