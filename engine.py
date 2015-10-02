@@ -717,6 +717,18 @@ class FlameEngine(sgtk.platform.Engine):
         backburner_args.append("-jobName:\"%s\"" % sanitized_job_name)
         backburner_args.append("-description:\"%s\"" % sanitized_job_desc)
 
+        bb_manager = self.get_setting("backburner_manager")
+        if bb_manager:
+            # there is an external backburner manager specified.
+            # this is only supported on 2016.1 and above
+            if self.flame_major_version == "2015" or \
+               (self.flame_major_version == "2016" and self.flame_minor_version == "0"):
+                self.log_warning("Backburner manager specifically set but this "
+                                 "is only supported on Flame 2016.1 and above.") 
+            
+            else:
+                backburner_args.append("-manager:\"%s\"" % bb_manager)
+
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
 
