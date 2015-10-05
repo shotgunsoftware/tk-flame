@@ -26,6 +26,7 @@ import tempfile
 import traceback
 import datetime
 from sgtk import TankError
+from distutils.version import LooseVersion
 
 LOG_CHANNEL = "sgtk.tk-flame"
 
@@ -187,7 +188,7 @@ class FlameEngine(sgtk.platform.Engine):
                 if not command_name or (command_name == name):
                     self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
                     callback()
-
+                    
     def destroy_engine(self):
         """
         Called when the engine is being destroyed
@@ -228,6 +229,25 @@ class FlameEngine(sgtk.platform.Engine):
             # break the flow, we return the highest protocol version we know. This will
             # generate a warning in the Flame ui, but at least it will work.
             return "5"
+
+    def is_version_less_than(self, version_str):
+        """
+        Compares the given version string with the current 
+        flame version and returns False if the given version is 
+        greater than the current version.
+        
+        Example: 
+        
+        - Flame: '2016.1.0.278', version str: '2016.1' => False
+        - Flame: '2015.2.p453',  version str: '2016.1' => True
+        
+        :param version_str: Version to run comparison against
+        """
+        if self._flame_version is None:
+            raise TankError("No Flame DCC version specified!")
+        
+        curr_version = self._flame_version["full"]
+        return LooseVersion(curr_version) < LooseVersion(version_str)
 
     @property
     def flame_major_version(self):
@@ -716,6 +736,16 @@ class FlameEngine(sgtk.platform.Engine):
         
         backburner_args.append("-jobName:\"%s\"" % sanitized_job_name)
         backburner_args.append("-description:\"%s\"" % sanitized_job_desc)
+
+        bb_manager = self.get_setting("backburner_manager")
+        if bb_manager:
+            # there is an external backburner manager specified.
+            # this is only supported on 2016.1 and above
+            if self.is_version_less_than("2016.1"):            
+                self.log_warning("Backburner manager specifically set but this "
+                                 "is only supported on Flame 2016.1 and above.")
+            else:
+                backburner_args.append("-manager:\"%s\"" % bb_manager)
 
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
