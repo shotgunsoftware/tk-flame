@@ -259,7 +259,7 @@ class FlameEngine(sgtk.platform.Engine):
         if self._flame_version is None:
             raise TankError("No Flame DCC version specified!")
         
-        return self._flame_version.get("major")
+        return self._flame_version["major"]
     
     @property
     def flame_minor_version(self):
@@ -271,7 +271,20 @@ class FlameEngine(sgtk.platform.Engine):
         if self._flame_version is None:
             raise TankError("No Flame DCC version specified!")
         
-        return self._flame_version.get("minor")
+        return self._flame_version["minor"]
+    
+    @property
+    def flame_version(self):
+        """
+        Returns Flame's full version number as a string.
+        
+        :returns: String (e.g. '2016.1.0.278')
+        """
+        if self._flame_version is None:
+            raise TankError("No Flame DCC version specified!")
+        
+        return self._flame_version["full"]
+    
     
     @property
     def has_ui(self):
