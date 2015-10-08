@@ -136,7 +136,7 @@ class ProjectStartupActions(HookBaseClass):
         # Note! Flame users are not compatible across DCC versions so there is a manual
         # process involved when upgrading. A common convention here is to generate one 
         # user per DCC version, so this is what the Shotgun integration will default to as well.
-        full_user_name = "%s (v%s)" % (user_name, self.parent.flame_major_version) 
+        full_user_name = "%s (v%s)" % (user_name, self.parent.flame_version) 
 
         return full_user_name
         

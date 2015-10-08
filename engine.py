@@ -26,6 +26,7 @@ import tempfile
 import traceback
 import datetime
 from sgtk import TankError
+from distutils.version import LooseVersion
 
 LOG_CHANNEL = "sgtk.tk-flame"
 
@@ -232,15 +233,34 @@ class FlameEngine(sgtk.platform.Engine):
         if self._flame_version is None:
             raise TankError("Cannot determine preset version - No Flame DCC version specified!")
         
-        if self._flame_version.get("major") == "2015":
+        if self.is_version_less_than("2016"):
+            # for 2015 versions, preset version is v4
             return "4"
-        elif self._flame_version.get("major") == "2016":
-            return "5"
+        elif self.is_version_less_than("2016.1"):
+            # for version 2016 before ext 1, export preset is v5
+            return "5" 
         else:
-            # assume this is 2017 or above. Rather than raising an exception, which will
-            # break the flow, we return the highest protocol version we know. This will
-            # generate a warning in the Flame ui, but at least it will work.
-            return "5"
+            # flame 2016 extension 1 and above.
+            return "6"
+
+    def is_version_less_than(self, version_str):
+        """
+        Compares the given version string with the current 
+        flame version and returns False if the given version is 
+        greater than the current version.
+        
+        Example: 
+        
+        - Flame: '2016.1.0.278', version str: '2016.1' => False
+        - Flame: '2015.2.p453',  version str: '2016.1' => True
+        
+        :param version_str: Version to run comparison against
+        """
+        if self._flame_version is None:
+            raise TankError("No Flame DCC version specified!")
+        
+        curr_version = self._flame_version["full"]
+        return LooseVersion(curr_version) < LooseVersion(version_str)
 
     @property
     def flame_major_version(self):
@@ -252,7 +272,7 @@ class FlameEngine(sgtk.platform.Engine):
         if self._flame_version is None:
             raise TankError("No Flame DCC version specified!")
         
-        return self._flame_version.get("major")
+        return self._flame_version["major"]
     
     @property
     def flame_minor_version(self):
@@ -264,7 +284,20 @@ class FlameEngine(sgtk.platform.Engine):
         if self._flame_version is None:
             raise TankError("No Flame DCC version specified!")
         
-        return self._flame_version.get("minor")
+        return self._flame_version["minor"]
+    
+    @property
+    def flame_version(self):
+        """
+        Returns Flame's full version number as a string.
+        
+        :returns: String (e.g. '2016.1.0.278')
+        """
+        if self._flame_version is None:
+            raise TankError("No Flame DCC version specified!")
+        
+        return self._flame_version["full"]
+    
     
     @property
     def has_ui(self):
@@ -729,6 +762,16 @@ class FlameEngine(sgtk.platform.Engine):
         
         backburner_args.append("-jobName:\"%s\"" % sanitized_job_name)
         backburner_args.append("-description:\"%s\"" % sanitized_job_desc)
+
+        bb_manager = self.get_setting("backburner_manager")
+        if bb_manager:
+            # there is an external backburner manager specified.
+            # this is only supported on 2016.1 and above
+            if self.is_version_less_than("2016.1"):            
+                self.log_warning("Backburner manager specifically set but this "
+                                 "is only supported on Flame 2016.1 and above.")
+            else:
+                backburner_args.append("-manager:\"%s\"" % bb_manager)
 
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
