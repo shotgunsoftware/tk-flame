@@ -151,8 +151,15 @@ class FlameEngine(sgtk.platform.Engine):
         self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str}
         self.log_debug("This engine is running with Flame version '%s'" % self._flame_version )
 
-    def _get_commands_matching_setting(self, setting, warning_message=""):
+    def _get_commands_matching_setting(self, setting):
         """
+        This expects a list of dictionaries in the form:
+            {name: command-name, app_instance: instance-name }
+
+        The app_instance value will match a particular app instance associated with
+        the engine.  The name is the menu name of the command to run when the engine starts up.
+        If name is '' then all commands from the given app instance are returned.
+
         :returns A list of tuples for all commands that match the given setting.
                  Each tuple will be in the form (instance_name, command_name, callback)
         """
@@ -175,8 +182,9 @@ class FlameEngine(sgtk.platform.Engine):
 
             if instance_commands is None:
                 self.log_warning(
-                    "%s  No command found for app instance '%s' named '%s'" %
-                    (warning_message, instance_name, command_name))
+                    "Error reading the '%s' configuration settings\n"
+                    "The requested command '%s' from app '%s' isn't loaded.\n"
+                    "Please make sure that you have the app installed" % (setting, command_name, instance_name))
                 continue
 
             for (name, callback) in instance_commands:
@@ -197,7 +205,7 @@ class FlameEngine(sgtk.platform.Engine):
             return
 
         # run any commands registered via run_at_startup
-        commands_to_start = self._get_commands_matching_setting("run_at_startup", "Unable to run startup command.")
+        commands_to_start = self._get_commands_matching_setting("run_at_startup")
         for (instance_name, command_name, callback) in commands_to_start:
             self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
             callback()

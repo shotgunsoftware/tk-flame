@@ -51,14 +51,12 @@ def getCustomUIActions():
     engine = sgtk.platform.current_engine()
 
     # go through the values from the run_at_startup setting and run any matching commands
-    context_commands = engine.get_setting("context_menu_commands", [])
+    context_commands = engine.get_setting("context_menu", [])
     if not context_commands:
         return ()
 
     # build a list of the matching commands
-    context_commands = engine._get_commands_matching_setting(
-        "context_menu_commands",
-        "Could not add command to the context menu.")
+    context_commands = engine._get_commands_matching_setting("context_menu")
 
     # Build the actions dictionary with the matches
     actions = []

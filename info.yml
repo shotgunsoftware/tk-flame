@@ -62,7 +62,7 @@ configuration:
                 name: { type: str }
                 app_instance: { type: str }
 
-    context_menu_commands:
+    context_menu:
         type: list
         description: "Controls the commands that show up in Flame's context menu. This is a list
                      where each element is a dictionary with two keys: 'app_instance' and 'name'.
