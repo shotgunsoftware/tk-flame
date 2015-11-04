@@ -18,6 +18,9 @@ class ProjectCreateDialog(QtGui.QWidget):
     Project setup dialog for Flame
     """
     
+    # map the tab indices in the UI to constants
+    (TAB_GENERAL, TAB_RESOLUTION, TAB_OLD_PROXY, TAB_NEW_PROXY) = range(4)
+    
     def __init__(self, 
                  project_name, 
                  user_name, 
@@ -46,6 +49,12 @@ class ProjectCreateDialog(QtGui.QWidget):
         # now load in the UI that was created in the UI designer
         self.ui = Ui_ProjectCreateDialog()
         self.ui.setupUi(self) 
+        
+        # for versions of flame before 2016.1, show the old proxy settings
+        if self._engine.is_version_less_than("2016.1"):
+            self.ui.tabWidget.removeTab(self.TAB_NEW_PROXY)
+        else:
+            self.ui.tabWidget.removeTab(self.TAB_OLD_PROXY)
         
         # with the tk dialogs, we need to hook up our modal 
         # dialog signals in a special way

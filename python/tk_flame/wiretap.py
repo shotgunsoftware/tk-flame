@@ -10,6 +10,23 @@
 
 """
 Wiretap connection with the local Flame to carry out common setup operations
+
+
+Some notes on debugging wiretap options
+---------------------------------------
+
+The wiretap options interface is best discovered by introspection.
+
+In order to for example find out what project options are available for
+a version of flame, you can do the following:
+
+> /usr/discreet/wiretap/tools/current/wiretap_print_tree -d 1 -n /projects/my_project -s XML
+
+This will dump the wiretap XML stream that is associated with the project
+node /projects/my_project.
+
+For more wiretap utilities, check out /usr/discreet/wiretap/tools/current
+
 """
 
 import sgtk
@@ -215,43 +232,31 @@ class WiretapHandler(object):
 
             # create xml structure
             xml  = "<Project>"
-            xml += "<Description>%s</Description>"             % "Created by the Shotgun Flame Integration"
-            xml += "<FrameWidth>%s</FrameWidth>"               % project_settings.get("FrameWidth")
-            xml += "<FrameHeight>%s</FrameHeight>"             % project_settings.get("FrameHeight")
-            xml += "<FrameDepth>%s</FrameDepth>"               % project_settings.get("FrameDepth")
-            xml += "<AspectRatio>%s</AspectRatio>"             % project_settings.get("AspectRatio")
-            xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
-            xml += "<ProxyEnable>%s</ProxyEnable>"             % project_settings.get("ProxyEnable")
-            xml += "<FieldDominance>%s</FieldDominance>"       % project_settings.get("FieldDominance")
             
+            xml += "<Description>%s</Description>"             % "Created by Shotgun Flame Integration %s" % self._engine.version
             
-            # added in v1.2.0 so may not be in all hooks
-            if project_settings.get("FrameRate"):
-                xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
+            xml += self._append_setting_to_xml(project_settings, "FrameWidth")
+            xml += self._append_setting_to_xml(project_settings, "FrameHeight")
+            xml += self._append_setting_to_xml(project_settings, "FrameDepth")
+            xml += self._append_setting_to_xml(project_settings, "AspectRatio")
+            xml += self._append_setting_to_xml(project_settings, "FrameRate")
+            xml += self._append_setting_to_xml(project_settings, "FieldDominance")            
+            xml += self._append_setting_to_xml(project_settings, "VisualDepth", starts_working_in="2015.3")
+
             
-            if project_settings.get("VisualDepth"):
-                # note - visualdepth does not work on Flame 2015.2 so only support in higher versions
-                if self._engine.is_version_less_than("2015.3"):
-                    self._engine.log_warning("Ignoring VisualDepth directive "
-                                             "since this is not handled by Flame v2015.2")
-                else: 
-                    xml += "<VisualDepth>%s</VisualDepth>"         % project_settings.get("VisualDepth")
+            xml += self._append_setting_to_xml(project_settings, "ProxyWidthHint")
+            xml += self._append_setting_to_xml(project_settings, "ProxyDepthMode")
+            xml += self._append_setting_to_xml(project_settings, "ProxyMinFrameSize")
+            xml += self._append_setting_to_xml(project_settings, "ProxyAbove8bits")
+            xml += self._append_setting_to_xml(project_settings, "ProxyQuality")
             
-            # some proxy settings are optional depending on other settings
-            if project_settings.get("ProxyWidthHint"):
-                xml += "<ProxyWidthHint>%s</ProxyWidthHint>"       % project_settings.get("ProxyWidthHint")
+            # deprecated proxy parameters for 2016.1
+            xml += self._append_setting_to_xml(project_settings, "ProxyEnable", stops_working_in="2016.1")
             
-            if project_settings.get("ProxyDepthMode"):
-                xml += "<ProxyDepthMode>%s</ProxyDepthMode>"       % project_settings.get("ProxyDepthMode")
-            
-            if project_settings.get("ProxyMinFrameSize"):
-                xml += "<ProxyMinFrameSize>%s</ProxyMinFrameSize>" % project_settings.get("ProxyMinFrameSize")
-            
-            if project_settings.get("ProxyAbove8bits"):
-                xml += "<ProxyAbove8bits>%s</ProxyAbove8bits>"     % project_settings.get("ProxyAbove8bits")
-            
-            if project_settings.get("ProxyQuality"):
-                xml += "<ProxyQuality>%s</ProxyQuality>"           % project_settings.get("ProxyQuality")
+            # new proxy parameters added in 2016.1
+            xml += self._append_setting_to_xml(project_settings, "ProxyWidth", starts_working_in="2016.1")
+            xml += self._append_setting_to_xml(project_settings, "ProxyRegenState", starts_working_in="2016.1")
+            xml += self._append_setting_to_xml(project_settings, "ProxyDepth", starts_working_in="2016.1")
             
             xml += "</Project>"
     
@@ -266,6 +271,43 @@ class WiretapHandler(object):
                
             self._engine.log_debug( "Project successfully created.")
          
+         
+         
+    def _append_setting_to_xml(self, project_settings, setting, starts_working_in=None, stops_working_in=None):
+        """
+        Generates xml for a parameter. May return an empty string if the xml
+        cannot or should not be generated.
+        
+        :param project_settings: Dictionary of parameters
+        :param setting: Setting to generate xml for
+        :param starts_working_in: Version of flame that supports this setting.
+                                  This is a string, e.g. '2016.1'. Passing this
+                                  parameter means earlier versions of flame will
+                                  ignore the parameter and return an empty string.
+        :param stops_working_in: Version of Flame where this parameter stopped
+                                 being supported. The reciprocal of starts_working_in.
+        
+        :returns: Empty string or '<setting>value</setting>'
+        """
+        xml = ""
+        if project_settings.get(setting):
+            
+            if starts_working_in and self._engine.is_version_less_than(starts_working_in):
+                # our version of flame is too old
+                self._engine.log_warning("Ignoring '%s' directive since this is " 
+                                         "not supported by this version of Flame" % setting)
+                
+                
+            elif stops_working_in and not self._engine.is_version_less_than(stops_working_in):
+                # our version of flame is too new
+                self._engine.log_warning("Ignoring '%s' directive since this is " 
+                                         "no longer supported by this version of Flame" % setting)
+                
+            else:
+                xml = "<%s>%s</%s>" % (setting, project_settings.get(setting), setting)
+    
+        return xml
+    
 
     def _get_volumes(self):
         """
