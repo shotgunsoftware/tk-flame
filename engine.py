@@ -47,7 +47,13 @@ class FlameEngine(sgtk.platform.Engine):
     # the name of the folder in the engine which we should register
     # with Flame to trigger various hooks to run.
     FLAME_HOOKS_FOLDER = "flame_hooks"
+    
+    # our default log file to write to
     SGTK_LOG_FILE = "/usr/discreet/log/tk-flame.log"
+    
+    # a 'plan B' safe log file that we call fall back on in case
+    # the default log file cannot be accessed
+    SGTK_LOG_FILE_SAFE = "/tmp/tk-flame.log"
     
     # define constants for the various modes the engine can execute in
     (ENGINE_MODE_DCC, ENGINE_MODE_PRELAUNCH, ENGINE_MODE_BACKBURNER) = range(3)
@@ -115,8 +121,25 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Set up logging for the engine
         """
+        
+        # default to using a safe log file that is 
+        # guaranteed to work
+        log_file = self.SGTK_LOG_FILE_SAFE
+        using_safe_log_file = True
+        
+        # test if we can write to the default log file
+        try:
+            fh = open(self.SGTK_LOG_FILE, "at")
+            fh.close()
+            log_file = self.SGTK_LOG_FILE 
+            using_safe_log_file = False
+        except IOError:
+            # cannot operate on file (usually related to permissions)
+            # write to tmp instead.
+            pass
+
         # Set up a rotating logger with 4MiB max file size
-        rotating = logging.handlers.RotatingFileHandler(self.SGTK_LOG_FILE, maxBytes=4*1024*1024, backupCount=10)
+        rotating = logging.handlers.RotatingFileHandler(log_file, maxBytes=4*1024*1024, backupCount=10)
         rotating.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] PID %(process)d: %(message)s"))
         # create a global logging object
         logger = logging.getLogger(LOG_CHANNEL)
@@ -128,6 +151,11 @@ class FlameEngine(sgtk.platform.Engine):
             logger.setLevel(logging.DEBUG)
         else:
             logger.setLevel(logging.INFO)
+
+        if using_safe_log_file:
+            logger.error("Cannot write to standard log file location %s! Please check "
+                         "the filesystem permissions. As a fallback, logs will be "
+                         "written to %s instead." % (self.SGTK_LOG_FILE, log_file))
         
     def set_python_executable(self, python_path):
         """
@@ -150,7 +178,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str}
         self.log_debug("This engine is running with Flame version '%s'" % self._flame_version )
-
+        
     def _get_commands_matching_setting(self, setting):
         """
         This expects a list of dictionaries in the form:

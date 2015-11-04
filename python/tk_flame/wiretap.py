@@ -10,9 +10,27 @@
 
 """
 Wiretap connection with the local Flame to carry out common setup operations
+
+
+Some notes on debugging wiretap options
+---------------------------------------
+
+The wiretap options interface is best discovered by introspection.
+
+In order to for example find out what project options are available for
+a version of flame, you can do the following:
+
+> /usr/discreet/wiretap/tools/current/wiretap_print_tree -d 1 -n /projects/my_project -s XML
+
+This will dump the wiretap XML stream that is associated with the project
+node /projects/my_project.
+
+For more wiretap utilities, check out /usr/discreet/wiretap/tools/current
+
 """
 
 import sgtk
+import xml.dom.minidom as minidom
 from sgtk import TankError
 
 # helper exception class to trap all the C style errors
@@ -110,7 +128,7 @@ class WiretapHandler(object):
             if not users.createNode(user_name, "USER", user_node):
                 raise WiretapError("Unable to create user %s: %s" % (user_name, users.lastError()))
  
-            self._engine.log_debug("User %s succesfully created" % user_name)
+            self._engine.log_debug("User %s successfully created" % user_name)
 
     def _ensure_workspace_exists(self, project_name, workspace_name):
         """
@@ -165,14 +183,14 @@ class WiretapHandler(object):
             host_name = self._engine.execute_hook_method("project_startup_hook", "get_server_hostname")
             
             # get project settings from the toolkit hook
-            project_settings = self._engine.execute_hook_method("project_startup_hook", "get_project_settings")            
+            project_settings = self._engine.execute_hook_method("project_startup_hook", "get_project_settings")
             
             # now check if we should pop up a ui where the user can tweak the default prefs
             if self._engine.execute_hook_method("project_startup_hook", "use_project_settings_ui"):
 
                 # at this point we don't have a QT application running, because we are still
                 # in the pre-DCC launch phase, so need to wrap our modal dialog call
-                # in a helper method which also creates a QApplication.        
+                # in a helper method which also creates a QApplication.
                 (return_code, widget) = start_qt_app_and_show_modal("Create Flame Project", 
                                                                     self._engine, 
                                                                     ProjectCreateDialog,
@@ -215,50 +233,40 @@ class WiretapHandler(object):
 
             # create xml structure
             xml  = "<Project>"
-            xml += "<Description>%s</Description>"             % "Created by the Shotgun Flame Integration"
-            xml += "<FrameWidth>%s</FrameWidth>"               % project_settings.get("FrameWidth")
-            xml += "<FrameHeight>%s</FrameHeight>"             % project_settings.get("FrameHeight")
-            xml += "<FrameDepth>%s</FrameDepth>"               % project_settings.get("FrameDepth")
-            xml += "<AspectRatio>%s</AspectRatio>"             % project_settings.get("AspectRatio")
-            xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
-            xml += "<ProxyEnable>%s</ProxyEnable>"             % project_settings.get("ProxyEnable")
-            xml += "<FieldDominance>%s</FieldDominance>"       % project_settings.get("FieldDominance")
             
+            xml += "<Description>%s</Description>"             % "Created by Shotgun Flame Integration %s" % self._engine.version
             
-            # added in v1.2.0 so may not be in all hooks
-            if project_settings.get("FrameRate"):
-                xml += "<FrameRate>%s</FrameRate>"                 % project_settings.get("FrameRate")
+            xml += self._append_setting_to_xml(project_settings, "FrameWidth")
+            xml += self._append_setting_to_xml(project_settings, "FrameHeight")
+            xml += self._append_setting_to_xml(project_settings, "FrameDepth")
+            xml += self._append_setting_to_xml(project_settings, "AspectRatio")
+            xml += self._append_setting_to_xml(project_settings, "FrameRate")
+            xml += self._append_setting_to_xml(project_settings, "FieldDominance")            
+            xml += self._append_setting_to_xml(project_settings, "VisualDepth", starts_working_in="2015.3")
+
             
-            if project_settings.get("VisualDepth"):
-                # note - visualdepth does not work on Flame 2015.2 so only support in higher versions
-                if self._engine.flame_major_version == "2015" and self._engine.flame_minor_version == "2":
-                    self._engine.log_warning("Ignoring VisualDepth directive "
-                                             "since this is not handled by Flame v2015.2")
-                else: 
-                    xml += "<VisualDepth>%s</VisualDepth>"         % project_settings.get("VisualDepth")
+            xml += self._append_setting_to_xml(project_settings, "ProxyWidthHint")
+            xml += self._append_setting_to_xml(project_settings, "ProxyDepthMode")
+            xml += self._append_setting_to_xml(project_settings, "ProxyMinFrameSize")
+            xml += self._append_setting_to_xml(project_settings, "ProxyAbove8bits")
+            xml += self._append_setting_to_xml(project_settings, "ProxyQuality")
             
-            # some proxy settings are optional depending on other settings
-            if project_settings.get("ProxyWidthHint"):
-                xml += "<ProxyWidthHint>%s</ProxyWidthHint>"       % project_settings.get("ProxyWidthHint")
+            # deprecated proxy parameters for 2016.1
+            xml += self._append_setting_to_xml(project_settings, "ProxyEnable", stops_working_in="2016.1")
             
-            if project_settings.get("ProxyDepthMode"):
-                xml += "<ProxyDepthMode>%s</ProxyDepthMode>"       % project_settings.get("ProxyDepthMode")
-            
-            if project_settings.get("ProxyMinFrameSize"):
-                xml += "<ProxyMinFrameSize>%s</ProxyMinFrameSize>" % project_settings.get("ProxyMinFrameSize")
-            
-            if project_settings.get("ProxyAbove8bits"):
-                xml += "<ProxyAbove8bits>%s</ProxyAbove8bits>"     % project_settings.get("ProxyAbove8bits")
-            
-            if project_settings.get("ProxyQuality"):
-                xml += "<ProxyQuality>%s</ProxyQuality>"           % project_settings.get("ProxyQuality")
+            # new proxy parameters added in 2016.1
+            xml += self._append_setting_to_xml(project_settings, "ProxyWidth", starts_working_in="2016.1")
+            xml += self._append_setting_to_xml(project_settings, "ProxyRegenState", starts_working_in="2016.1")
+            xml += self._append_setting_to_xml(project_settings, "ProxyDepth", starts_working_in="2016.1")
             
             xml += "</Project>"
     
             # force cast to string - values coming from qt are unicode...
             xml = str(xml)
-    
-            self._engine.log_debug("The following xml will be emitted: %s" % xml)
+            
+            # parse and pretty print xml to validate and aid debug
+            pretty_xml = minidom.parseString(xml).toprettyxml()
+            self._engine.log_debug("The following xml will be emitted: %s" % pretty_xml)
     
             # Set the project meta data
             if not project_node.setMetaData("XML", xml):
@@ -266,6 +274,43 @@ class WiretapHandler(object):
                
             self._engine.log_debug( "Project successfully created.")
          
+         
+         
+    def _append_setting_to_xml(self, project_settings, setting, starts_working_in=None, stops_working_in=None):
+        """
+        Generates xml for a parameter. May return an empty string if the xml
+        cannot or should not be generated.
+        
+        :param project_settings: Dictionary of parameters
+        :param setting: Setting to generate xml for
+        :param starts_working_in: Version of flame that supports this setting.
+                                  This is a string, e.g. '2016.1'. Passing this
+                                  parameter means earlier versions of flame will
+                                  ignore the parameter and return an empty string.
+        :param stops_working_in: Version of Flame where this parameter stopped
+                                 being supported. The reciprocal of starts_working_in.
+        
+        :returns: Empty string or '<setting>value</setting>'
+        """
+        xml = ""
+        if project_settings.get(setting):
+            
+            if starts_working_in and self._engine.is_version_less_than(starts_working_in):
+                # our version of flame is too old
+                self._engine.log_warning("Ignoring '%s' directive since this is " 
+                                         "not supported by this version of Flame" % setting)
+                
+                
+            elif stops_working_in and not self._engine.is_version_less_than(stops_working_in):
+                # our version of flame is too new
+                self._engine.log_warning("Ignoring '%s' directive since this is " 
+                                         "no longer supported by this version of Flame" % setting)
+                
+            else:
+                xml = "<%s>%s</%s>" % (setting, project_settings.get(setting), setting)
+    
+        return xml
+    
 
     def _get_volumes(self):
         """
@@ -312,7 +357,10 @@ class WiretapHandler(object):
         # get number of children
         num_children = WireTapInt(0)
         if not parent.getNumChildren(num_children):
-            raise WiretapError("Unable to obtain number of children for %s: %s" % (parent_path, parent.lastError()))
+            raise WiretapError("Wiretap Error: Unable to obtain number of "
+                               "children for node %s. Please check that your "
+                               "wiretap service is running. "
+                               "Error reported: %s" % (parent_path, parent.lastError()))
                             
         # iterate over children, look for the given node
         child_obj = WireTapNodeHandle()

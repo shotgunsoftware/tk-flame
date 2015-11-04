@@ -155,15 +155,28 @@ class ProjectStartupActions(HookBaseClass):
          - FrameRate ("23.976 fps", "24 fps", "25 fps", "29.97 fps DF", "29.97 fps NDF", "30 fps", "50 fps",
                       "59.94 fps DF", "59.94 fps NDF", "60 fps")
          
-         For proxy settings see http://images.autodesk.com/adsk/files/wiretap2011_sdk_guide.pdf
+         For proxy settings for flame versions before 2016 ext 1, 
+         see http://images.autodesk.com/adsk/files/wiretap2011_sdk_guide.pdf
          
          - ProxyEnable ("true" or "false")
          - ProxyWidthHint
          - ProxyDepthMode
          - ProxyMinFrameSize
-         - ProxyAbove8bits
+         - ProxyAbove8bits ("true" or "false")
          - ProxyQuality
-        
+         
+         For proxy settings for flame versions from 2016 ext 1 and above,
+         the following parameters can be specified
+         
+         - ProxyWidthHint
+         - ProxyDepthMode
+         - ProxyMinFrameSize
+         - ProxyAbove8bits ("true" or "false")
+         - ProxyQuality
+         - ProxyWidth
+         - ProxyRegenState ("true" or "false")
+         - ProxyDepth 
+
         :returns: dictionary of standard wiretap style project setup parameters.
         """
         settings = {}
@@ -174,12 +187,21 @@ class ProjectStartupActions(HookBaseClass):
         settings["FieldDominance"] = "PROGRESSIVE"
         settings["FrameRate"] = "24 fps"
         settings["VisualDepth"] = "16bits"
-        
-        settings["ProxyEnable"] = "false"
+
+        # proxy settings used in all versions of Flame
         settings["ProxyDepthMode"] = "8-bit"
-        settings["ProxyQuality"] = "medium"
-        settings["ProxyWidthHint"] = "720"
-        settings["ProxyMinFrameSize"] = "0"
+        settings["ProxyQuality"] = "draft"
+        settings["ProxyWidthHint"] = "960"
+        settings["ProxyMinFrameSize"] = "960"
         settings["ProxyAbove8bits"] = "false"
 
+        # proxy settings used in 2016 and below
+        settings["ProxyEnable"] = "false"
+        
+        # proxy settings used in 2016 ext 1 and above
+        settings["ProxyWidth"] = "960"
+        settings["ProxyRegenState"] = "false"
+        settings["ProxyDepth"] = "8-bit"
+        
+        
         return settings
