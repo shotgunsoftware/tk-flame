@@ -744,7 +744,7 @@ height: 100px;
        <item row="4" column="0">
         <widget class="QLabel" name="proxy_min_frame_size_label_2">
          <property name="text">
-          <string>Width &gt;</string>
+          <string>Conditional Width &gt;</string>
          </property>
         </widget>
        </item>

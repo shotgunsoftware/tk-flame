@@ -192,7 +192,7 @@ class ProjectStartupActions(HookBaseClass):
         settings["ProxyDepthMode"] = "8-bit"
         settings["ProxyQuality"] = "draft"
         settings["ProxyWidthHint"] = "960"
-        settings["ProxyMinFrameSize"] = "0"
+        settings["ProxyMinFrameSize"] = "960"
         settings["ProxyAbove8bits"] = "false"
 
         # proxy settings used in 2016 and below

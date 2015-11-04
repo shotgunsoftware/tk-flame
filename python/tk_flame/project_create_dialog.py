@@ -180,6 +180,9 @@ class ProjectCreateDialog(QtGui.QWidget):
         proxy_min_frame_size = int(project_settings.get("ProxyMinFrameSize") or 0)
         self.ui.new_proxy_min_frame_size.setValue(proxy_min_frame_size)
         self.ui.new_proxy_min_frame_size.valueChanged.connect(self._on_new_proxy_min_frame_size_change)
+        
+        # refresh value at startup
+        self._on_new_proxy_min_frame_size_change()
 
         # figure out the mode setting - this is driven by the ProxyWidth setting 
         proxy_width = int(project_settings.get("ProxyWidth") or 0)

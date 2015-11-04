@@ -455,7 +455,7 @@ class Ui_ProjectCreateDialog(object):
         self.new_proxy_quality.setItemText(6, QtGui.QApplication.translate("ProjectCreateDialog", "triangle", None, QtGui.QApplication.UnicodeUTF8))
         self.new_proxy_quality.setItemText(7, QtGui.QApplication.translate("ProjectCreateDialog", "impulse", None, QtGui.QApplication.UnicodeUTF8))
         self.new_proxy_quality.setItemText(8, QtGui.QApplication.translate("ProjectCreateDialog", "draft", None, QtGui.QApplication.UnicodeUTF8))
-        self.proxy_min_frame_size_label_2.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Width >", None, QtGui.QApplication.UnicodeUTF8))
+        self.proxy_min_frame_size_label_2.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Conditional Width >", None, QtGui.QApplication.UnicodeUTF8))
         self.new_proxy_min_frame_size_preview.setText(QtGui.QApplication.translate("ProjectCreateDialog", "720px", None, QtGui.QApplication.UnicodeUTF8))
         self.new_generate_proxies.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Generate Proxies By Default", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.new_proxy_tab), QtGui.QApplication.translate("ProjectCreateDialog", "Proxy", None, QtGui.QApplication.UnicodeUTF8))
