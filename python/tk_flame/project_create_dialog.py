@@ -79,8 +79,14 @@ class ProjectCreateDialog(QtGui.QWidget):
                 
         # populate proxy tab
         if self._engine.is_version_less_than("2016.1"):
+            # hide new-style settings tab
+            self.ui.tabWidget.removeTab(self.TAB_NEW_PROXY)            
+            # init old-style settings tab
             self.__set_up_old_proxy_tab(project_settings)
         else:
+            # hide old settings tab
+            self.ui.tabWidget.removeTab(self.TAB_OLD_PROXY)
+            # init new settings tab
             self.__set_up_new_proxy_tab(project_settings)
 
     def __populate_resolution_tab(self, project_settings):
@@ -119,9 +125,6 @@ class ProjectCreateDialog(QtGui.QWidget):
         :param project_settings: Dictionary as returned by 
                                  the project_startup_hook's get_project_settings method
         """
-        # first hide the new proxy tab
-        self.ui.tabWidget.removeTab(self.TAB_NEW_PROXY)
-        
         # set up signals for interaction
         self.ui.proxy_width_hint.valueChanged.connect(self._on_proxy_width_hint_change)
         self.ui.proxy_min_frame_size.valueChanged.connect(self._on_proxy_min_frame_size_change)
@@ -162,11 +165,7 @@ class ProjectCreateDialog(QtGui.QWidget):
         
         :param project_settings: Dictionary as returned by 
                                  the project_startup_hook's get_project_settings method
-        """
-        
-        # first hide the old proxy tab
-        self.ui.tabWidget.removeTab(self.TAB_OLD_PROXY)
-        
+        """        
         # set the quality combo
         self.__set_combo_value(project_settings, self.ui.new_proxy_quality, "ProxyQuality")
         
@@ -181,7 +180,7 @@ class ProjectCreateDialog(QtGui.QWidget):
         self.ui.new_proxy_min_frame_size.setValue(proxy_min_frame_size)
         self.ui.new_proxy_min_frame_size.valueChanged.connect(self._on_new_proxy_min_frame_size_change)
         
-        # refresh value at startup
+        # make sure the preview label is updated to display the value at startup
         self._on_new_proxy_min_frame_size_change()
 
         # figure out the mode setting - this is driven by the ProxyWidth setting 

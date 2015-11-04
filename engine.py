@@ -153,8 +153,9 @@ class FlameEngine(sgtk.platform.Engine):
             logger.setLevel(logging.INFO)
 
         if using_safe_log_file:
-            logger.error("Cannot write to standard log file location %s! As a fallback, "
-                         "logs will be written to %s instead." % (self.SGTK_LOG_FILE, log_file))
+            logger.error("Cannot write to standard log file location %s! Please check "
+                         "the filesystem permissions. As a fallback, logs will be "
+                         "written to %s instead." % (self.SGTK_LOG_FILE, log_file))
         
     def set_python_executable(self, python_path):
         """
