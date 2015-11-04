@@ -110,7 +110,7 @@ class WiretapHandler(object):
             if not users.createNode(user_name, "USER", user_node):
                 raise WiretapError("Unable to create user %s: %s" % (user_name, users.lastError()))
  
-            self._engine.log_debug("User %s succesfully created" % user_name)
+            self._engine.log_debug("User %s successfully created" % user_name)
 
     def _ensure_workspace_exists(self, project_name, workspace_name):
         """
@@ -231,7 +231,7 @@ class WiretapHandler(object):
             
             if project_settings.get("VisualDepth"):
                 # note - visualdepth does not work on Flame 2015.2 so only support in higher versions
-                if self._engine.flame_major_version == "2015" and self._engine.flame_minor_version == "2":
+                if self._engine.is_version_less_than("2015.3"):
                     self._engine.log_warning("Ignoring VisualDepth directive "
                                              "since this is not handled by Flame v2015.2")
                 else: 
@@ -312,7 +312,10 @@ class WiretapHandler(object):
         # get number of children
         num_children = WireTapInt(0)
         if not parent.getNumChildren(num_children):
-            raise WiretapError("Unable to obtain number of children for %s: %s" % (parent_path, parent.lastError()))
+            raise WiretapError("Wiretap Error: Unable to obtain number of "
+                               "children for node %s. Please check that your "
+                               "wiretap service is running. "
+                               "Error reported: %s" % (parent_path, parent.lastError()))
                             
         # iterate over children, look for the given node
         child_obj = WireTapNodeHandle()
