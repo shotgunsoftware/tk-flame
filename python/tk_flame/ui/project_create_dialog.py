@@ -441,7 +441,7 @@ class Ui_ProjectCreateDialog(object):
         self.proxy_min_frame_size_preview.setText(QtGui.QApplication.translate("ProjectCreateDialog", "720px", None, QtGui.QApplication.UnicodeUTF8))
         self.proxy_above_8_bits.setText(QtGui.QApplication.translate("ProjectCreateDialog", ">8 bits", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.old_proxy_tab), QtGui.QApplication.translate("ProjectCreateDialog", "Proxy", None, QtGui.QApplication.UnicodeUTF8))
-        self.proxy_depth_label_3.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Mode", None, QtGui.QApplication.UnicodeUTF8))
+        self.proxy_depth_label_3.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Ratio", None, QtGui.QApplication.UnicodeUTF8))
         self.new_proxy_mode.setItemText(0, QtGui.QApplication.translate("ProjectCreateDialog", "Proxy 1/2", None, QtGui.QApplication.UnicodeUTF8))
         self.new_proxy_mode.setItemText(1, QtGui.QApplication.translate("ProjectCreateDialog", "Proxy 1/4", None, QtGui.QApplication.UnicodeUTF8))
         self.new_proxy_mode.setItemText(2, QtGui.QApplication.translate("ProjectCreateDialog", "Proxy 1/8", None, QtGui.QApplication.UnicodeUTF8))

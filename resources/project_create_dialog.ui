@@ -656,7 +656,7 @@ height: 100px;
        <item row="1" column="0">
         <widget class="QLabel" name="proxy_depth_label_3">
          <property name="text">
-          <string>Mode</string>
+          <string>Ratio</string>
          </property>
         </widget>
        </item>
