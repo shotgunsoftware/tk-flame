@@ -178,6 +178,49 @@ class FlameEngine(sgtk.platform.Engine):
         self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str}
         self.log_debug("This engine is running with Flame version '%s'" % self._flame_version )
         
+    def _get_commands_matching_setting(self, setting):
+        """
+        This expects a list of dictionaries in the form:
+            {name: command-name, app_instance: instance-name }
+
+        The app_instance value will match a particular app instance associated with
+        the engine.  The name is the menu name of the command to run when the engine starts up.
+        If name is '' then all commands from the given app instance are returned.
+
+        :returns A list of tuples for all commands that match the given setting.
+                 Each tuple will be in the form (instance_name, command_name, callback)
+        """
+        # return a dictionary grouping all the commands by instance name
+        commands_by_instance = {}
+        for (name, value) in self.commands.iteritems():
+            app_instance = value["properties"].get("app")
+            if app_instance is None:
+                continue
+            instance_name = app_instance.instance_name
+            commands_by_instance.setdefault(instance_name, []).append((name, value["callback"]))
+
+        # go through the values from the setting and return any matching commands
+        ret_value = []
+        setting_value = self.get_setting(setting, [])
+        for command in setting_value:
+            command_name = command["name"]
+            instance_name = command["app_instance"]
+            instance_commands = commands_by_instance.get(instance_name)
+
+            if instance_commands is None:
+                self.log_warning(
+                    "Error reading the '%s' configuration settings\n"
+                    "The requested command '%s' from app '%s' isn't loaded.\n"
+                    "Please make sure that you have the app installed" % (setting, command_name, instance_name))
+                continue
+
+            for (name, callback) in instance_commands:
+                # add the command if the name from the settings is '' or the name matches
+                if not command_name or (command_name == name):
+                    ret_value.append((instance_name, name, callback))
+
+        return ret_value
+
     def post_app_init(self):
         """
         Do any initialization after apps have been loaded
@@ -188,34 +231,12 @@ class FlameEngine(sgtk.platform.Engine):
         if self._engine_mode != self.ENGINE_MODE_DCC:
             return
 
-        # group all the commands by instance name
-        commands_by_instance = {}
-        for (name, value) in self.commands.iteritems():
-            app_instance = value["properties"].get("app")
-            if app_instance is None:
-                continue
-            instance_name = app_instance.instance_name
-            commands_by_instance.setdefault(instance_name, []).append((name, value["callback"]))
+        # run any commands registered via run_at_startup
+        commands_to_start = self._get_commands_matching_setting("run_at_startup")
+        for (instance_name, command_name, callback) in commands_to_start:
+            self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
+            callback()
 
-        # go through the values from the run_at_startup setting and run any matching commands
-        commands_to_start = self.get_setting("run_at_startup", [])
-        for command_to_start in commands_to_start:
-            command_name = command_to_start["name"]
-            instance_name = command_to_start["app_instance"]
-            instance_commands = commands_by_instance.get(instance_name)
-
-            if instance_commands is None:
-                self.log_warning(
-                    "Could not run (%s, %s) at startup.  The specified app instance "
-                    "is not registered." % (instance_name, command_name))
-                continue
-
-            for (name, callback) in instance_commands:
-                # run the command if the name from the settings is '' or the name matches
-                if not command_name or (command_name == name):
-                    self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
-                    callback()
-                    
     def destroy_engine(self):
         """
         Called when the engine is being destroyed
