@@ -47,7 +47,13 @@ class FlameEngine(sgtk.platform.Engine):
     # the name of the folder in the engine which we should register
     # with Flame to trigger various hooks to run.
     FLAME_HOOKS_FOLDER = "flame_hooks"
+    
+    # our default log file to write to
     SGTK_LOG_FILE = "/usr/discreet/log/tk-flame.log"
+    
+    # a 'plan B' safe log file that we call fall back on in case
+    # the default log file cannot be accessed
+    SGTK_LOG_FILE_SAFE = "/tmp/tk-flame.log"
     
     # define constants for the various modes the engine can execute in
     (ENGINE_MODE_DCC, ENGINE_MODE_PRELAUNCH, ENGINE_MODE_BACKBURNER) = range(3)
@@ -115,8 +121,25 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Set up logging for the engine
         """
+        
+        # default to using a safe log file that is 
+        # guaranteed to work
+        log_file = self.SGTK_LOG_FILE_SAFE
+        using_safe_log_file = True
+        
+        # test if we can write to the default log file
+        try:
+            fh = open(self.SGTK_LOG_FILE, "at")
+            fh.close()
+            log_file = self.SGTK_LOG_FILE 
+            using_safe_log_file = False
+        except IOError:
+            # cannot operate on file (usually related to permissions)
+            # write to tmp instead.
+            pass
+
         # Set up a rotating logger with 4MiB max file size
-        rotating = logging.handlers.RotatingFileHandler(self.SGTK_LOG_FILE, maxBytes=4*1024*1024, backupCount=10)
+        rotating = logging.handlers.RotatingFileHandler(log_file, maxBytes=4*1024*1024, backupCount=10)
         rotating.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] PID %(process)d: %(message)s"))
         # create a global logging object
         logger = logging.getLogger(LOG_CHANNEL)
@@ -128,6 +151,10 @@ class FlameEngine(sgtk.platform.Engine):
             logger.setLevel(logging.DEBUG)
         else:
             logger.setLevel(logging.INFO)
+
+        if using_safe_log_file:
+            logger.error("Cannot write to standard log file location %s! As a fallback, "
+                         "logs will be written to %s instead." % (self.SGTK_LOG_FILE, log_file))
         
     def set_python_executable(self, python_path):
         """
@@ -150,50 +177,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str}
         self.log_debug("This engine is running with Flame version '%s'" % self._flame_version )
-
-    def _get_commands_matching_setting(self, setting):
-        """
-        This expects a list of dictionaries in the form:
-            {name: command-name, app_instance: instance-name }
-
-        The app_instance value will match a particular app instance associated with
-        the engine.  The name is the menu name of the command to run when the engine starts up.
-        If name is '' then all commands from the given app instance are returned.
-
-        :returns A list of tuples for all commands that match the given setting.
-                 Each tuple will be in the form (instance_name, command_name, callback)
-        """
-        # return a dictionary grouping all the commands by instance name
-        commands_by_instance = {}
-        for (name, value) in self.commands.iteritems():
-            app_instance = value["properties"].get("app")
-            if app_instance is None:
-                continue
-            instance_name = app_instance.instance_name
-            commands_by_instance.setdefault(instance_name, []).append((name, value["callback"]))
-
-        # go through the values from the setting and return any matching commands
-        ret_value = []
-        setting_value = self.get_setting(setting, [])
-        for command in setting_value:
-            command_name = command["name"]
-            instance_name = command["app_instance"]
-            instance_commands = commands_by_instance.get(instance_name)
-
-            if instance_commands is None:
-                self.log_warning(
-                    "Error reading the '%s' configuration settings\n"
-                    "The requested command '%s' from app '%s' isn't loaded.\n"
-                    "Please make sure that you have the app installed" % (setting, command_name, instance_name))
-                continue
-
-            for (name, callback) in instance_commands:
-                # add the command if the name from the settings is '' or the name matches
-                if not command_name or (command_name == name):
-                    ret_value.append((instance_name, name, callback))
-
-        return ret_value
-
+        
     def post_app_init(self):
         """
         Do any initialization after apps have been loaded
@@ -204,12 +188,34 @@ class FlameEngine(sgtk.platform.Engine):
         if self._engine_mode != self.ENGINE_MODE_DCC:
             return
 
-        # run any commands registered via run_at_startup
-        commands_to_start = self._get_commands_matching_setting("run_at_startup")
-        for (instance_name, command_name, callback) in commands_to_start:
-            self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
-            callback()
+        # group all the commands by instance name
+        commands_by_instance = {}
+        for (name, value) in self.commands.iteritems():
+            app_instance = value["properties"].get("app")
+            if app_instance is None:
+                continue
+            instance_name = app_instance.instance_name
+            commands_by_instance.setdefault(instance_name, []).append((name, value["callback"]))
 
+        # go through the values from the run_at_startup setting and run any matching commands
+        commands_to_start = self.get_setting("run_at_startup", [])
+        for command_to_start in commands_to_start:
+            command_name = command_to_start["name"]
+            instance_name = command_to_start["app_instance"]
+            instance_commands = commands_by_instance.get(instance_name)
+
+            if instance_commands is None:
+                self.log_warning(
+                    "Could not run (%s, %s) at startup.  The specified app instance "
+                    "is not registered." % (instance_name, command_name))
+                continue
+
+            for (name, callback) in instance_commands:
+                # run the command if the name from the settings is '' or the name matches
+                if not command_name or (command_name == name):
+                    self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
+                    callback()
+                    
     def destroy_engine(self):
         """
         Called when the engine is being destroyed
