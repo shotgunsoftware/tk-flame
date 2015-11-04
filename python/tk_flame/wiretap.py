@@ -30,6 +30,7 @@ For more wiretap utilities, check out /usr/discreet/wiretap/tools/current
 """
 
 import sgtk
+import xml.dom.minidom as minidom
 from sgtk import TankError
 
 # helper exception class to trap all the C style errors
@@ -182,14 +183,14 @@ class WiretapHandler(object):
             host_name = self._engine.execute_hook_method("project_startup_hook", "get_server_hostname")
             
             # get project settings from the toolkit hook
-            project_settings = self._engine.execute_hook_method("project_startup_hook", "get_project_settings")            
+            project_settings = self._engine.execute_hook_method("project_startup_hook", "get_project_settings")
             
             # now check if we should pop up a ui where the user can tweak the default prefs
             if self._engine.execute_hook_method("project_startup_hook", "use_project_settings_ui"):
 
                 # at this point we don't have a QT application running, because we are still
                 # in the pre-DCC launch phase, so need to wrap our modal dialog call
-                # in a helper method which also creates a QApplication.        
+                # in a helper method which also creates a QApplication.
                 (return_code, widget) = start_qt_app_and_show_modal("Create Flame Project", 
                                                                     self._engine, 
                                                                     ProjectCreateDialog,
@@ -262,8 +263,10 @@ class WiretapHandler(object):
     
             # force cast to string - values coming from qt are unicode...
             xml = str(xml)
-    
-            self._engine.log_debug("The following xml will be emitted: %s" % xml)
+            
+            # parse and pretty print xml to validate and aid debug
+            pretty_xml = minidom.parseString(xml).toprettyxml()
+            self._engine.log_debug("The following xml will be emitted: %s" % pretty_xml)
     
             # Set the project meta data
             if not project_node.setMetaData("XML", xml):

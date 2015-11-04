@@ -162,7 +162,7 @@ class ProjectStartupActions(HookBaseClass):
          - ProxyWidthHint
          - ProxyDepthMode
          - ProxyMinFrameSize
-         - ProxyAbove8bits
+         - ProxyAbove8bits ("true" or "false")
          - ProxyQuality
          
          For proxy settings for flame versions from 2016 ext 1 and above,
@@ -171,10 +171,10 @@ class ProjectStartupActions(HookBaseClass):
          - ProxyWidthHint
          - ProxyDepthMode
          - ProxyMinFrameSize
-         - ProxyAbove8bits
+         - ProxyAbove8bits ("true" or "false")
          - ProxyQuality
          - ProxyWidth
-         - ProxyRegenState
+         - ProxyRegenState ("true" or "false")
          - ProxyDepth 
 
         :returns: dictionary of standard wiretap style project setup parameters.
@@ -190,7 +190,7 @@ class ProjectStartupActions(HookBaseClass):
 
         # proxy settings used in all versions of Flame
         settings["ProxyDepthMode"] = "8-bit"
-        settings["ProxyQuality"] = "medium"
+        settings["ProxyQuality"] = "draft"
         settings["ProxyWidthHint"] = "960"
         settings["ProxyMinFrameSize"] = "0"
         settings["ProxyAbove8bits"] = "false"
@@ -200,7 +200,7 @@ class ProjectStartupActions(HookBaseClass):
         
         # proxy settings used in 2016 ext 1 and above
         settings["ProxyWidth"] = "960"
-        settings["ProxyRegenState"] = "0"
+        settings["ProxyRegenState"] = "false"
         settings["ProxyDepth"] = "8-bit"
         
         
