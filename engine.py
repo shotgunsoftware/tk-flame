@@ -444,43 +444,38 @@ class FlameEngine(sgtk.platform.Engine):
             # enable Flame hooks debug
             os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
         
-        # special logic for Flare - see if we can load up a batch file
-        if self.instance_name == "tk-flare":
-            
-            self.log_debug("Environment instance is named '%s': We are launching Flare!" % self.instance_name)
+        # see if we can launch into batch mode. We only do this when in a 
+        # shot context and if there is a published batch file in Shotgun
+        #
+        # For now, hard code the logic of how to detect which batch file to load up.
+        # TODO: in the future, we may want to expose this in a hook - but it is arguably
+        # pretty advanced customization :)
+        #
+        # Current logic: Find the latest batch publish belonging to the context
         
-            # For Flare, try to see if we can seed the session with a particular batch file.
-            # we do this by passing a special environment to the Flare startup.
-            # 
-            # For now, hard code the logic of how to detect which batch file to load up.
-            # TODO: in the future, we may want to expose this in a hook - but it is arguably
-            # pretty advanced customization :)
-            #
-            # Current logic: Find the latest batch publish belonging to the context
+        if self.context.entity:
+            # we have a current context to lock on to!
+    
+            # try to see if we can find the latest batch publish
+            publish_type = sgtk.util.get_published_file_entity_type(self.sgtk)
             
-            if self.context.entity:
-                # we have a current context to lock on to!
-        
-                # try to see if we can find the latest batch publish
-                publish_type = sgtk.util.get_published_file_entity_type(self.sgtk)
-                
-                if publish_type == "PublishedFile":
-                    type_link_field = "published_file_type.PublishedFileType.code"
-                else:
-                    type_link_field = "tank_type.TankType.code"
-                
-                sg_data = self.shotgun.find_one(publish_type, 
-                                                [[type_link_field, "is", self.get_setting("flame_batch_publish_type")],
-                                                 ["entity", "is", self.context.entity]],
-                                                ["path"],
-                                                order=[{"field_name": "created_at", "direction": "desc"}])
-                
-                if sg_data:
-                    # we have a batch file published for this context!
-                    batch_file_path = sg_data["path"]["local_path"]
-                    self.log_debug("Setting Flare auto startup file '%s'" % batch_file_path)
+            if publish_type == "PublishedFile":
+                type_link_field = "published_file_type.PublishedFileType.code"
+            else:
+                type_link_field = "tank_type.TankType.code"
+            
+            sg_data = self.shotgun.find_one(publish_type, 
+                                            [[type_link_field, "is", self.get_setting("flame_batch_publish_type")],
+                                             ["entity", "is", self.context.entity]],
+                                            ["path"],
+                                            order=[{"field_name": "created_at", "direction": "desc"}])
+            
+            if sg_data:
+                # we have a batch file published for this context!
+                batch_file_path = sg_data["path"]["local_path"]
+                if os.path.exists(batch_file_path):
+                    self.log_debug("Setting auto startup file '%s'" % batch_file_path)
                     os.environ["DL_BATCH_START_WITH_SETUP"] = batch_file_path
-        
         
         # add Flame hooks for this engine
         flame_hooks_folder = os.path.join(self.disk_location, self.FLAME_HOOKS_FOLDER)

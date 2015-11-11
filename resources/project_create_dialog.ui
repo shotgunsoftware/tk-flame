@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>401</width>
-    <height>496</height>
+    <width>446</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -527,52 +527,25 @@ height: 100px;
        <item row="3" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QSlider" name="proxy_width_hint">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="minimum">
-            <number>24</number>
-           </property>
+          <widget class="QSpinBox" name="proxy_width">
            <property name="maximum">
-            <number>8192</number>
+            <number>65536</number>
            </property>
            <property name="singleStep">
-            <number>4</number>
-           </property>
-           <property name="pageStep">
-            <number>400</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="tickPosition">
-            <enum>QSlider::TicksBelow</enum>
-           </property>
-           <property name="tickInterval">
-            <number>400</number>
+            <number>16</number>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="proxy_width_hint_preview">
+          <widget class="QLabel" name="proxy_width_label">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>720px</string>
+            <string>px</string>
            </property>
           </widget>
          </item>
@@ -588,52 +561,25 @@ height: 100px;
        <item row="4" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
-          <widget class="QSlider" name="proxy_min_frame_size">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="minimum">
-            <number>24</number>
-           </property>
+          <widget class="QSpinBox" name="proxy_min_width">
            <property name="maximum">
-            <number>8192</number>
+            <number>65536</number>
            </property>
            <property name="singleStep">
-            <number>4</number>
-           </property>
-           <property name="pageStep">
-            <number>400</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="tickPosition">
-            <enum>QSlider::TicksBelow</enum>
-           </property>
-           <property name="tickInterval">
-            <number>400</number>
+            <number>16</number>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="proxy_min_frame_size_preview">
+          <widget class="QLabel" name="proxy_min_width_label">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>720px</string>
+            <string>px</string>
            </property>
           </widget>
          </item>
@@ -751,52 +697,25 @@ height: 100px;
        <item row="4" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <widget class="QSlider" name="new_proxy_min_frame_size">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="minimum">
-            <number>24</number>
-           </property>
+          <widget class="QSpinBox" name="new_proxy_width">
            <property name="maximum">
-            <number>8192</number>
+            <number>65536</number>
            </property>
            <property name="singleStep">
-            <number>4</number>
-           </property>
-           <property name="pageStep">
-            <number>400</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="tickPosition">
-            <enum>QSlider::TicksBelow</enum>
-           </property>
-           <property name="tickInterval">
-            <number>400</number>
+            <number>16</number>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="new_proxy_min_frame_size_preview">
+          <widget class="QLabel" name="new_proxy_width_label">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>720px</string>
+            <string>px</string>
            </property>
           </widget>
          </item>

@@ -244,20 +244,18 @@ class WiretapHandler(object):
             xml += self._append_setting_to_xml(project_settings, "FieldDominance")            
             xml += self._append_setting_to_xml(project_settings, "VisualDepth", starts_working_in="2015.3")
 
-            
-            xml += self._append_setting_to_xml(project_settings, "ProxyWidthHint")
-            xml += self._append_setting_to_xml(project_settings, "ProxyDepthMode")
+            # proxy settings
             xml += self._append_setting_to_xml(project_settings, "ProxyMinFrameSize")
-            xml += self._append_setting_to_xml(project_settings, "ProxyAbove8bits")
             xml += self._append_setting_to_xml(project_settings, "ProxyQuality")
+            xml += self._append_setting_to_xml(project_settings, "ProxyWidthHint")
             
             # deprecated proxy parameters for 2016.1
             xml += self._append_setting_to_xml(project_settings, "ProxyEnable", stops_working_in="2016.1")
+            xml += self._append_setting_to_xml(project_settings, "ProxyAbove8bits", stops_working_in="2016.1")
+            xml += self._append_setting_to_xml(project_settings, "ProxyDepthMode", stops_working_in="2016.1")
             
             # new proxy parameters added in 2016.1
-            xml += self._append_setting_to_xml(project_settings, "ProxyWidth", starts_working_in="2016.1")
             xml += self._append_setting_to_xml(project_settings, "ProxyRegenState", starts_working_in="2016.1")
-            xml += self._append_setting_to_xml(project_settings, "ProxyDepth", starts_working_in="2016.1")
             
             xml += "</Project>"
     

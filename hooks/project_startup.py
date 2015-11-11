@@ -81,7 +81,7 @@ class ProjectStartupActions(HookBaseClass):
         # Flame is restrictive with special characters, so adopt 
         # a conservative approach
         sanitized_project_name = re.sub(r'\W+', '_', project_name)
-        
+
         return sanitized_project_name
 
     def get_volume(self, volumes):
@@ -168,14 +168,10 @@ class ProjectStartupActions(HookBaseClass):
          For proxy settings for flame versions from 2016 ext 1 and above,
          the following parameters can be specified
          
-         - ProxyWidthHint
-         - ProxyDepthMode
          - ProxyMinFrameSize
-         - ProxyAbove8bits ("true" or "false")
+         - ProxyWidthHint
          - ProxyQuality
-         - ProxyWidth
          - ProxyRegenState ("true" or "false")
-         - ProxyDepth 
 
         :returns: dictionary of standard wiretap style project setup parameters.
         """
@@ -189,19 +185,22 @@ class ProjectStartupActions(HookBaseClass):
         settings["VisualDepth"] = "16bits"
 
         # proxy settings used in all versions of Flame
-        settings["ProxyDepthMode"] = "8-bit"
         settings["ProxyQuality"] = "draft"
-        settings["ProxyWidthHint"] = "960"
         settings["ProxyMinFrameSize"] = "960"
-        settings["ProxyAbove8bits"] = "false"
 
         # proxy settings used in 2016 and below
         settings["ProxyEnable"] = "false"
+        settings["ProxyDepthMode"] = "8-bit"
+        settings["ProxyAbove8bits"] = "false"
+        #settings["ProxyWidthHint"] = "960"
         
         # proxy settings used in 2016 ext 1 and above
-        settings["ProxyWidth"] = "960"
         settings["ProxyRegenState"] = "false"
-        settings["ProxyDepth"] = "8-bit"
+        #settings["ProxyWidthHint"] = "0.5"
         
+        # NOTE! In older versions of flame, ProxyMinFrameSize
+        # was a resolution in pixels. On 2016.1+, it's a ratio (0.5)
+        # if you customize this hook, please make sure that 
+        # the correct values are specified above
         
         return settings

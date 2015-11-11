@@ -126,14 +126,13 @@ class ProjectCreateDialog(QtGui.QWidget):
                                  the project_startup_hook's get_project_settings method
         """
         # set up signals for interaction
-        self.ui.proxy_width_hint.valueChanged.connect(self._on_proxy_width_hint_change)
-        self.ui.proxy_min_frame_size.valueChanged.connect(self._on_proxy_min_frame_size_change)
+        self.ui.proxy_width.valueChanged.connect(self._on_proxy_width_hint_change)
         self.ui.proxy_mode.currentIndexChanged.connect(self._on_proxy_mode_change)
         
         enable_proxy = project_settings.get("ProxyEnable") == "true"
         proxy_min_frame_size = int(project_settings.get("ProxyMinFrameSize") or 0)
         
-        self.ui.proxy_min_frame_size.setValue(proxy_min_frame_size)
+        self.ui.proxy_min_width.setValue(proxy_min_frame_size)
         
         # first reset the combo to trigger the change events later
         self.ui.proxy_mode.setCurrentIndex(-1)
@@ -154,7 +153,7 @@ class ProjectCreateDialog(QtGui.QWidget):
             self.ui.proxy_above_8_bits.setChecked(False)
 
         pwh = int(project_settings.get("ProxyWidthHint") or 0)        
-        self.ui.proxy_width_hint.setValue(pwh)
+        self.ui.proxy_width.setValue(pwh)
         
         
     def __set_up_new_proxy_tab(self, project_settings):
@@ -177,29 +176,22 @@ class ProjectCreateDialog(QtGui.QWidget):
         
         # set the minimum size slider
         proxy_min_frame_size = int(project_settings.get("ProxyMinFrameSize") or 0)
-        self.ui.new_proxy_min_frame_size.setValue(proxy_min_frame_size)
-        self.ui.new_proxy_min_frame_size.valueChanged.connect(self._on_new_proxy_min_frame_size_change)
-        
-        # make sure the preview label is updated to display the value at startup
-        self._on_new_proxy_min_frame_size_change()
+        self.ui.new_proxy_width.setValue(proxy_min_frame_size)
 
         # figure out the mode setting - this is driven by the ProxyWidth setting 
-        proxy_width = int(project_settings.get("ProxyWidth") or 0)
-        frame_width = int(project_settings.get("FrameWidth") or 0)
+        proxy_width = float(project_settings.get("ProxyWidthHint") or 0.0)
         
-        combo_index = -1
-        if proxy_width == 0:
-            # undefined, so set to 1/2
+        if proxy_width == 0.5:
             combo_index = self.ui.new_proxy_mode.findText("Proxy 1/2")
             
-        elif float(frame_width)/float(proxy_width) == 2:
-            combo_index = self.ui.new_proxy_mode.findText("Proxy 1/2")
-            
-        elif float(frame_width)/float(proxy_width) == 4:
+        elif proxy_width == 0.25:
             combo_index = self.ui.new_proxy_mode.findText("Proxy 1/4")
 
-        elif float(frame_width)/float(proxy_width) == 8:
+        elif proxy_width == 0.125:
             combo_index = self.ui.new_proxy_mode.findText("Proxy 1/8")
+            
+        else:
+            combo_index = self.ui.new_proxy_mode.findText("Proxy 1/2")            
 
         self.ui.new_proxy_mode.setCurrentIndex(combo_index)
         
@@ -241,7 +233,6 @@ class ProjectCreateDialog(QtGui.QWidget):
          - ProxyMinFrameSize
          - ProxyAbove8bits ("true" or "false")
          - ProxyQuality
-         - ProxyWidth
          - ProxyRegenState
          - ProxyDepth         
         """
@@ -271,17 +262,17 @@ class ProjectCreateDialog(QtGui.QWidget):
                 
             elif self.ui.proxy_mode.currentIndex() == 1:
                 settings["ProxyEnable"] = "false"
-                settings["ProxyWidthHint"] = "%s" % self.ui.proxy_width_hint.value()
+                settings["ProxyWidthHint"] = "%s" % self.ui.proxy_width.value()
                 settings["ProxyDepthMode"] = self.ui.proxy_depth.currentText()
-                settings["ProxyMinFrameSize"] = "%s" % self.ui.proxy_min_frame_size.value()
+                settings["ProxyMinFrameSize"] = "%s" % self.ui.proxy_min_width.value()
                 settings["ProxyAbove8bits"] = "true" if self.ui.proxy_above_8_bits.isChecked() else "false"
                 settings["ProxyQuality"] = self.ui.proxy_quality.currentText()
             
             else:
                 settings["ProxyEnable"] = "true"
-                settings["ProxyWidthHint"] = "%s" % self.ui.proxy_width_hint.value()
+                settings["ProxyWidthHint"] = "%s" % self.ui.proxy_width.value()
                 settings["ProxyDepthMode"] = self.ui.proxy_depth.currentText()
-                settings["ProxyMinFrameSize"] = "%s" % self.ui.proxy_min_frame_size.value()
+                settings["ProxyMinFrameSize"] = "%s" % self.ui.proxy_min_width.value()
                 settings["ProxyAbove8bits"] = "true" if self.ui.proxy_above_8_bits.isChecked() else "false"
                 settings["ProxyQuality"] = self.ui.proxy_quality.currentText()
 
@@ -289,16 +280,17 @@ class ProjectCreateDialog(QtGui.QWidget):
             # new (2016.1 and above) proxy settings
             settings["ProxyRegenState"] = "true" if self.ui.new_generate_proxies.isChecked() else "false"
             settings["ProxyQuality"] = self.ui.new_proxy_quality.currentText()
-            settings["ProxyMinFrameSize"] = "%s" % self.ui.new_proxy_min_frame_size.value()
-            # the ProxyWidth is derived from the 1/2, 1/4, 1/8 settings and the width
+            settings["ProxyMinFrameSize"] = "%s" % self.ui.new_proxy_width.value()
+            
+            # the ProxyWidthHint is derived from the 1/2, 1/4, 1/8 settings and the width
             if self.ui.new_proxy_mode.currentText() == "Proxy 1/2":
-                settings["ProxyWidth"] = int(self.ui.width.text()) / 2
+                settings["ProxyWidthHint"] = "0.5"
             
             elif self.ui.new_proxy_mode.currentText() == "Proxy 1/4":
-                settings["ProxyWidth"] = int(self.ui.width.text()) / 4
+                settings["ProxyWidthHint"] = "0.25"
             
             elif self.ui.new_proxy_mode.currentText() == "Proxy 1/8":
-                settings["ProxyWidth"] = int(self.ui.width.text()) / 8
+                settings["ProxyWidthHint"] = "0.125"
                 
         return settings
         
@@ -347,25 +339,10 @@ class ProjectCreateDialog(QtGui.QWidget):
         """
         Update slider preview for proxy width hint
         """
-        val = self.ui.proxy_width_hint.value()
-        self.ui.proxy_width_hint_preview.setText("%s px" % val)
+        val = self.ui.proxy_width.value()
         # min frame size value must be greater or equal to this value
-        self.ui.proxy_min_frame_size.setMinimum(val)
+        self.ui.proxy_min_width.setMinimum(val)
         
-    def _on_proxy_min_frame_size_change(self):
-        """
-        Update slider preview for proxy min size
-        """
-        val = self.ui.proxy_min_frame_size.value()
-        self.ui.proxy_min_frame_size_preview.setText("%d px" % val)
-        
-    def _on_new_proxy_min_frame_size_change(self):
-        """
-        Update slider preview for proxy min size
-        """
-        val = self.ui.new_proxy_min_frame_size.value()
-        self.ui.new_proxy_min_frame_size_preview.setText("%d px" % val)
-
     def _on_proxy_mode_change(self, idx):
         """
         Proxy enabled clicked. Enable/disable a bunch 
@@ -376,14 +353,14 @@ class ProjectCreateDialog(QtGui.QWidget):
         # first turn off everything
         self.ui.proxy_depth.setVisible(False)
         self.ui.proxy_quality.setVisible(False)
-        self.ui.proxy_width_hint.setVisible(False)
-        self.ui.proxy_width_hint_preview.setVisible(False)
+        self.ui.proxy_width.setVisible(False)
+        self.ui.proxy_width_label.setVisible(False)
         self.ui.proxy_depth_label.setVisible(False)
         self.ui.proxy_quality_label.setVisible(False)
         self.ui.proxy_width_hint_label.setVisible(False)
         
-        self.ui.proxy_min_frame_size.setVisible(False)
-        self.ui.proxy_min_frame_size_preview.setVisible(False)
+        self.ui.proxy_min_width.setVisible(False)
+        self.ui.proxy_min_width_label.setVisible(False)
         self.ui.proxy_above_8_bits.setVisible(False)
         self.ui.proxy_min_frame_size_label.setVisible(False)
         
@@ -391,16 +368,16 @@ class ProjectCreateDialog(QtGui.QWidget):
             # on / conditional
             self.ui.proxy_depth.setVisible(True)
             self.ui.proxy_quality.setVisible(True)
-            self.ui.proxy_width_hint.setVisible(True)
-            self.ui.proxy_width_hint_preview.setVisible(True)
+            self.ui.proxy_width.setVisible(True)
+            self.ui.proxy_width_label.setVisible(True)
             self.ui.proxy_depth_label.setVisible(True)
             self.ui.proxy_quality_label.setVisible(True)
             self.ui.proxy_width_hint_label.setVisible(True)
             
         if idx == 1:
             # conditional
-            self.ui.proxy_min_frame_size.setVisible(True)
-            self.ui.proxy_min_frame_size_preview.setVisible(True)
+            self.ui.proxy_min_width.setVisible(True)
+            self.ui.proxy_min_width_label.setVisible(True)
             self.ui.proxy_above_8_bits.setVisible(True)
             self.ui.proxy_min_frame_size_label.setVisible(True)
         
