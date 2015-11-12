@@ -102,7 +102,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     
     # first of all, check that the executable path to Flame exists
     if not os.path.exists(app_path):
-        raise TankError("Cannot launch Flame - the path '%s' does not exist on disk!" % app_path)
+        raise TankError("Cannot launch the Flame/Flare integration environment - the path '%s' does not exist on disk!" % app_path)
     
     # update the environment prior to launch
     os.environ["TOOLKIT_ENGINE_NAME"] = engine_instance_name

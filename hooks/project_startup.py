@@ -192,7 +192,7 @@ class ProjectStartupActions(HookBaseClass):
         settings["ProxyEnable"] = "false"
         settings["ProxyDepthMode"] = "8-bit"
         settings["ProxyAbove8bits"] = "false"
-        #settings["ProxyWidthHint"] = "960"
+        settings["ProxyWidthHint"] = "960"
         
         # proxy settings used in 2016 ext 1 and above
         settings["ProxyRegenState"] = "false"
