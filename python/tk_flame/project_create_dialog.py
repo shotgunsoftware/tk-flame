@@ -259,6 +259,7 @@ class ProjectCreateDialog(QtGui.QWidget):
             if self.ui.proxy_mode.currentIndex() == 0:
                 settings["ProxyEnable"] = "false"
                 settings["ProxyWidthHint"] = "0"
+                settings["ProxyMinFrameSize"] = "0"
                 
             elif self.ui.proxy_mode.currentIndex() == 1:
                 settings["ProxyEnable"] = "false"
