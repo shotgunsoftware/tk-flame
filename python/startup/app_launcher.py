@@ -91,26 +91,8 @@ def launch_flame(dcc_path, dcc_args):
         flame_engine.set_version_info(major_version_str, minor_version_str, full_version_str)
         
     # and kick off the pre-process - this will ensure that a Flame project exists.
-    try:
-        app_args = flame_engine.pre_dcc_launch_phase()
+    app_args = flame_engine.pre_dcc_launch_phase()
     
-    except Exception, e:    
-        # log it
-        flame_engine.log_exception("General error reported by pre-launch")
-        
-        # now try to show it to the user
-        if flame_engine.has_ui:
-            try:
-                # Note - Since Flame is a PySide only environment, we import it directly
-                # rather than going through the sgtk wrappers.         
-                from PySide import QtGui
-                msg = "Error launching Flame/Flare!\n\n%s\n\nFor more details, see the application log." % e
-                QtGui.QMessageBox.critical(None, "Shotgun General Error", msg)
-            except:
-                pass
-
-        raise
-
     # now launch Flame!
     flame_engine.log_debug("-" * 60)
     flame_engine.log_debug("About to launch the actual flame DCC.")

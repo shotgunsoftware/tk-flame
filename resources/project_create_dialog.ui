@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>446</width>
-    <height>503</height>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -425,6 +425,9 @@ height: 100px;
        <string>Proxy</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="proxy_depth_label_2">
          <property name="text">
@@ -527,25 +530,52 @@ height: 100px;
        <item row="3" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QSpinBox" name="proxy_width">
+          <widget class="QSlider" name="proxy_width_hint">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="minimum">
+            <number>24</number>
+           </property>
            <property name="maximum">
-            <number>65536</number>
+            <number>8192</number>
            </property>
            <property name="singleStep">
-            <number>16</number>
+            <number>4</number>
+           </property>
+           <property name="pageStep">
+            <number>400</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::TicksBelow</enum>
+           </property>
+           <property name="tickInterval">
+            <number>400</number>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="proxy_width_label">
+          <widget class="QLabel" name="proxy_width_hint_preview">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>px</string>
+            <string>720px</string>
            </property>
           </widget>
          </item>
@@ -561,25 +591,52 @@ height: 100px;
        <item row="4" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
-          <widget class="QSpinBox" name="proxy_min_width">
+          <widget class="QSlider" name="proxy_min_frame_size">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="minimum">
+            <number>24</number>
+           </property>
            <property name="maximum">
-            <number>65536</number>
+            <number>8192</number>
            </property>
            <property name="singleStep">
-            <number>16</number>
+            <number>4</number>
+           </property>
+           <property name="pageStep">
+            <number>400</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::TicksBelow</enum>
+           </property>
+           <property name="tickInterval">
+            <number>400</number>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="proxy_min_width_label">
+          <widget class="QLabel" name="proxy_min_frame_size_preview">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>px</string>
+            <string>720px</string>
            </property>
           </widget>
          </item>
