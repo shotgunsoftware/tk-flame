@@ -163,14 +163,14 @@ class ProjectStartupActions(HookBaseClass):
          - ProxyDepthMode
          - ProxyMinFrameSize
          - ProxyAbove8bits ("true" or "false")
-         - ProxyQuality
+         - ProxyQuality (e.g "draft", "medium" etc)
          
          For proxy settings for flame versions from 2016 ext 1 and above,
          the following parameters can be specified
          
-         - ProxyMinFrameSize
-         - ProxyWidthHint
-         - ProxyQuality
+         - ProxyMinFrameSize (e.g. "960")
+         - ProxyWidthHint ("0.5", "0.25" or "0.125")
+         - ProxyQuality (e.g "lanczos", "medium" etc)
          - ProxyRegenState ("true" or "false")
 
         :returns: dictionary of standard wiretap style project setup parameters.
@@ -184,23 +184,25 @@ class ProjectStartupActions(HookBaseClass):
         settings["FrameRate"] = "24 fps"
         settings["VisualDepth"] = "16bits"
 
-        # proxy settings used in all versions of Flame
-        settings["ProxyQuality"] = "draft"
-        settings["ProxyMinFrameSize"] = "960"
-
-        # proxy settings used in 2016 and below
-        settings["ProxyEnable"] = "false"
-        settings["ProxyDepthMode"] = "8-bit"
-        settings["ProxyAbove8bits"] = "false"
-        settings["ProxyWidthHint"] = "960"
+        if self.parent.is_version_less_than("2016.1"):
+            # proxy settings used in 2016 and below        
+            settings["ProxyEnable"] = "false"
+            settings["ProxyDepthMode"] = "8-bit"
+            settings["ProxyQuality"] = "medium"
+            settings["ProxyWidthHint"] = "720"
+            settings["ProxyMinFrameSize"] = "0"
+            settings["ProxyAbove8bits"] = "false"
         
-        # proxy settings used in 2016 ext 1 and above
-        settings["ProxyRegenState"] = "false"
-        #settings["ProxyWidthHint"] = "0.5"
+        else:
+            # proxy settings used in 2016 ext 1 and above
+            # NOTE! In older versions of flame, ProxyWidthHint
+            # was a resolution in pixels. On 2016.1+, it's a ratio (0.5)
+            # if you customize this hook, please make sure that 
+            # the correct values are specified.
+            settings["ProxyRegenState"] = "false"
+            settings["ProxyWidthHint"] = "0.5"
+            settings["ProxyMinFrameSize"] = "960"
+            settings["ProxyQuality"] = "lanczos"
         
-        # NOTE! In older versions of flame, ProxyMinFrameSize
-        # was a resolution in pixels. On 2016.1+, it's a ratio (0.5)
-        # if you customize this hook, please make sure that 
-        # the correct values are specified above
         
         return settings

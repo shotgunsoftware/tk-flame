@@ -139,9 +139,9 @@ class ProjectCreateDialog(QtGui.QWidget):
         if enable_proxy == False and proxy_min_frame_size == 0:
             self.ui.proxy_mode.setCurrentIndex(0) # off
         elif enable_proxy == False and proxy_min_frame_size > 0:
-            self.ui.proxy_mode.setCurrentIndex(1) # on 
+            self.ui.proxy_mode.setCurrentIndex(1) # conditionally 
         else:
-            self.ui.proxy_mode.setCurrentIndex(2) # conditionally
+            self.ui.proxy_mode.setCurrentIndex(2) # on
            
         self.__set_combo_value(project_settings, self.ui.proxy_depth, "ProxyDepthMode")
         self.__set_combo_value(project_settings, self.ui.proxy_quality, "ProxyQuality")
