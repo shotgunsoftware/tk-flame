@@ -232,6 +232,12 @@ class WiretapHandler(object):
                 self._engine.log_debug("%s: %s" % (k, v))
 
             # create xml structure
+
+            # NOTE! It seems the attribute order in the xml data may be significant
+            # when the data is read into flame. Moving proxy parameters round in the past
+            # has resulted in regressions, so ensure the xml structure is the intact
+            # when making modifications. 
+
             xml  = "<Project>"
             
             xml += "<Description>%s</Description>"             % "Created by Shotgun Flame Integration %s" % self._engine.version
@@ -241,19 +247,17 @@ class WiretapHandler(object):
             xml += self._append_setting_to_xml(project_settings, "FrameDepth")
             xml += self._append_setting_to_xml(project_settings, "AspectRatio")
             xml += self._append_setting_to_xml(project_settings, "FrameRate")
+            xml += self._append_setting_to_xml(project_settings, "ProxyEnable", stops_working_in="2016.1")            
             xml += self._append_setting_to_xml(project_settings, "FieldDominance")            
             xml += self._append_setting_to_xml(project_settings, "VisualDepth", starts_working_in="2015.3")
 
             # proxy settings
-            xml += self._append_setting_to_xml(project_settings, "ProxyMinFrameSize")
-            xml += self._append_setting_to_xml(project_settings, "ProxyQuality")
             xml += self._append_setting_to_xml(project_settings, "ProxyWidthHint")
-            
-            # deprecated proxy parameters for 2016.1
-            xml += self._append_setting_to_xml(project_settings, "ProxyEnable", stops_working_in="2016.1")
-            xml += self._append_setting_to_xml(project_settings, "ProxyAbove8bits", stops_working_in="2016.1")
             xml += self._append_setting_to_xml(project_settings, "ProxyDepthMode", stops_working_in="2016.1")
-            
+            xml += self._append_setting_to_xml(project_settings, "ProxyMinFrameSize")
+            xml += self._append_setting_to_xml(project_settings, "ProxyAbove8bits", stops_working_in="2016.1")
+            xml += self._append_setting_to_xml(project_settings, "ProxyQuality")
+                        
             # new proxy parameters added in 2016.1
             xml += self._append_setting_to_xml(project_settings, "ProxyRegenState", starts_working_in="2016.1")
             
@@ -261,15 +265,16 @@ class WiretapHandler(object):
     
             # force cast to string - values coming from qt are unicode...
             xml = str(xml)
-            
+
             # parse and pretty print xml to validate and aid debug
             pretty_xml = minidom.parseString(xml).toprettyxml()
             self._engine.log_debug("The following xml will be emitted: %s" % pretty_xml)
+
     
             # Set the project meta data
             if not project_node.setMetaData("XML", xml):
                 raise WiretapError("Error setting metadata for %s: %s" % (project_name, project_node.lastError()))
-               
+            
             self._engine.log_debug( "Project successfully created.")
          
          
