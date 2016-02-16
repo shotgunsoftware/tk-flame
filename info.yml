@@ -89,3 +89,5 @@ description: "Shotgun Integration in Flame"
 requires_shotgun_version:
 requires_core_version: "v0.14.76"
 
+# XXX will require core version with metrics logging
+
