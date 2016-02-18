@@ -102,6 +102,12 @@ def launch_flame(dcc_path, dcc_args):
     cmd_line = "\"%s\" %s %s &" % (dcc_path, app_args, " ".join(dcc_args))
     flame_engine.log_debug("Full command line '%s'" % cmd_line)
     flame_engine.log_debug("-" * 60)
+
+    try:
+        flame_engine.log_user_attribute_metric("Flame version", full_version_str)
+    except:
+        # ignore all errors. ex: using a core that doesn't support metrics
+        pass
     
     return os.system(cmd_line)
     
