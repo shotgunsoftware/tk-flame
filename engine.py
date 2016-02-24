@@ -228,6 +228,13 @@ class FlameEngine(sgtk.platform.Engine):
         """
         self.log_debug("%s: Running post app init..." % self)
 
+        try:
+            full_version_str = os.environ.get("TOOLKIT_FLAME_VERSION")
+            self.log_user_attribute_metric("Flame version", full_version_str)
+        except:
+            # ignore all errors. ex: using a core that doesn't support metrics
+            pass
+
         # only run the startup commands when in DCC mode
         if self._engine_mode != self.ENGINE_MODE_DCC:
             return
@@ -237,6 +244,7 @@ class FlameEngine(sgtk.platform.Engine):
         for (instance_name, command_name, callback) in commands_to_start:
             self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
             callback()
+
 
     def destroy_engine(self):
         """
