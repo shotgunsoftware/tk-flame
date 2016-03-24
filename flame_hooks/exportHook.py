@@ -216,6 +216,8 @@ def preExportAsset(info, userData):
        sourceOut:       Source out point in frame and asset frame rate.
        recordIn:        Record in point in frame and sequence frame rate.
        recordOut:       Record out point in frame and sequence frame rate.
+       handleIn:        Head as a frame, using the asset frame rate (fps key).
+       handleOut:       Tail as a frame, using the asset frame rate (fps key).
        track:           ID of the sequence's track that contains the asset.
        trackName:       Name of the sequence's track that contains the asset.
        segmentIndex:    Asset index (1 based) in the track.
@@ -265,6 +267,8 @@ def postExportAsset(info, userData):
        sourceOut:       Source out point in frame and asset frame rate.
        recordIn:        Record in point in frame and sequence frame rate.
        recordOut:       Record out point in frame and sequence frame rate.
+       handleIn:        Head as a frame, using the asset frame rate (fps key).
+       handleOut:       Tail as a frame, using the asset frame rate (fps key).
        track:           ID of the sequence's track that contains the asset.
        trackName:       Name of the sequence's track that contains the asset.
        segmentIndex:    Asset index (1 based) in the track.       
