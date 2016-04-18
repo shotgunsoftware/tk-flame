@@ -283,9 +283,12 @@ class FlameEngine(sgtk.platform.Engine):
         elif self.is_version_less_than("2016.1"):
             # for version 2016 before ext 1, export preset is v5
             return "5" 
-        else:
+        elif self.is_version_less_than("2017"):
             # flame 2016 extension 1 and above.
             return "6"
+        else:
+            # flame 2017 and above
+            return "7"
 
     def is_version_less_than(self, version_str):
         """
@@ -780,7 +783,10 @@ class FlameEngine(sgtk.platform.Engine):
         
         # run as current user, not as root
         backburner_args.append("-userRights")
-        
+
+        # increase the max task length to 600 minutes
+        backburner_args.append("-timeout:600")
+
         # add basic job info
         # backburner does not do any kind of sanitaion itself, so ensure that job
         # info doesn't contain any strange characters etc
