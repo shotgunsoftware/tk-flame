@@ -288,7 +288,13 @@ class FlameEngine(sgtk.platform.Engine):
             return "6"
         else:
             # flame 2017 and above
-            return "7"
+            #
+            # Note: Flame 2017 uses preset 7, however further adjustments to the actual
+            #       preset format used is required in individual apps - for the time being,
+            #       the preset version is held at v6, ensuring that app apps operate correctly,
+            #       but generating a warning message at startup.
+            #
+            return "6"
 
     def is_version_less_than(self, version_str):
         """
