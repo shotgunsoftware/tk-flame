@@ -70,23 +70,27 @@ def launch_flame(dcc_path, dcc_args):
     os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "PRE_LAUNCH"
     flame_engine = sgtk.platform.start_engine(engine_instance_name, context.sgtk, context)
     del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
-    
-    # pass the python executable from the bootstrap to the engine 
+
+    # pass the python executable from the bootstrap to the engine
     python_executable = os.environ.get("TOOLKIT_FLAME_PYTHON_BINARY")
     if not python_executable:
-        flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_PYTHON_BINARY - this is set "
-                               "during the sgtk bootstrap of Flame.")
+        flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_PYTHON_BINARY")
     else:
         flame_engine.set_python_executable(python_executable)
-    
+
+    install_root = os.environ.get("TOOLKIT_FLAME_INSTALL_ROOT")
+    if not install_root:
+        flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_INSTALL_ROOT")
+    else:
+        flame_engine.set_install_root(install_root)
+
     # and the version number
     major_version_str = os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION")
     minor_version_str = os.environ.get("TOOLKIT_FLAME_MINOR_VERSION")
     full_version_str = os.environ.get("TOOLKIT_FLAME_VERSION")
     
     if None in (major_version_str, minor_version_str, full_version_str):
-        flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_x_VERSION - this is set "
-                               "during the sgtk bootstrap of Flame.")
+        flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_x_VERSION")
     else:
         flame_engine.set_version_info(major_version_str, minor_version_str, full_version_str)
         
