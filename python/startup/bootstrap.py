@@ -15,15 +15,16 @@ import os
 import re
 import sys
 
+
 def _get_flame_version(flame_path):
     """
     Returns the version string for the given Flame path
     
-    .../flameassist_2015.2/bin/startApplication        --> (2015, 2, "2015.2")
-    .../flameassist_2015.3/bin/startApplication        --> (2015, 3, "2015.3")
-    .../flameassist_2016.0.0.322/bin/startApplication  --> (2016, 0, "2016.0.0.322")
-    .../flameassist_2015.2.pr99/bin/startApplication   --> (2015, 2, "2015.2.pr99")
-    .../flame_2016.pr50/bin/start_Flame                --> (2016, 0, "2016.pr50")
+    <INSTALL_ROOT>/flameassist_2015.2/bin/startApplication        --> (2015, 2, "2015.2")
+    <INSTALL_ROOT>/flameassist_2015.3/bin/startApplication        --> (2015, 3, "2015.3")
+    <INSTALL_ROOT>/flameassist_2016.0.0.322/bin/startApplication  --> (2016, 0, "2016.0.0.322")
+    <INSTALL_ROOT>/flameassist_2015.2.pr99/bin/startApplication   --> (2015, 2, "2015.2.pr99")
+    <INSTALL_ROOT>/flame_2016.pr50/bin/start_Flame                --> (2016, 0, "2016.pr50")
 
     If the minor or major version cannot be extracted, it will be set to zero.
 

@@ -123,11 +123,6 @@ class FlameEngine(sgtk.platform.Engine):
 
         :param install_root: path to flame install root
         """
-        # default to using a safe log file that is 
-        # guaranteed to work
-        log_file = self.SGTK_LOG_FILE_SAFE
-        using_safe_log_file = True
-
         # standard flame log file
         std_log_file = os.path.join(install_root, "log", self.SGTK_LOG_FILE)
 
@@ -140,7 +135,8 @@ class FlameEngine(sgtk.platform.Engine):
         except IOError:
             # cannot operate on file (usually related to permissions)
             # write to tmp instead.
-            pass
+            log_file = self.SGTK_LOG_FILE_SAFE
+            using_safe_log_file = True
 
         # Set up a rotating logger with 4MiB max file size
         rotating = logging.handlers.RotatingFileHandler(log_file, maxBytes=4*1024*1024, backupCount=10)
@@ -156,6 +152,7 @@ class FlameEngine(sgtk.platform.Engine):
         else:
             logger.setLevel(logging.INFO)
 
+        # now that we have a logger, we can warn about a non-std log file :)
         if using_safe_log_file:
             logger.error("Cannot write to standard log file location %s! Please check "
                          "the filesystem permissions. As a fallback, logs will be "
