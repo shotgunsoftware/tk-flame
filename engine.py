@@ -311,7 +311,7 @@ class FlameEngine(sgtk.platform.Engine):
             #       the preset version is held at v6, ensuring that app apps operate correctly,
             #       but generating a warning message at startup.
             #
-            return "6"
+            return "7"
 
     def is_version_less_than(self, version_str):
         """
