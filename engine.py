@@ -186,7 +186,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         this may be '/usr/discreet', '/opt/Autodesk' etc.
 
-        @param install_root: root path to flame installation
+        :param install_root: root path to flame installation
         """
         if self._install_root:
             # cannot call this multiple times
@@ -311,7 +311,7 @@ class FlameEngine(sgtk.platform.Engine):
             #       the preset version is held at v6, ensuring that app apps operate correctly,
             #       but generating a warning message at startup.
             #
-            return "6"
+            return "7"
 
     def is_version_less_than(self, version_str):
         """
@@ -367,8 +367,18 @@ class FlameEngine(sgtk.platform.Engine):
             raise TankError("No Flame DCC version specified!")
         
         return self._flame_version["full"]
-    
-    
+
+    @property
+    def install_root(self):
+        """
+        The location where flame is installed.
+
+        This may be '/usr/discreet', '/opt/Autodesk' etc.
+
+        :returns: Path as string
+        """
+        return self._install_root
+
     @property
     def has_ui(self):
         """
