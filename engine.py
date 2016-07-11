@@ -63,6 +63,14 @@ class FlameEngine(sgtk.platform.Engine):
         Overridden constructor where we init some things which 
         need to be defined very early on in the engine startup.
         """
+
+        # to support use cases where the flame engine isn't started via
+        # the multi-launchapp chain, make sure that hooks that the engine
+        # implements are registered.
+        flame_hooks_folder = os.path.join(self.disk_location, self.FLAME_HOOKS_FOLDER)
+        sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
+        self.log_debug("Added to hook path: %s" % flame_hooks_folder)
+
         # the path to the associated python executable
         self._python_executable_path = None 
         
