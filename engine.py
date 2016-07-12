@@ -321,6 +321,22 @@ class FlameEngine(sgtk.platform.Engine):
             #
             return "7"
 
+    @property
+    def export_presets_root(self):
+        """
+        The location where flame export presets are located
+
+        :returns: Path as string
+        """
+        return os.path.join(
+            self.install_root,
+            "presets",
+            self.flame_version,
+            "export",
+            "presets",
+            "flame"
+        )
+
     def is_version_less_than(self, version_str):
         """
         Compares the given version string with the current 
