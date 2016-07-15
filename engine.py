@@ -328,14 +328,25 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: Path as string
         """
-        return os.path.join(
-            self.install_root,
-            "presets",
-            self.flame_version,
-            "export",
-            "presets",
-            "flame"
-        )
+        if self.is_version_less_than("2017"):
+            # flame 2016 presets structure
+            return os.path.join(
+                self.install_root,
+                "presets",
+                self.flame_version,
+                "export",
+                "presets"
+            )
+        else:
+            # flame 2017+ presets structure (note the extra flame folder)
+            return os.path.join(
+                self.install_root,
+                "presets",
+                self.flame_version,
+                "export",
+                "presets",
+                "flame"
+            )
 
     def is_version_less_than(self, version_str):
         """
