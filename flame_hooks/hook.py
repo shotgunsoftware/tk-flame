@@ -50,7 +50,7 @@ def getCustomUIActions():
     import sgtk
     engine = sgtk.platform.current_engine()
 
-    # go through the values from the run_at_startup setting and run any matching commands
+    # go through the values from the context_menu setting and run any matching commands
     context_commands = engine.get_setting("context_menu", [])
     if not context_commands:
         return ()
