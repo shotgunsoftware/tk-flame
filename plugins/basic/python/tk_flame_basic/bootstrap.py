@@ -14,7 +14,7 @@ import os
 import re
 import sys
 from PySide import QtGui, QtCore
-import sgtk_plugin
+from sgtk_plugin_basic import manifest
 
 g_toolkit_init_complete = False
 
@@ -35,7 +35,7 @@ def bootstrap_flame(plugin_root, project_name):
 
         # initialize logging to disk
         sgtk.LogManager().initialize_base_file_handler("tk-flame")
-        sgtk.LogManager().global_debug = sgtk_plugin.manifest.debug_logging
+        sgtk.LogManager().global_debug = manifest.debug_logging
         g_toolkit_init_complete = True
 
     else:
@@ -45,7 +45,7 @@ def bootstrap_flame(plugin_root, project_name):
     # kick off logging
     logger = sgtk.LogManager.get_logger(__name__)
     logger.debug("Flame sgtk project hook waking up!")
-    logger.debug("Manifest: %s" % sgtk_plugin.manifest.BUILD_INFO)
+    logger.debug("Manifest: %s" % manifest.BUILD_INFO)
 
     # turn off previous running engines
     if sgtk.platform.current_engine():
@@ -106,7 +106,7 @@ def bootstrap_flame(plugin_root, project_name):
     mgr.bundle_cache_fallback_paths = [os.path.join(plugin_root_dir, "bundle_cache")]
 
     # define our entry point
-    mgr.entry_point = sgtk_plugin.manifest.entry_point
+    mgr.entry_point = manifest.entry_point
 
     # Set up our config:
     #
@@ -114,7 +114,7 @@ def bootstrap_flame(plugin_root, project_name):
     # In the future, it should be moved out into a separate
     # repository so that updates can be pushed out automatically.
     #
-    mgr.base_configuration = sgtk_plugin.manifest.base_configuration
+    mgr.base_configuration = manifest.base_configuration
 
     # flag to the engine that it operates in its main mode
     os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "DCC"
