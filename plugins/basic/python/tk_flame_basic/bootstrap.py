@@ -18,7 +18,7 @@ import sgtk_plugin
 
 g_toolkit_init_complete = False
 
-def _bootstrap_flame(plugin_root, project_name):
+def bootstrap_flame(plugin_root, project_name):
     """
     Main entry point for Shotgun boostrap.
     Executed whenever a project is being started.
