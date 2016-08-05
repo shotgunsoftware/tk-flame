@@ -14,11 +14,9 @@ import os
 import re
 import sys
 from PySide import QtGui, QtCore
-
-from .manifest import Manifest
+import sgtk_plugin
 
 g_toolkit_init_complete = False
-
 
 def _bootstrap_flame(plugin_root, project_name):
     """
@@ -30,17 +28,14 @@ def _bootstrap_flame(plugin_root, project_name):
     """
     global g_toolkit_init_complete
 
-    manifest = Manifest(plugin_root)
-
     if not g_toolkit_init_complete:
 
         # import toolkit
-        sys.path.append(manifest.plugin_core_path)
         import sgtk
 
         # initialize logging to disk
         sgtk.LogManager().initialize_base_file_handler("tk-flame")
-        sgtk.LogManager().global_debug = manifest.get_setting("debug_logging")
+        sgtk.LogManager().global_debug = sgtk_plugin.manifest.debug_logging
         g_toolkit_init_complete = True
 
     else:
@@ -50,7 +45,7 @@ def _bootstrap_flame(plugin_root, project_name):
     # kick off logging
     logger = sgtk.LogManager.get_logger(__name__)
     logger.debug("Flame sgtk project hook waking up!")
-    logger.debug("Manifest: %r" % manifest)
+    logger.debug("Manifest: %r" % sgtk_plugin.manifest.BUILD_INFO)
 
     # turn off previous running engines
     if sgtk.platform.current_engine():
@@ -106,10 +101,12 @@ def _bootstrap_flame(plugin_root, project_name):
     mgr = sgtk.bootstrap.ToolkitManager(user)
 
     # add our local baked cache to the search path
-    mgr.bundle_cache_fallback_paths = [manifest.bundle_cache_root]
+    this_dir = os.path.abspath(os.path.dirname(__file__))
+    plugin_root_dir = os.path.abspath(os.path.join(this_dir, "..", ".."))
+    mgr.bundle_cache_fallback_paths = [os.path.join(plugin_root_dir, "bundle_cache")]
 
     # define our entry point
-    mgr.entry_point = manifest.entry_point
+    mgr.entry_point = sgtk_plugin.manifest.entry_point
 
     # Set up our config:
     #
@@ -117,10 +114,7 @@ def _bootstrap_flame(plugin_root, project_name):
     # In the future, it should be moved out into a separate
     # repository so that updates can be pushed out automatically.
     #
-    mgr.base_configuration = {
-        "type": "path",
-        "path": os.path.join(root_dir, "config"),
-    }
+    mgr.base_configuration = sgtk_plugin.manifest.base_configuration
 
     # flag to the engine that it operates in its main mode
     os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "DCC"

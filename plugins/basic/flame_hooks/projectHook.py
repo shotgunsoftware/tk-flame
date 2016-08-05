@@ -17,14 +17,20 @@ import sys
 # figure out our location
 this_dir = os.path.abspath(os.path.dirname(__file__))
 plugin_root_dir = os.path.abspath(os.path.join(this_dir, ".."))
+
 # add python module to path
 python_path = os.path.join(plugin_root_dir, "python")
 sys.path.append(python_path)
 
-# import manifest that handles config and paths
-from tk_flame_basic import Manifest, exception_ui, bootstrap
+# add bundle cache module to path
+python_path = os.path.join(plugin_root_dir, "bundle_cache", "python")
+sys.path.append(python_path)
 
-if Manifest(plugin_root_dir).get_setting("debug_logging"):
+# import manifest that handles config and paths
+import sgtk_plugin
+from tk_flame_basic import exception_ui, bootstrap
+
+if sgtk_plugin.manifest.debug_logging:
     # turn on flame debug
     os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
 

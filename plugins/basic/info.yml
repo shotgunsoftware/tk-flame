@@ -10,21 +10,20 @@
 
 # values required by all plugins
 base_configuration:
-  type:    app_store
-  name:    tk-config-pluginbasic
+  type:    baked
+  path:    ./config
 
 entry_point: "basic"
 
+# recommended values that all plugins should
+# specify by convention, unless there is good reason not to
 name: Shotgun Integration
 description: Short description of the plugin
 author: Shotgun Software
 organization: Autodesk, Inc
 contact: support@shotgunsoftware.com
 url: http://www.shotgunsoftware.com
-
 version: "v1.2.3"
 
 # plugin specific settings
-configuration:
-
-  debug_logging: true
+debug_logging: true
