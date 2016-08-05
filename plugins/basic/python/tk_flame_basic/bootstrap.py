@@ -45,7 +45,7 @@ def _bootstrap_flame(plugin_root, project_name):
     # kick off logging
     logger = sgtk.LogManager.get_logger(__name__)
     logger.debug("Flame sgtk project hook waking up!")
-    logger.debug("Manifest: %r" % sgtk_plugin.manifest.BUILD_INFO)
+    logger.debug("Manifest: %s" % sgtk_plugin.manifest.BUILD_INFO)
 
     # turn off previous running engines
     if sgtk.platform.current_engine():
