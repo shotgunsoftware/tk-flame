@@ -10,8 +10,9 @@
 
 # values required by all plugins
 base_configuration:
-  type:    baked
-  path:    ./config
+  type:    manual
+  name:    tk-config-flame
+  version: v1.0.0
 
 entry_point: "basic"
 
@@ -27,3 +28,4 @@ version: "v1.2.3"
 
 # plugin specific settings
 debug_logging: true
+log_to_stdout: true

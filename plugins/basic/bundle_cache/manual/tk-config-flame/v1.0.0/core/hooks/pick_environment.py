@@ -20,4 +20,9 @@ class PickEnvironment(Hook):
         """
         This config only operates in the site context.
         """
-        return "project"
+
+        if context.project is None:
+            return "site"
+
+        else:
+            return "project"

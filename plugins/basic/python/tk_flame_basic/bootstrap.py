@@ -38,6 +38,9 @@ def bootstrap_flame(plugin_root, project_name):
         sgtk.LogManager().global_debug = manifest.debug_logging
         g_toolkit_init_complete = True
 
+        if manifest.log_to_stdout:
+            sgtk.LogManager().initialize_custom_handler()
+
     else:
         # toolkit already present
         import sgtk
@@ -119,8 +122,10 @@ def bootstrap_flame(plugin_root, project_name):
     # flag to the engine that it operates in its main mode
     os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "DCC"
 
+    engine = mgr.bootstrap_engine("tk-flame")
+
     # bootstrap into the engine
-    engine = mgr.bootstrap_engine("tk-flame", entity=proj)
+    #engine = mgr.bootstrap_engine("tk-flame", entity=proj)
 
     # clean up operational state
     del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
@@ -137,6 +142,10 @@ def bootstrap_flame(plugin_root, project_name):
 
     # and the version number
     engine.set_version_info(str(major_ver), str(minor_ver), version_str)
+
+    logger.error("FLAME APPS: %s" % engine.apps)
+
+    engine.apps["tk-flame-projectcreate"].callback()
 
 
 def _determine_flame_version():
