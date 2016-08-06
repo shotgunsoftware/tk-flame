@@ -50,28 +50,34 @@ def getCustomUIActions():
     import sgtk
     engine = sgtk.platform.current_engine()
 
-    # go through the values from the context_menu setting and run any matching commands
-    context_commands = engine.get_setting("context_menu", [])
-    if not context_commands:
-        return ()
-
     # build a list of the matching commands
+    # returns a list of items, each a tuple with (instance_name, name, callback)
     context_commands = engine._get_commands_matching_setting("context_menu")
 
-    # Build the actions dictionary with the matches
-    actions = []
+    # Commands are uniquely identified by name so build a list of them
+    commands = []
     for (instance_name, command_name, callback) in context_commands:
-        actions.append({
-            "name": instance_name,
-            "caption": command_name,
-        })
+        commands.append(command_name)
+
+    # now add any 'normal' registered commands not already in the actions dict
+    # omit system actions that are on the context menu
+    for command_name in engine.commands:
+        properties = engine.commands[command_name]["properties"]
+        if command_name not in commands and properties.get("type") != "context_menu":
+            commands.append(command_name)
 
     # do not add the menu if there are no matches
-    if not actions:
+    if not commands:
         return ()
 
+    # generate flame data structure
+    actions = [{"name": x, "caption": x} for x in commands]
+
     return (
-        {"name": "Shotgun", "actions": tuple(actions)},
+        {
+            "name": "Shotgun",
+            "actions": tuple(actions)
+        },
     )
 
 
@@ -88,14 +94,9 @@ def customUIAction(info, userData):
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
-
-    for (command_name, value) in engine.commands.iteritems():
-        app_instance = value["properties"].get("app")
-        if app_instance is None:
-            continue
-        instance_name = app_instance.instance_name
-
-        if userData["name"] == instance_name and userData["caption"] == command_name:
-            # we have a match, run the callback
-            value["callback"]()
-            break
+    # get the comand name
+    command_name = info["name"]
+    # find it in toolkit
+    command_obj = engine.commands[command_name]
+    # execute the callback
+    command_obj["callback"]()
