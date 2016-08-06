@@ -122,10 +122,10 @@ def bootstrap_flame(plugin_root, project_name):
     # flag to the engine that it operates in its main mode
     os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "DCC"
 
-    engine = mgr.bootstrap_engine("tk-flame")
+    #engine = mgr.bootstrap_engine("tk-flame")
 
     # bootstrap into the engine
-    #engine = mgr.bootstrap_engine("tk-flame", entity=proj)
+    engine = mgr.bootstrap_engine("tk-flame", entity=proj)
 
     # clean up operational state
     del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
@@ -145,7 +145,16 @@ def bootstrap_flame(plugin_root, project_name):
 
     logger.error("FLAME APPS: %s" % engine.apps)
 
-    engine.apps["tk-flame-projectcreate"].callback()
+    #engine.apps["tk-flame-projectcreate"].callback()
+
+    engine.register_command("wintermute.shotgunstudio.com", callback)
+    engine.register_command("Log out", callback)
+
+    logger.error("FLAME APPS: %s" % engine.apps)
+
+def callback():
+
+    print "CALLBACK"
 
 
 def _determine_flame_version():

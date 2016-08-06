@@ -95,16 +95,17 @@ engines:
     #
     debug_logging: true
     location:
-      version: v1.6.1
-      type: app_store
-      name: tk-flame
+      path: 'git@github.com:shotgunsoftware/tk-flame.git'
+      version: '22c693f10726697d03ebb68d39aee684043b8a45'
+      type: git_branch
+      branch: register_command
     project_startup_hook: '{self}/project_startup.py'
     flame_batch_publish_type: Flame Batch File
     backburner_shared_tmp: /tmp
     run_at_startup: []
     backburner_manager: ''
     context_menu: [ {app_instance: tk-multi-shotgunpanel, name: ''}]
-    context_menu: [ {app_instance: tk-multi-loader2, name: ''}]
+
 
 frameworks:
   tk-framework-qtwidgets_v2.x.x:

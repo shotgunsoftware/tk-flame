@@ -33,9 +33,10 @@ engines:
     #
     debug_logging: false
     location:
-      version: v1.6.1
-      type: app_store
-      name: tk-flame
+      path: 'git@github.com:shotgunsoftware/tk-flame.git'
+      version: '22c693f10726697d03ebb68d39aee684043b8a45'
+      type: git_branch
+      branch: register_command
     project_startup_hook: '{self}/project_startup.py'
     flame_batch_publish_type: Flame Batch File
     backburner_shared_tmp: /tmp
