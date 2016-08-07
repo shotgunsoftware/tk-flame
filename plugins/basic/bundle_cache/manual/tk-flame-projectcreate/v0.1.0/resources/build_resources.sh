@@ -11,7 +11,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # The path to output all built .py files to: 
-UI_PYTHON_PATH=../python/app/ui
+UI_PYTHON_PATH=../python/tk_flame_projectcreate/ui
 
 
 # Helper functions to build UI files
@@ -37,7 +37,7 @@ function build_res {
 # build UI's:
 echo "building user interfaces..."
 build_ui dialog
-build_ui list_item_widget
+build_ui project_widget
 # add any additional .ui files you want converted here!
 
 # build resources

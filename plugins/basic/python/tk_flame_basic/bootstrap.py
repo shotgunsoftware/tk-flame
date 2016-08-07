@@ -90,9 +90,6 @@ def bootstrap_flame(plugin_root, project_name):
 
     logger.debug("Logged in to Shotgun! %s" % user)
 
-
-
-
     # see if a project exists
     logger.debug(
         "Checking if a project '%s' exists on %s..." % (project_name, sg.base_url)
@@ -111,7 +108,15 @@ def bootstrap_flame(plugin_root, project_name):
 
         # start up app
         project_create_app = engine.apps["tk-flame-projectcreate"]
-        proj = project_create_app.show_modal(project_name)
+        (status, proj) = project_create_app.show_modal(project_name)
+
+        if status == project_create_app.LOGOUT_REQUESTED:
+            # user wants to log out
+            #authenticator = sgtk.authentication.ShotgunAuthenticator()
+            #authenticator.clear_default_user()
+            pass
+
+
 
         logger.debug("Project create app returned project %s" % proj)
 
@@ -127,14 +132,23 @@ def bootstrap_flame(plugin_root, project_name):
     engine = _bootstrap_flame_engine(user, entity=proj)
 
     logger.debug("Adding custom actions")
-    engine.register_command("wintermute.shotgunstudio.com", callback)
-    engine.register_command("Log out", callback)
+
+    jump_to_sg = lambda : QtGui.QDesktopServices.openUrl(QtCore.QUrl(sg.base_url))
+
+    engine.register_command(
+        sg.base_url,
+        jump_to_sg
+    )
+    engine.register_command("Log out", logout)
 
 
+def logout():
 
-def callback():
-
-    print "CALLBACK"
+    import sgtk
+    # todo: close windows
+    sgtk.platform.current_engine().destroy()
+    authenticator = sgtk.authentication.ShotgunAuthenticator()
+    authenticator.clear_default_user()
 
 
 def _bootstrap_flame_engine(user, entity):

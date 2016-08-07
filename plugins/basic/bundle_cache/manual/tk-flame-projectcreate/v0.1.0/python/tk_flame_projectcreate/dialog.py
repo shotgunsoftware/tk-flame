@@ -24,13 +24,13 @@ shotgun_model = sgtk.platform.import_framework("tk-framework-shotgunutils",
 # Set up alias
 ShotgunModel = shotgun_model.ShotgunModel
 
-from .delegate_list_item import ListItemDelegate
+from .delegate_project import ProjectDelegate
 
 class AppDialog(QtGui.QWidget):
     """
     Main application dialog window
     """
-    
+
     def __init__(self):
         """
         Constructor
@@ -55,13 +55,27 @@ class AppDialog(QtGui.QWidget):
         self._model = shotgun_model.SimpleShotgunModel(self)
 
         # tell the view to pull data from the model
-        self.ui.view.setModel(self._model)
+        self.ui.page3_view.setModel(self._model)
 
         # load all assets from Shotgun
-        self._model.load_data(entity_type="Asset")
+        self._model.load_data(entity_type="Project")
 
         # setup a delegate
-        self._delegate = ListItemDelegate(self.ui.view)
+        self._delegate = ProjectDelegate(self.ui.page3_view)
 
         # hook up delegate renderer with view
-        self.ui.view.setItemDelegate(self._delegate)
+        self.ui.page3_view.setItemDelegate(self._delegate)
+
+
+    def is_logout_requested(self):
+        """
+        Returns true if the user requested to log out
+        """
+        return False
+
+    def get_project(self):
+        """
+        Returns the project entity selected by the user
+        or None if no project was desired.
+        """
+        return None

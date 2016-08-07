@@ -11,11 +11,13 @@
 
 from sgtk.platform import Application
 
-class StgkStarterApp(Application):
+class FlameProjectSelector(Application):
     """
     The app entry point. This class is responsible for intializing and tearing down
     the application, handle menu registration etc.
     """
+
+    (LOGOUT_REQUESTED, PROJECT_SELECTED) = range(2)
 
     def init_app(self):
         """
@@ -25,7 +27,10 @@ class StgkStarterApp(Application):
 
     def show_modal(self, flame_project_name):
 
-        app_payload = self.import_module("app")
+        # check in qsettings if we have already said no
+
+        # show project create UI
+        app_payload = self.import_module("tk_flame_projectcreate")
 
         (return_code, widget) = self.engine.show_modal(
             "Shotgun Project Setup",
@@ -33,4 +38,9 @@ class StgkStarterApp(Application):
             app_payload.dialog.AppDialog
         )
 
-        return return_code
+        if widget.is_logout_requested():
+            return self.LOGOUT_REQUESTED, None
+
+        else:
+            return self.PROJECT_SELECTED, widget.get_project()
+
