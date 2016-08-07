@@ -42,4 +42,6 @@ def projectChanged(projectName):
     except Exception, e:
         exception_ui.show_exception_in_ui()
 
+# tell Flame not to display the fish cursor while we process the hook
+projectChanged.func_dict["waitCursor"] = False
 

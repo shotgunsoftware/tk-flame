@@ -15,23 +15,38 @@ import threading
 
 # by importing QT from sgtk rather than directly, we ensure that
 # the code will be compatible with both PySide and PyQt.
-from sgtk.platform.qt import QtCore, QtGui
+from PySide import QtCore, QtGui
 from .ui.welcome_dialog import Ui_WelcomeDialog
 
 
-class WelcomeDialog(QtGui.QWidget):
+class WelcomeDialog(QtGui.QDialog):
     """
     Main application dialog window
     """
-    
+
+    (LOGIN, LEARN_MORE, NEW_SITE) = range(3)
+
     def __init__(self):
         """
         Constructor
         """
         # first, call the base class and let it do its thing.
-        QtGui.QWidget.__init__(self)
+        QtGui.QDialog.__init__(self)
         
         # now load in the UI that was created in the UI designer
         self.ui = Ui_WelcomeDialog()
         self.ui.setupUi(self)
-        
+
+        self.ui.learn_more.clicked.connect(self._on_learn_more_clicked)
+        self.ui.login.clicked.connect(self._on_login_clicked)
+        self.ui.register_site.clicked.connect(self._on_register_clicked)
+
+    def _on_learn_more_clicked(self):
+        self.done(self.LEARN_MORE)
+
+    def _on_login_clicked(self):
+        self.done(self.LOGIN)
+
+    def _on_register_clicked(self):
+        self.done(self.NEW_SITE)
+

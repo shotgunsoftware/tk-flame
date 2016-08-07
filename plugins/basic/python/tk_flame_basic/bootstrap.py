@@ -16,6 +16,8 @@ import sys
 from PySide import QtGui, QtCore
 from sgtk_plugin_basic import manifest
 
+from .welcome_dialog import WelcomeDialog
+
 g_toolkit_init_complete = False
 
 def bootstrap_flame(plugin_root, project_name):
@@ -29,7 +31,6 @@ def bootstrap_flame(plugin_root, project_name):
     global g_toolkit_init_complete
 
     if not g_toolkit_init_complete:
-
         # import toolkit
         import sgtk
 
@@ -62,12 +63,35 @@ def bootstrap_flame(plugin_root, project_name):
         # don't try to start up an engine for this case.
         return
 
-    # authenticate and log in
+
+    # check if we are already logged in
     authenticator = sgtk.authentication.ShotgunAuthenticator()
+    if authenticator.get_default_user() is None:
+
+        logger.debug("We are not logged in - pop up UI to tell user about shotgun.")
+
+        # we were not authenticated - in this case tell user about shotgun
+        welcome_ui = WelcomeDialog()
+        status = welcome_ui.exec_()
+
+        if status == welcome_ui.NEW_SITE:
+            # navigate to site register page and bail
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://www.shotgunsoftware.com/signup"))
+            return
+
+        elif status == welcome_ui.LEARN_MORE:
+            # navigate to home page and bail
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://www.shotgunsoftware.com"))
+            return
+
+    # authenticate and log in
     user = authenticator.get_user()
     sg = user.create_sg_connection()
 
     logger.debug("Logged in to Shotgun! %s" % user)
+
+
+
 
     # see if a project exists
     logger.debug(
@@ -75,30 +99,46 @@ def bootstrap_flame(plugin_root, project_name):
     )
     proj = sg.find_one(
         "Project",
-        [["name", "is", project_name]]
+        [["tank_name", "is", project_name]]
     )
 
     if proj is None:
 
-        msg = ("The project '%s' doesn't exist\n"
-               "on your Shotgun server %s.\n\n"
-               "Would you like to create it?" % (project_name, sg.base_url)
-               )
+        logger.debug("No associated project found - launching site level engine to prompt.")
 
-        # no project found with that name in Shotgun
-        answer = QtGui.QMessageBox.question(
-            None,
-            "Shotgun",
-            msg,
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No
-        )
+        # no project match - in this case pop up the UI where the user can manage projects
+        engine = _bootstrap_flame_engine(user, entity=None)
 
-        if answer == QtGui.QMessageBox.Yes:
-            proj = sg.create("Project", {"name": project_name})
-        else:
-            # todo: if No, then store this in qsettings and do not ask again
-            logger.info("No shotgun integration for this project!")
+        # start up app
+        project_create_app = engine.apps["tk-flame-projectcreate"]
+        proj = project_create_app.show_modal(project_name)
+
+        logger.debug("Project create app returned project %s" % proj)
+
+        # kill engine
+        engine.destroy()
+
+        if proj is None:
+            # user didn't want to create project for this one
+            logger.debug("Early exit. No associated shotgun project.")
             return
+
+    logger.debug("Starting up actual integration for proj %s" % proj)
+    engine = _bootstrap_flame_engine(user, entity=proj)
+
+    logger.debug("Adding custom actions")
+    engine.register_command("wintermute.shotgunstudio.com", callback)
+    engine.register_command("Log out", callback)
+
+
+
+def callback():
+
+    print "CALLBACK"
+
+
+def _bootstrap_flame_engine(user, entity):
+    import sgtk
 
     # start up toolkit via the manager
     mgr = sgtk.bootstrap.ToolkitManager(user)
@@ -122,10 +162,7 @@ def bootstrap_flame(plugin_root, project_name):
     # flag to the engine that it operates in its main mode
     os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "DCC"
 
-    #engine = mgr.bootstrap_engine("tk-flame")
-
-    # bootstrap into the engine
-    engine = mgr.bootstrap_engine("tk-flame", entity=proj)
+    engine = mgr.bootstrap_engine("tk-flame", entity=entity)
 
     # clean up operational state
     del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
@@ -143,19 +180,7 @@ def bootstrap_flame(plugin_root, project_name):
     # and the version number
     engine.set_version_info(str(major_ver), str(minor_ver), version_str)
 
-    logger.error("FLAME APPS: %s" % engine.apps)
-
-    #engine.apps["tk-flame-projectcreate"].callback()
-
-    engine.register_command("wintermute.shotgunstudio.com", callback)
-    engine.register_command("Log out", callback)
-
-    logger.error("FLAME APPS: %s" % engine.apps)
-
-def callback():
-
-    print "CALLBACK"
-
+    return engine
 
 def _determine_flame_version():
     """

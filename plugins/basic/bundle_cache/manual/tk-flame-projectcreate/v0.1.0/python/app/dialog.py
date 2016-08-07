@@ -26,18 +26,6 @@ ShotgunModel = shotgun_model.ShotgunModel
 
 from .delegate_list_item import ListItemDelegate
 
-def show_dialog(app_instance):
-    """
-    Shows the main dialog window.
-    """
-    # in order to handle UIs seamlessly, each toolkit engine has methods for launching
-    # different types of windows. By using these methods, your windows will be correctly
-    # decorated and handled in a consistent fashion by the system.
-
-    # we pass the dialog class to this method and leave the actual construction
-    # to be carried out by toolkit.
-    app_instance.engine.show_dialog("Starter Template App...", app_instance, AppDialog)
-
 class AppDialog(QtGui.QWidget):
     """
     Main application dialog window

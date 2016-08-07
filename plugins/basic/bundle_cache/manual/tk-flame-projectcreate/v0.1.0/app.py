@@ -22,38 +22,15 @@ class StgkStarterApp(Application):
         Called as the application is being initialized
         """
 
-        # first, we use the special import_module command to access the app module
-        # that resides inside the python folder in the app. This is where the actual UI
-        # and business logic of the app is kept. By using the import_module command,
-        # toolkit's code reload mechanism will work properly.
+
+    def show_modal(self, flame_project_name):
+
         app_payload = self.import_module("app")
 
-        # now register a *command*, which is normally a menu entry of some kind on a Shotgun
-        # menu (but it depends on the engine). The engine will manage this command and
-        # whenever the user requests the command, it will call out to the callback.
+        (return_code, widget) = self.engine.show_modal(
+            "Shotgun Project Setup",
+            self,
+            app_payload.dialog.AppDialog
+        )
 
-        # first, set up our callback, calling out to a method inside the app module contained
-        # in the python folder of the app
-        menu_callback = lambda : app_payload.dialog.show_dialog(self)
-
-        # now register the command with the engine
-        self.engine.register_command("Show Starter Template App...", menu_callback)
-
-
-    def callback(self):
-
-
-        # first, we use the special import_module command to access the app module
-        # that resides inside the python folder in the app. This is where the actual UI
-        # and business logic of the app is kept. By using the import_module command,
-        # toolkit's code reload mechanism will work properly.
-        app_payload = self.import_module("app")
-
-        # now register a *command*, which is normally a menu entry of some kind on a Shotgun
-        # menu (but it depends on the engine). The engine will manage this command and
-        # whenever the user requests the command, it will call out to the callback.
-
-        # first, set up our callback, calling out to a method inside the app module contained
-        # in the python folder of the app
-        app_payload.dialog.show_dialog(self)
-
+        return return_code
