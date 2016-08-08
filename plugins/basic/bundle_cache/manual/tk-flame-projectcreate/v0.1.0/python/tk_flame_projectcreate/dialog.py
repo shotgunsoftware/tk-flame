@@ -24,6 +24,8 @@ shotgun_model = sgtk.platform.import_framework("tk-framework-shotgunutils",
 # Set up alias
 ShotgunModel = shotgun_model.ShotgunModel
 
+log = sgtk.platform.get_logger(__name__)
+
 from .delegate_project import ProjectDelegate
 
 class AppDialog(QtGui.QWidget):
@@ -46,11 +48,6 @@ class AppDialog(QtGui.QWidget):
         # it is often handy to keep a reference to this. You can get it via the following method:
         self._app = sgtk.platform.current_bundle()
         
-        # via the self._app handle we can for example access:
-        # - The engine, via self._app.engine
-        # - A Shotgun API instance, via self._app.shotgun
-        # - A tk API instance, via self._app.tk 
-        
         # setup our data backend
         self._model = shotgun_model.SimpleShotgunModel(self)
 
@@ -58,7 +55,11 @@ class AppDialog(QtGui.QWidget):
         self.ui.page3_view.setModel(self._model)
 
         # load all assets from Shotgun
-        self._model.load_data(entity_type="Project")
+        self._model.load_data(
+            entity_type="Project",
+            fields=["name"],
+            filters=[["tank_name", "is", None]]
+        )
 
         # setup a delegate
         self._delegate = ProjectDelegate(self.ui.page3_view)
@@ -66,6 +67,33 @@ class AppDialog(QtGui.QWidget):
         # hook up delegate renderer with view
         self.ui.page3_view.setItemDelegate(self._delegate)
 
+        # navigation
+        self.ui.page1_existing.clicked.connect(lambda: self.ui.wizard.setCurrentIndex(2))
+        self.ui.page1_new.clicked.connect(lambda: self.ui.wizard.setCurrentIndex(1))
+        self.ui.page1_noshotgun.clicked.connect(self._no_shotgun)
+
+        self.ui.page2_back.clicked.connect(lambda: self.ui.wizard.setCurrentIndex(0))
+        self.ui.page3_back.clicked.connect(lambda: self.ui.wizard.setCurrentIndex(0))
+
+        self.ui.page3_select.clicked.connect(self._on_project_select)
+        self.ui.page2_create.clicked.connect(self._on_project_create)
+
+        self.ui.switch_project.clicked.connect(self._switch_site)
+
+        # setup our data backend
+        self._template_projects_model = shotgun_model.SimpleShotgunModel(self)
+        self.ui.page2_template.setModel(self._template_projects_model)
+        self._template_projects_model.load_data(
+            entity_type="Project",
+            fields=["name"],
+            filters=[["is_template", "is", True]]
+        )
+
+
+    @property
+    def hide_tk_title_bar(self):
+        "Tell the system to not show the standard toolkit toolbar"
+        return True
 
     def is_logout_requested(self):
         """
@@ -79,3 +107,28 @@ class AppDialog(QtGui.QWidget):
         or None if no project was desired.
         """
         return None
+
+
+    def _no_shotgun(self):
+        """
+        User has indicated no shotgun for this project
+        """
+        log.debug("no shotgun")
+
+    def _on_project_select(self):
+        """
+        User selects existing project
+        """
+        log.debug("selected")
+
+    def _on_project_create(self):
+        """
+        User selects existing project
+        """
+        log.debug("create")
+
+    def _switch_site(self):
+        """
+        log out and switch site
+        """
+        log.debug("switch!")

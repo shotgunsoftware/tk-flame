@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>761</width>
-    <height>478</height>
+    <width>583</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,9 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QStackedWidget" name="stackedWidget">
+    <widget class="QStackedWidget" name="wizard">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -323,7 +323,10 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>You are connected to wintermute.shotgunstudio.com</string>
+        <string>&lt;small&gt;You are connected to &lt;a href='https://wintermute.shotgunsoftware.com'&gt;wintermute.shotgunstudio.com&lt;/a&gt;&lt;/small&gt;</string>
+       </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -341,16 +344,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="switch_site">
+      <widget class="QToolButton" name="switch_project">
        <property name="text">
         <string>Switch to another site</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="show_site">
-       <property name="text">
-        <string>Jump to Site</string>
        </property>
       </widget>
      </item>

@@ -141,6 +141,8 @@ class ProjectDelegate(shotgun_view.EditSelectedWidgetDelegate):
         if icon:
             thumb = icon.pixmap(512)
             widget.set_thumbnail(thumb)
+        else:
+            widget.set_thumbnail(QtGui.QPixmap(":/tk_flame_projectcreate/missing_thumbnail_project.png"))
 
         widget.set_text(sg_data.get("name"))
 
