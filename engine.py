@@ -68,7 +68,7 @@ class FlameEngine(sgtk.platform.Engine):
         # the multi-launchapp chain, make sure that hooks that the engine
         # implements are registered.
         flame_hooks_folder = os.path.join(self.disk_location, self.FLAME_HOOKS_FOLDER)
-        sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
+        sgtk.util.append_path_to_env_var("DL_SHOTGUN_PYTHON_HOOK", flame_hooks_folder)
         self.log_debug("Added to hook path: %s" % flame_hooks_folder)
 
         # the path to the associated python executable
@@ -558,7 +558,7 @@ class FlameEngine(sgtk.platform.Engine):
         
         # add Flame hooks for this engine
         flame_hooks_folder = os.path.join(self.disk_location, self.FLAME_HOOKS_FOLDER)
-        sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
+        sgtk.util.append_path_to_env_var("DL_SHOTGUN_PYTHON_HOOK", flame_hooks_folder)
         self.log_debug("Added to hook path: %s" % flame_hooks_folder)
                 
         # now that we have a wiretap library, call out and initialize the project 

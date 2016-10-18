@@ -11,7 +11,7 @@
 # Note! This file implements the hook interface from Flame 2016.1
 
 
-def getCustomUIActions():
+def getSGCustomUIActions():
     """
     Hook returning the custom ui actions to display to the user in the contextual menu.
 
@@ -89,7 +89,7 @@ def customUIAction(info, userData):
                  - name: Name of the action being triggered
                  - selection: Tuple of wiretap ids
 
-    :param userData: The action dictionary that was passed to getCustomUIActions
+    :param userData: The action dictionary that was passed to getSGCustomUIActions
     """
     # first, get the toolkit engine
     import sgtk
