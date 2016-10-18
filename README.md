@@ -47,7 +47,7 @@ Flame is typically being launched:
 
 - The multi launch app now executes the re-written DCC path and thereby starts executing `python/startup/launch_app.py`.
   inside the python interpreter which comes bundled with Flame (and contains a known version of PySide). The engine starts
-  up, hooks paths are registered by setting the `DL_PYTHON_HOOK_PATH` environment variable etc.
+  up, hooks paths are registered by setting the `DL_SHOTGUN_PYTHON_HOOK` environment variable etc.
   At this point, a check is carried out to see if a Flame project corresponding to the Shotgun project exists or not.
   If it doesn't, a project setup UI is shown on screen where a user can configure a new Flame project.
 
