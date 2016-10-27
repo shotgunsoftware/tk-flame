@@ -38,8 +38,15 @@ def appInitialized(projectName):
     
     else:
         # no engine running - so start one!
-        engine_name = os.environ.get("TOOLKIT_ENGINE_NAME") 
-        context = sgtk.context.deserialize(os.environ.get("TOOLKIT_CONTEXT"))
+        engine_name = os.environ.get("TOOLKIT_ENGINE_NAME")
+        toolkit_context = os.environ.get("TOOLKIT_CONTEXT")
+        
+        if toolkit_context is None:
+            logger = sgtk.LogManager.get_logger(__name__)
+            logger.debug("No toolkit context, can't initialize the engine")
+            return
+        
+        context = sgtk.context.deserialize(toolkit_context)
         
         # set a special environment variable to help hint to the engine
         # that we are running a backburner job
