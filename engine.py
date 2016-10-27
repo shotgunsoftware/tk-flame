@@ -276,7 +276,7 @@ class FlameEngine(sgtk.platform.Engine):
         Called when the engine is being destroyed
         """
         self.log_debug("%s: Destroying..." % self)
-    
+
     @property
     def python_executable(self):
         """

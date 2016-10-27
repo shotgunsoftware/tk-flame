@@ -21,20 +21,24 @@ def appInitialized(projectName):
     
     import sgtk
     import os    
-    
-    if sgtk.platform.current_engine():
+
+    engine = sgtk.platform.current_engine()
+
+    if engine:
         # there is already an engine running.
         # TODO: later on, allow for switching of engines as projects 
         #       are being switched. For now, issue a warning
         
         # Note - Since Flame is a PySide only environment, we import it directly
         # rather than going through the sgtk wrappers. 
-        from PySide import QtGui     
-        QtGui.QMessageBox.warning(None,
-                                  "No project switching!",
-                                  "The Shotgun integration does not currently support project switching.\n"
-                                  "Even if you switch projects, any Shotgun specific configuration will\n"
-                                  "remain connected to the initially loaded project.")
+
+        if engine.get_setting("project_switching") is False:
+            from PySide import QtGui
+            QtGui.QMessageBox.warning(None,
+                                      "No project switching!",
+                                      "The Shotgun integration does not currently support project switching.\n"
+                                      "Even if you switch projects, any Shotgun specific configuration will\n"
+                                      "remain connected to the initially loaded project.")
     
     else:
         # no engine running - so start one!
