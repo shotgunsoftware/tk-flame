@@ -9,7 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # Note! This file implements the batchHook interface from Flame 2015.2
-
 def batchSetupLoaded(setupPath):
     """
     Hook called when a batch setup is loaded.
@@ -18,6 +17,12 @@ def batchSetupLoaded(setupPath):
     """
     import sgtk
     engine = sgtk.platform.current_engine()
+    
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
     engine.trigger_batch_callback("batchSetupLoaded", {"setupPath": setupPath})        
 
 def batchSetupSaved(setupPath):
@@ -28,6 +33,12 @@ def batchSetupSaved(setupPath):
     """
     import sgtk
     engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
     engine.trigger_batch_callback("batchSetupSaved", {"setupPath": setupPath})        
 
 def batchExportBegin(info, userData):
@@ -66,6 +77,12 @@ def batchExportBegin(info, userData):
     """
     import sgtk
     engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
     engine.trigger_batch_callback("batchExportBegin", info)        
 
 def batchExportEnd(info, userData):
@@ -105,5 +122,10 @@ def batchExportEnd(info, userData):
     """
     import sgtk
     engine = sgtk.platform.current_engine()
-    engine.trigger_batch_callback("batchExportEnd", info)        
 
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
+    engine.trigger_batch_callback("batchExportEnd", info)        
