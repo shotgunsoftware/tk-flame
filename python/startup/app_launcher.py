@@ -107,6 +107,9 @@ def launch_flame(dcc_path, dcc_args):
     flame_engine.log_debug("Full command line '%s'" % cmd_line)
     flame_engine.log_debug("-" * 60)
 
+    # keep a hint about the current workflow
+    os.environ["SHOTGUN_FLAME_INTEGRATION"] = "CLASSIC"
+    
     return os.system(cmd_line)
     
 
