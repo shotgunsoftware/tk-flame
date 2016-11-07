@@ -936,9 +936,15 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Absolute path as a string  
         """
         if sys.platform == "darwin":
-            wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
+            if self.is_version_less_than("2018"):
+                wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
+            else:
+                wtc_path = "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
         elif sys.platform == "linux2":
-            wtc_path = "/var/www/cgi-bin/WiretapCentral"
+            if self.is_version_less_than("2018"):
+                wtc_path = "/var/www/cgi-bin/WiretapCentral"
+            else:
+                wtc_path = "/var/www/html/WiretapCentral/cgi-bin"
         else:    
             raise TankError("Your operating system does not support wiretap central!")
         
