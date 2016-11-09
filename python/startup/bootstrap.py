@@ -20,10 +20,10 @@ def _get_flame_version(flame_path):
     """
     Returns the version string for the given Flame path
     
-    <INSTALL_ROOT>/flameassist_2015.2/bin/startApplication        --> (2015, 2, "2015.2")
-    <INSTALL_ROOT>/flameassist_2015.3/bin/startApplication        --> (2015, 3, "2015.3")
+    <INSTALL_ROOT>/flameassist_2016.2/bin/startApplication        --> (2016, 2, "2016.2")
+    <INSTALL_ROOT>/flameassist_2016.3/bin/startApplication        --> (2016, 3, "2016.3")
     <INSTALL_ROOT>/flameassist_2016.0.0.322/bin/startApplication  --> (2016, 0, "2016.0.0.322")
-    <INSTALL_ROOT>/flameassist_2015.2.pr99/bin/startApplication   --> (2015, 2, "2015.2.pr99")
+    <INSTALL_ROOT>/flameassist_2016.2.pr99/bin/startApplication   --> (2016, 2, "2016.2.pr99")
     <INSTALL_ROOT>/flame_2016.pr50/bin/start_Flame                --> (2016, 0, "2016.pr50")
 
     If the minor or major version cannot be extracted, it will be set to zero.
@@ -39,8 +39,8 @@ def _get_flame_version(flame_path):
     version_str = re_match.group(1)
 
     # Examples:
-    # 2015.2
     # 2016
+    # 2016.2
     # 2016.pr99
     # 2015.2.pr99
 
@@ -102,11 +102,8 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     # do a quick check to ensure that we are running 2015.2 or later
     (major_ver, minor_ver, version_str) = _get_flame_version(app_path)
 
-    if major_ver < 2015:
-        raise TankError("In order to run the Shotgun integration, you need at least Flame 2015, extension 2!")
-
-    if major_ver == 2015 and minor_ver < 2:
-        raise TankError("In order to run the Shotgun integration, you need at least Flame 2015, extension 2!")
+    if major_ver < 2016:
+        raise TankError("In order to run the Shotgun integration, you need at least Flame 2016!")
 
     # first of all, check that the executable path to Flame exists
     if not os.path.exists(app_path):
@@ -118,35 +115,20 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
 
     # ensure that we add the right location for the wiretap API.
     # on 2016 and above, we can use the one distributed with Flame
-    # on 2015 ext2 and ext3, this version is not working and we instead
-    # use a version specifically distributed with the engine.
     # in 2016: /usr/discreet/flameassist_2016.0.0.322/python
 
     wiretap_path = None
     install_root = None
 
-    if major_ver == 2015:
-        install_root = "/usr/discreet"
-        this_folder = os.path.abspath(os.path.dirname(__file__))
-        engine_root = os.path.abspath(os.path.join(this_folder, "..", ".."))
-        if sys.platform == "linux2":
-            wiretap_path = os.path.join(engine_root, "resources", "wiretap", "2015", "linux")
-        elif sys.platform == "darwin":
-            wiretap_path = os.path.join(engine_root, "resources", "wiretap", "2015", "macosx")
-        else:
-            raise TankError("Unsupported platform for the wiretap API!")
-
+    # grab <INSTALL_ROOT>/<APP_FOLDER> part of the path and then append python
+    re_match = re.search("(^.*)/(fla[mr]e[^_]*_[^/]+)/bin", app_path)
+    if not re_match:
+        raise TankError("Cannot extract install root from the path '%s'!" % app_path)
     else:
-        # grab <INSTALL_ROOT>/<APP_FOLDER> part of the path and then append python
+        install_root = re_match.group(1)
+        app_folder = re_match.group(2)
 
-        re_match = re.search("(^.*)/(fla[mr]e[^_]*_[^/]+)/bin", app_path)
-        if not re_match:
-            raise TankError("Cannot extract install root from the path '%s'!" % app_path)
-        else:
-            install_root = re_match.group(1)
-            app_folder = re_match.group(2)
-
-            wiretap_path = os.path.join(install_root, app_folder, "python" )
+        wiretap_path = os.path.join(install_root, app_folder, "python" )
 
     sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
 
@@ -165,22 +147,15 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
 
     elif sys.platform == "linux2":
         # add python related libraries
-        if major_ver == 2015:
-            # on Flame 2015, this is stored in the python lib location
-            sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "%s/Python-2.6.9/lib" % install_root)
-        else:
-            # on Flame 2016, each version is managed separately
-            sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "%s/python/%s/lib" % (install_root, version_str))
+
+        # on Flame, each version is managed separately
+        sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "%s/python/%s/lib" % (install_root, version_str))
 
         # add system libraries
         sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "%s/lib64/%s" % (install_root, version_str))
 
     # figure out the python location
-    if major_ver == 2015:
-        python_binary = "%s/Python-2.6.9/bin/python" % install_root
-
-    else:
-        python_binary = "%s/python/%s/bin/python" % (install_root, version_str)
+    python_binary = "%s/python/%s/bin/python" % (install_root, version_str)
 
     # we need to pass the Flame version into the engine so that this
     # can be picked up at runtime in the Flame. This is in order for

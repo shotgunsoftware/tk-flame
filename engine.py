@@ -302,10 +302,7 @@ class FlameEngine(sgtk.platform.Engine):
         if self._flame_version is None:
             raise TankError("Cannot determine preset version - No Flame DCC version specified!")
         
-        if self.is_version_less_than("2016"):
-            # for 2015 versions, preset version is v4
-            return "4"
-        elif self.is_version_less_than("2016.1"):
+        if self.is_version_less_than("2016.1"):
             # for version 2016 before ext 1, export preset is v5
             return "5" 
         elif self.is_version_less_than("2017"):
@@ -357,7 +354,7 @@ class FlameEngine(sgtk.platform.Engine):
         Example: 
         
         - Flame: '2016.1.0.278', version str: '2016.1' => False
-        - Flame: '2015.2.p453',  version str: '2016.1' => True
+        - Flame: '2016',  version str: '2016.1' => True
         
         :param version_str: Version to run comparison against
         """
@@ -372,7 +369,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Returns Flame's major version number as a string.
         
-        :returns: String (e.g. '2015')
+        :returns: String (e.g. '2016')
         """
         if self._flame_version is None:
             raise TankError("No Flame DCC version specified!")
