@@ -100,7 +100,7 @@ class FlameEngine(sgtk.platform.Engine):
         self._initialize_logging(self._install_root)
         self.log_debug("Flame install root is '%s'" % self._install_root)
 
-        self._python_executable = self._ensure_envvar("TOOLKIT_FLAME_PYTHON_BINARY")
+        self._python_executable_path = self._ensure_envvar("TOOLKIT_FLAME_PYTHON_BINARY")
         self.log_debug("This engine is running python interpreter '%s'" % self._python_executable_path)
 
         self._flame_version = {
@@ -264,9 +264,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: path to python, e.g. '/usr/discreet/python/2016.0.0.322/bin/python'
         """
-        if self._python_executable_path is None:
-            raise TankError("Python executable has not been defined for this engine instance!")
-        
         return self._python_executable_path
     
     @property
@@ -279,9 +276,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: Preset version, as string, e.g. '5'
         """  
-        if self._flame_version is None:
-            raise TankError("Cannot determine preset version - No Flame DCC version specified!")
-        
         if self.is_version_less_than("2016"):
             # for 2015 versions, preset version is v4
             return "4"
@@ -341,9 +335,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param version_str: Version to run comparison against
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
         curr_version = self._flame_version["full"]
         return LooseVersion(curr_version) < LooseVersion(version_str)
 
@@ -354,9 +345,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: String (e.g. '2015')
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
         return self._flame_version["major"]
     
     @property
@@ -366,9 +354,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: String (e.g. '2')
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
         return self._flame_version["minor"]
     
     @property
@@ -378,9 +363,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: String (e.g. '2016.1.0.278')
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
         return self._flame_version["full"]
 
     @property
