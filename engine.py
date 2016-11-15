@@ -71,15 +71,6 @@ class FlameEngine(sgtk.platform.Engine):
         sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
         self.log_debug("Added to hook path: %s" % flame_hooks_folder)
 
-        # the path to the associated python executable
-        self._python_executable_path = None 
-        
-        # version of Flame we are running
-        self._flame_version = None
-
-        # root folder where flame is installed
-        self._install_root = None
-
         # set the current engine mode. The mode contains information about
         # how the engine was started - it can be executed either before the 
         # actual DCC starts up (pre-launch), in the DCC itself or on the 
@@ -87,7 +78,7 @@ class FlameEngine(sgtk.platform.Engine):
         # scripts which can launch the engine (all contained within the engine itself).
         # these bootstrap scripts all set an environment variable called
         # TOOLKIT_FLAME_ENGINE_MODE which defines the desired engine mode.
-        engine_mode_str = os.environ.get("TOOLKIT_FLAME_ENGINE_MODE")
+        engine_mode_str = self._ensure_envvar("TOOLKIT_FLAME_ENGINE_MODE")
         if engine_mode_str == "PRE_LAUNCH":
             self._engine_mode = self.ENGINE_MODE_PRELAUNCH
         elif engine_mode_str == "BACKBURNER":
@@ -97,9 +88,36 @@ class FlameEngine(sgtk.platform.Engine):
         else:
             raise TankError("Unknown launch mode '%s' defined in "
                             "environment variable TOOLKIT_FLAME_ENGINE_MODE!" % engine_mode_str)
-        
+
         super(FlameEngine, self).__init__(*args, **kwargs)
-    
+
+        # Set this up at first so we can turn on logging asap
+        self._install_root = self._ensure_envvar("TOOLKIT_FLAME_INSTALL_ROOT")
+
+        # We can't initialize logging until the engine's base class has been initialized to access
+        # settings and we can't initialize it until we know the install root. Unfortunately,
+        # this means that anything going wrong before this won't be reportable in the logs.
+        self._initialize_logging(self._install_root)
+        self.log_debug("Flame install root is '%s'" % self._install_root)
+
+        self._python_executable_path = self._ensure_envvar("TOOLKIT_FLAME_PYTHON_BINARY")
+        self.log_debug("This engine is running python interpreter '%s'" % self._python_executable_path)
+
+        self._flame_version = {
+            "full": self._ensure_envvar("TOOLKIT_FLAME_VERSION"),
+            "major": self._ensure_envvar("TOOLKIT_FLAME_MINOR_VERSION"),
+            "minor": self._ensure_envvar("TOOLKIT_FLAME_MINOR_VERSION")
+        }
+        self.log_debug("This engine is running with Flame version '%s'" % self._flame_version)
+
+    def _ensure_envvar(self, env_var_name):
+        """
+        Ensure's an environment variable is set.
+        """
+        if env_var_name not in os.environ:
+            raise TankError("Cannot find environment variable '%s'" % env_var_name)
+        return os.environ.get(env_var_name)
+
     def pre_app_init(self):
         """
         Engine construction/setup done before any apps are initialized
@@ -165,44 +183,6 @@ class FlameEngine(sgtk.platform.Engine):
             logger.error("Cannot write to standard log file location %s! Please check "
                          "the filesystem permissions. As a fallback, logs will be "
                          "written to %s instead." % (std_log_file, log_file))
-        
-    def set_python_executable(self, python_path):
-        """
-        Specifies the path to the associated python process.
-        This is typically populated as part of the engine startup.
-        
-        :param python_path: path to python, as string 
-        """
-        self._python_executable_path = python_path
-        self.log_debug("This engine is running python interpreter '%s'" % self._python_executable_path )
-        
-    def set_version_info(self, major_version_str, minor_version_str, full_version_str):
-        """
-        Specifies which version of Flame this engine is running.
-        This is typically populated as part of the engine startup.
-        
-        :param major_version_str: Major version number as string 
-        :param minor_version_str: Minor version number as string
-        :param full_version_str: Full version number as string
-        """
-        self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str}
-        self.log_debug("This engine is running with Flame version '%s'" % self._flame_version )
-
-    def set_install_root(self, install_root):
-        """
-        Specifies where the flame installation is located.
-
-        this may be '/usr/discreet', '/opt/Autodesk' etc.
-
-        :param install_root: root path to flame installation
-        """
-        if self._install_root:
-            # cannot call this multiple times
-            raise TankError("Cannot call set_install_root multiple times!")
-
-        self.log_debug("Flame install root is '%s'" % self._install_root)
-        self._install_root = install_root
-        self._initialize_logging(install_root)
 
     def _get_commands_matching_setting(self, setting):
         """
@@ -254,7 +234,7 @@ class FlameEngine(sgtk.platform.Engine):
         self.log_debug("%s: Running post app init..." % self)
 
         try:
-            full_version_str = os.environ.get("TOOLKIT_FLAME_VERSION")
+            full_version_str = self.flame_version
             self.log_user_attribute_metric("Flame version", full_version_str)
         except:
             # ignore all errors. ex: using a core that doesn't support metrics
@@ -284,9 +264,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: path to python, e.g. '/usr/discreet/python/2016.0.0.322/bin/python'
         """
-        if self._python_executable_path is None:
-            raise TankError("Python executable has not been defined for this engine instance!")
-        
         return self._python_executable_path
     
     @property
@@ -358,9 +335,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param version_str: Version to run comparison against
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
         curr_version = self._flame_version["full"]
         return LooseVersion(curr_version) < LooseVersion(version_str)
 
@@ -371,9 +345,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: String (e.g. '2016')
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
         return self._flame_version["major"]
     
     @property
@@ -383,9 +354,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: String (e.g. '2')
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
         return self._flame_version["minor"]
     
     @property
@@ -395,9 +363,6 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: String (e.g. '2016.1.0.278')
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
         return self._flame_version["full"]
 
     @property
@@ -491,7 +456,6 @@ class FlameEngine(sgtk.platform.Engine):
         :param msg: The error message to log
         """        
         logging.getLogger(LOG_CHANNEL).error(msg)
-
 
     ################################################################################################################
     # Engine Bootstrap
@@ -904,6 +868,8 @@ class FlameEngine(sgtk.platform.Engine):
         data["method_to_execute"] = method_name
         data["args"] = args
         data["sgtk_core_location"] = os.path.dirname(sgtk.__path__[0])
+        data["install_root"] = self._install_root
+        data["flame_version"] = self._flame_version
         
         fh = open(session_file, "wb")
         pickle.dump(data, fh)
@@ -933,12 +899,12 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Absolute path as a string  
         """
         if sys.platform == "darwin":
-            if int(self.flame_major_version()) <= 2017:
+            if int(self.flame_major_version) <= 2017:
                 wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
             else:
                 wtc_path = "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
         elif sys.platform == "linux2":
-            if int(self.flame_major_version()) <= 2017:
+            if int(self.flame_major_version) <= 2017:
                 wtc_path = "/var/www/cgi-bin/WiretapCentral"
             else:
                 wtc_path = "/var/www/html/WiretapCentral/cgi-bin"
