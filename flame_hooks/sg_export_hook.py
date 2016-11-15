@@ -9,7 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # Note! This file implements the exportHook interface from Flame 2015.2
-
 def getCustomExportProfiles(profiles):
     """
     Hook returning the custom export profiles to display to the user in the
@@ -20,7 +19,12 @@ def getCustomExportProfiles(profiles):
     """
     import sgtk
     engine = sgtk.platform.current_engine()
-    
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
     for preset_title in engine.get_export_presets(): 
         profiles[preset_title] = {"preset_title": preset_title}
 
@@ -45,6 +49,11 @@ def preCustomExport(info, userData):
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
 
     # get the preset that the user selected from the menu
     current_preset = userData.get("preset_title")
@@ -77,6 +86,11 @@ def postCustomExport(info, userData):
     import sgtk
     engine = sgtk.platform.current_engine()
 
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
@@ -102,6 +116,11 @@ def preExport(info, userData):
     import sgtk
     engine = sgtk.platform.current_engine()
 
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
@@ -125,6 +144,11 @@ def postExport(info, userData):
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
@@ -158,6 +182,11 @@ def preExportSequence(info, userData):
     import sgtk
     engine = sgtk.platform.current_engine()
 
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
@@ -183,6 +212,11 @@ def postExportSequence(info, userData):
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
@@ -231,6 +265,11 @@ def preExportAsset(info, userData):
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
@@ -282,6 +321,11 @@ def postExportAsset(info, userData):
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app

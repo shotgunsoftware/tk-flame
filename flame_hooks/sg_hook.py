@@ -8,10 +8,18 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-# Note! This file implements the hook interface from Flame 2016.1
-
+import os
 
 def getCustomUIActions():
+    major_version = os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION")
+    if major_version is not None and int(major_version) >= 2018:
+        # Bypass getCustomUIActions contextual hook from version 2018.
+        # More recent version will use the main menu instead.
+        return ()
+
+    return getMainMenuCustomUIActions()
+
+def getMainMenuCustomUIActions( ):
     """
     Hook returning the custom ui actions to display to the user in the contextual menu.
 
@@ -50,6 +58,12 @@ def getCustomUIActions():
     import sgtk
     engine = sgtk.platform.current_engine()
 
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return ()
+
+    
     # build a list of the matching commands
     # returns a list of items, each a tuple with (instance_name, name, callback)
     context_commands = engine._get_commands_matching_setting("context_menu")
@@ -94,6 +108,12 @@ def customUIAction(info, userData):
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine. 
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
     # get the comand name
     command_name = info["name"]
     # find it in toolkit

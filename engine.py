@@ -256,7 +256,7 @@ class FlameEngine(sgtk.platform.Engine):
         Called when the engine is being destroyed
         """
         self.log_debug("%s: Destroying..." % self)
-    
+
     @property
     def python_executable(self):
         """
@@ -331,7 +331,7 @@ class FlameEngine(sgtk.platform.Engine):
         Example: 
         
         - Flame: '2016.1.0.278', version str: '2016.1' => False
-        - Flame: '2015.2.p453',  version str: '2016.1' => True
+        - Flame: '2016',  version str: '2016.1' => True
         
         :param version_str: Version to run comparison against
         """
@@ -343,7 +343,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Returns Flame's major version number as a string.
         
-        :returns: String (e.g. '2015')
+        :returns: String (e.g. '2016')
         """
         return self._flame_version["major"]
     
@@ -899,9 +899,15 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Absolute path as a string  
         """
         if sys.platform == "darwin":
-            wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
+            if int(self.flame_major_version()) <= 2017:
+                wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
+            else:
+                wtc_path = "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
         elif sys.platform == "linux2":
-            wtc_path = "/var/www/cgi-bin/WiretapCentral"
+            if int(self.flame_major_version()) <= 2017:
+                wtc_path = "/var/www/cgi-bin/WiretapCentral"
+            else:
+                wtc_path = "/var/www/html/WiretapCentral/cgi-bin"
         else:    
             raise TankError("Your operating system does not support wiretap central!")
         

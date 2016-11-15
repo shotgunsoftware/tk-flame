@@ -17,7 +17,12 @@ configuration:
         type: bool
         description: Controls whether debug messages should be emitted to the logger
         default_value: false
-        
+
+    project_switching:
+        type: bool
+        description: Hint about the possibility to switch project
+        default_value: false
+
     project_startup_hook:
         type: hook
         default_value: "{self}/project_startup.py"
