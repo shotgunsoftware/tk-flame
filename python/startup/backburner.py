@@ -48,6 +48,8 @@ engine_instance = data["engine_instance"]
 app_instance = data["app_instance"]
 method_to_execute = data["method_to_execute"]
 method_args = data["args"]
+install_root = data["install_root"]
+flame_version = data["flame_version"]
 
 # add sgtk to our python path
 sys.path.append(sgtk_core_location)
@@ -59,6 +61,10 @@ context = sgtk.context.deserialize(serialized_context)
 # set a special environment variable to help hint to the engine
 # that we are running a backburner job
 os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "BACKBURNER"
+os.environ["TOOLKIT_FLAME_INSTALL_ROOT"] = install_root
+os.environ["TOOLKIT_FLAME_VERSION"] = flame_version["full"]
+os.environ["TOOLKIT_FLAME_MAJOR_VERSION"] = flame_version["major"]
+os.environ["TOOLKIT_FLAME_MINOR_VERSION"] = flame_version["minor"]
 engine = sgtk.platform.start_engine(engine_instance, context.sgtk, context)
 del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
 engine.log_debug("Engine launched for backburner process.")
@@ -81,4 +87,3 @@ try:
     engine.log_debug("Temporary pickle job successfully deleted.")
 except Exception, e:
     engine.log_warning("Could not remove temporary file '%s': %s" % (pickle_file, e))
-    

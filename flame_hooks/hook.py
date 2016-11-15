@@ -63,7 +63,7 @@ def getCustomUIActions():
     # omit system actions that are on the context menu
     for command_name in engine.commands:
         properties = engine.commands[command_name]["properties"]
-        if command_name not in commands and properties.get("type") != "context_menu":
+        if command_name not in commands:
             commands.append(command_name)
 
     # do not add the menu if there are no matches
