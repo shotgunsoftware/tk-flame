@@ -933,12 +933,12 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Absolute path as a string  
         """
         if sys.platform == "darwin":
-            if int(self.flame_major_version()) <= 2017:
+            if int(self.flame_major_version) <= 2017:
                 wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
             else:
                 wtc_path = "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
         elif sys.platform == "linux2":
-            if int(self.flame_major_version()) <= 2017:
+            if int(self.flame_major_version) <= 2017:
                 wtc_path = "/var/www/cgi-bin/WiretapCentral"
             else:
                 wtc_path = "/var/www/html/WiretapCentral/cgi-bin"
