@@ -98,13 +98,17 @@ class FlameEngine(sgtk.platform.Engine):
         # settings and we can't initialize it until we know the install root. Unfortunately,
         # this means that anything going wrong before this won't be reportable in the logs.
         self._initialize_logging(self._install_root)
+        self.log_debug("Flame install root is '%s'" % self._install_root)
 
         self._python_executable = self._ensure_envvar("TOOLKIT_FLAME_PYTHON_BINARY")
+        self.log_debug("This engine is running python interpreter '%s'" % self._python_executable_path)
+
         self._flame_version = {
             "full": self._ensure_envvar("TOOLKIT_FLAME_VERSION"),
             "major": self._ensure_envvar("TOOLKIT_FLAME_MINOR_VERSION"),
             "minor": self._ensure_envvar("TOOLKIT_FLAME_MINOR_VERSION")
         }
+        self.log_debug("This engine is running with Flame version '%s'" % self._flame_version)
 
     def _ensure_envvar(self, env_var_name):
         """
