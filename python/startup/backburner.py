@@ -61,7 +61,9 @@ context = sgtk.context.deserialize(serialized_context)
 # set a special environment variable to help hint to the engine
 # that we are running a backburner job
 os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "BACKBURNER"
+# Set all the engine's settings
 os.environ["TOOLKIT_FLAME_INSTALL_ROOT"] = install_root
+os.environ["TOOLKIT_FLAME_PYTHON_BINARY"] = sys.executable
 os.environ["TOOLKIT_FLAME_VERSION"] = flame_version["full"]
 os.environ["TOOLKIT_FLAME_MAJOR_VERSION"] = flame_version["major"]
 os.environ["TOOLKIT_FLAME_MINOR_VERSION"] = flame_version["minor"]
