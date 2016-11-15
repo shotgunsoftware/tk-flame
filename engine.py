@@ -276,10 +276,10 @@ class FlameEngine(sgtk.platform.Engine):
         
         :returns: Preset version, as string, e.g. '5'
         """  
-        if self.is_version_less_than("2016"):
-            # for 2015 versions, preset version is v4
-            return "4"
-        elif self.is_version_less_than("2016.1"):
+        if self._flame_version is None:
+            raise TankError("Cannot determine preset version - No Flame DCC version specified!")
+        
+        if self.is_version_less_than("2016.1"):
             # for version 2016 before ext 1, export preset is v5
             return "5" 
         elif self.is_version_less_than("2017"):
@@ -882,7 +882,7 @@ class FlameEngine(sgtk.platform.Engine):
         self.log_debug("App: %s" % app)
         self.log_debug("Method: %s with args %s" % (method_name, args))
 
-        # kick it off
+        # kick it off        
         if os.system(full_cmd) != 0:
             raise TankError("Shotgun backburner job could not be created. Please see log for details.")
 
