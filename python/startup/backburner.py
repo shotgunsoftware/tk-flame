@@ -48,6 +48,10 @@ engine_instance = data["engine_instance"]
 app_instance = data["app_instance"]
 method_to_execute = data["method_to_execute"]
 method_args = data["args"]
+user_home_path = data["user_home_path"]
+
+# fix home path environment not set by backburner
+os.environ["HOME"] = user_home_path
 
 # add sgtk to our python path
 sys.path.append(sgtk_core_location)
