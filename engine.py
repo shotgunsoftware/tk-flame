@@ -276,6 +276,7 @@ class FlameEngine(sgtk.platform.Engine):
         Called when the engine is being destroyed
         """
         self.log_debug("%s: Destroying..." % self)
+        self.close_windows()
 
     @property
     def python_executable(self):
@@ -462,6 +463,25 @@ class FlameEngine(sgtk.platform.Engine):
         
         # lastly, return the instantiated widget
         return widget
+
+    def close_windows(self):
+        """
+        Closes the various windows (dialogs, panels, etc.) opened by the engine.
+        """
+
+        # Make a copy of the list of Tank dialogs that have been created by the engine and
+        # are still opened since the original list will be updated when each dialog is closed.
+        opened_dialog_list = self.created_qt_dialogs[:]
+
+        # Loop through the list of opened Tank dialogs.
+        for dialog in opened_dialog_list:
+            dialog_window_title = dialog.windowTitle()
+            try:
+                # Close the dialog and let its close callback remove it from the original dialog list.
+                self.log_debug("Closing dialog %s." % dialog_window_title)
+                dialog.close()
+            except Exception, exception:
+                self.log_error("Cannot close dialog %s: %s" % (dialog_window_title, exception))
 
     def log_debug(self, msg):
         """
