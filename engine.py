@@ -904,6 +904,7 @@ class FlameEngine(sgtk.platform.Engine):
         data["method_to_execute"] = method_name
         data["args"] = args
         data["sgtk_core_location"] = os.path.dirname(sgtk.__path__[0])
+        data["flame_version"] = self._flame_version
         
         fh = open(session_file, "wb")
         pickle.dump(data, fh)
