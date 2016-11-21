@@ -904,6 +904,7 @@ class FlameEngine(sgtk.platform.Engine):
         data["method_to_execute"] = method_name
         data["args"] = args
         data["sgtk_core_location"] = os.path.dirname(sgtk.__path__[0])
+        data["flame_version"] = self._flame_version
         data["user_home_path"] = os.path.expanduser( "~" )
 
         fh = open(session_file, "wb")
@@ -934,12 +935,12 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Absolute path as a string  
         """
         if sys.platform == "darwin":
-            if int(self.flame_major_version()) <= 2017:
+            if int(self.flame_major_version) <= 2017:
                 wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
             else:
                 wtc_path = "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
         elif sys.platform == "linux2":
-            if int(self.flame_major_version()) <= 2017:
+            if int(self.flame_major_version) <= 2017:
                 wtc_path = "/var/www/cgi-bin/WiretapCentral"
             else:
                 wtc_path = "/var/www/html/WiretapCentral/cgi-bin"
