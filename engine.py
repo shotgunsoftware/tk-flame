@@ -905,7 +905,8 @@ class FlameEngine(sgtk.platform.Engine):
         data["args"] = args
         data["sgtk_core_location"] = os.path.dirname(sgtk.__path__[0])
         data["flame_version"] = self._flame_version
-        
+        data["user_home_path"] = os.path.expanduser( "~" )
+
         fh = open(session_file, "wb")
         pickle.dump(data, fh)
         fh.close()
