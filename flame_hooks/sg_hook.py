@@ -117,8 +117,8 @@ def customUIAction(info, userData):
     # get the comand name
     command_name = info["name"]
     # find it in toolkit
-    command_obj = engine.commands[command_name] if command_name in engine.commands else None
+    command_obj = engine.commands.get(command_name)
 
     # execute the callback if found
-    if command_obj is not None:
+    if command_obj:
         command_obj["callback"]()
