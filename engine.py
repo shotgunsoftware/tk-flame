@@ -512,6 +512,53 @@ class FlameEngine(sgtk.platform.Engine):
         """        
         logging.getLogger(LOG_CHANNEL).error(msg)
 
+    @property
+    def enabled_ui_action(self):
+        """
+        Provide a ordered Custom UI action tuple based on the registered commands and the design
+
+        :returns: Custom UI action tuple
+        """
+        # build a list of the matching commands
+        # returns a list of items, each a tuple with (instance_name, name, callback)
+        context_commands = self._get_commands_matching_setting("context_menu")
+
+        # Commands are uniquely identified by name so build a list of them
+        commands = []
+        for (instance_name, command_name, callback) in context_commands:
+            commands.append(command_name)
+
+        # now add any 'normal' registered commands not already in the actions dict
+        # omit system actions that are on the context menu
+        for command_name in self.commands:
+            properties = self.commands[command_name]["properties"]
+            if command_name not in commands and properties.get("type") != "context_menu":
+                commands.append(command_name)
+
+        if not commands:
+            return ()
+
+        actions = []
+
+        # Add the command to the action list if present in the commands list
+        if "Shotgun Panel..." in commands:
+            actions += [{"name": "Shotgun Panel...", "caption": "Shotgun Panel"}]
+
+        if "Launch Shotgun in Web Browser" in commands:
+            actions += [{"name": "Launch Shotgun in Web Browser", "caption": "Jump to Shotgun"}]
+
+        if "Log Out" in commands:
+            actions += [{"name": "Log Out", "caption": "Log Out"}]
+
+        if actions:
+            return (
+                {
+                    "name": "Shotgun",
+                    "actions": tuple(actions)
+                },
+            )
+        else:
+            return ()
 
     ################################################################################################################
     # Engine Bootstrap
