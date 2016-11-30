@@ -538,17 +538,7 @@ class FlameEngine(sgtk.platform.Engine):
         if not commands:
             return ()
 
-        actions = []
-
-        # Add the command to the action list if present in the commands list
-        if "Shotgun Panel..." in commands:
-            actions += [{"name": "Shotgun Panel...", "caption": "Shotgun Panel"}]
-
-        if "Launch Shotgun in Web Browser" in commands:
-            actions += [{"name": "Launch Shotgun in Web Browser", "caption": "Jump to Shotgun"}]
-
-        if "Log Out" in commands:
-            actions += [{"name": "Log Out", "caption": "Log Out"}]
+        actions = self._generate_actions_list(commands)
 
         if actions:
             return (
@@ -559,6 +549,43 @@ class FlameEngine(sgtk.platform.Engine):
             )
         else:
             return ()
+
+    @property
+    def ui_command_list(self):
+        """
+        Ordered list of UI command tuples where the first element is the registered command name and the second one is
+        the display name in the Flame UI.
+
+        :return: List of ordered Strings tuple
+        """
+        return [("Shotgun Panel...", "Shotgun Panel"),
+                ("Launch Shotgun in Web Browser", "Jump to Shotgun"),
+                ("Log Out", "Log Out")]
+
+    def _generate_actions_list(self, registered_commands):
+        """
+        Generate a list of UI commands based on the ordered ui_command_list. The generated list will respect the
+        ui_command_list order and will add to the end every command not in the ui_command_list.
+
+        :param registered_commands: list of commands registered in the engine
+        :return:
+        """
+        logger = sgtk.LogManager.get_logger(__name__)
+        actions = []
+
+        # Add the ui_command in the list if the command is registered in the engine
+        for ui_command in self.ui_command_list:
+            if ui_command[0] in registered_commands:
+                actions += [{"name": ui_command[0], "caption": ui_command[1]}]
+
+        # Add registered command that is not in the ui_command_list
+        known_commands = [command[0] for command in self.ui_command_list]
+        for command_name in registered_commands:
+            if command_name not in known_commands:
+                logger.debug("[%s] is not in the ui_command_list. It will be added at the end of the list." % command_name)
+                actions += [{"name": command_name, "caption": command_name}]
+
+        return actions
 
     ################################################################################################################
     # Engine Bootstrap
