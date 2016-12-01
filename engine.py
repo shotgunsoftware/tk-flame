@@ -562,12 +562,12 @@ class FlameEngine(sgtk.platform.Engine):
                 ("Launch Shotgun in Web Browser", "Jump to Shotgun"),
                 ("Log Out", "Log Out")]
 
-    def _generate_actions_list(self, registered_commands):
+    def _generate_actions_list(self, registered_command_names):
         """
         Generate a list of UI commands based on the ordered ui_command_list. The generated list will respect the
         ui_command_list order and will add to the end every command not in the ui_command_list.
 
-        :param registered_commands: list of commands registered in the engine
+        :param registered_command_names: list of commands registered in the engine
         :return:
         """
         logger = sgtk.LogManager.get_logger(__name__)
@@ -575,15 +575,16 @@ class FlameEngine(sgtk.platform.Engine):
 
         # Add the ui_command in the list if the command is registered in the engine
         for ui_command in self.ui_command_list:
-            if ui_command[0] in registered_commands:
-                actions += [{"name": ui_command[0], "caption": ui_command[1]}]
+            if ui_command[0] in registered_command_names:
+                actions += [{"name": ui_command[0],  # Registered command in the engine
+                             "caption": ui_command[1]}]  # Name of the command in the UI
 
         # Add registered command that is not in the ui_command_list
-        known_commands = [command[0] for command in self.ui_command_list]
-        for command_name in registered_commands:
-            if command_name not in known_commands:
-                logger.debug("[%s] is not in the ui_command_list. It will be added at the end of the list." % command_name)
-                actions += [{"name": command_name, "caption": command_name}]
+        ui_command_names = [ui_command[0] for ui_command in self.ui_command_list]
+        for registered_command_name in registered_command_names:
+            if registered_command_name not in ui_command_names:
+                logger.debug("[%s] is not in the ui_command_list. It will be added at the end of the list." % registered_command_name)
+                actions += [{"name": registered_command_name, "caption": registered_command_name}]
 
         return actions
 
