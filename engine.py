@@ -945,33 +945,61 @@ class FlameEngine(sgtk.platform.Engine):
 
     ################################################################################################################
     # accessors to various core settings and functions                
-                
+
     def __get_wiretap_central_binary(self, binary_name):
         """
-        Returns the path to a binary in the wiretap central binary collection.
-        This is standard on all Flame installations.
-        
+        Try to returns the path to a binary in the wiretap central binary collection.
+
+        This function is compatible with both new Wiretap Central and the legacy Wiretap Central.
+
         :param binary_name: Name of desired binary
-        :returns: Absolute path as a string  
+        :returns: Absolute path as a string
+        """
+        # Wiretap Central can only be present on MacOS and on Linux
+        if sys.platform not in ["darwin", "linux2"]:
+            raise TankError("Your operating system does not support wiretap central!")
+
+        # Priority have to be given to every ".bin" executable on the Wiretap Central binary folder
+        wtc_path = self._get_wiretap_central_bin_path()
+        binary = os.path.join(wtc_path, binary_name + ".bin")
+        if os.path.exists(binary):
+            return binary
+
+        # If not found, we should look for the same path without the ".bin"
+        binary = os.path.join(wtc_path, binary_name)
+        if os.path.exists(binary):
+            return binary
+
+        # If we reach this, we are running a legacy Wiretap Central
+        wtc_path = self._get_wiretap_central_legacy_bin_path()
+        binary = os.path.join(wtc_path, binary_name)
+        if os.path.exists(binary):
+            return binary
+
+        # We don't have any Wiretap Central installed on this workstation
+        raise TankError("Cannot find binary '%s'!" % binary_name)
+
+    def _get_wiretap_central_bin_path(self):
+        """
+        Get the path to the Wiretap Central binaries folder based on the current operating system.
+
+        :return: Path to the Wiretap Central binaries folder
         """
         if sys.platform == "darwin":
-            if int(self.flame_major_version) <= 2017:
-                wtc_path = "/Library/WebServer/CGI-Executables/WiretapCentral"
-            else:
-                wtc_path = "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
+            return "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
         elif sys.platform == "linux2":
-            if int(self.flame_major_version) <= 2017:
-                wtc_path = "/var/www/cgi-bin/WiretapCentral"
-            else:
-                wtc_path = "/var/www/html/WiretapCentral/cgi-bin"
-        else:    
-            raise TankError("Your operating system does not support wiretap central!")
-        
-        path = os.path.join(wtc_path, binary_name)
-        if not os.path.exists(path):
-            raise TankError("Cannot find binary '%s'!" % path)
-        
-        return path
+            return "/var/www/html/WiretapCentral/cgi-bin"
+
+    def _get_wiretap_central_legacy_bin_path(self):
+        """
+        Get the path to the legacy Wiretap Central binaries folder based on the current operating system.
+
+        :return: Path to the legacy Wiretap Central binaries folder
+        """
+        if sys.platform == "darwin":
+            return "/Library/WebServer/CGI-Executables/WiretapCentral"
+        elif sys.platform == "linux2":
+            return "/var/www/cgi-bin/WiretapCentral"
 
     def get_ffmpeg_path(self):
         """
