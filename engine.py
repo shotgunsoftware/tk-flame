@@ -948,7 +948,7 @@ class FlameEngine(sgtk.platform.Engine):
 
     def __get_wiretap_central_binary(self, binary_name):
         """
-        Try to returns the path to a binary in the wiretap central binary collection.
+        Try to returns the path to a binary in the Wiretap Central binary collection.
 
         This function is compatible with both new Wiretap Central and the legacy Wiretap Central.
 
@@ -957,7 +957,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         # Wiretap Central can only be present on MacOS and on Linux
         if sys.platform not in ["darwin", "linux2"]:
-            raise TankError("Your operating system does not support wiretap central!")
+            raise TankError("Your operating system does not support Wiretap Central!")
 
         # Priority have to be given to every ".bin" executable on the Wiretap Central binary folder
         wtc_path = self._get_wiretap_central_bin_path()
