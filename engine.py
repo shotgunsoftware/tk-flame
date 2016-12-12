@@ -512,6 +512,81 @@ class FlameEngine(sgtk.platform.Engine):
         """        
         logging.getLogger(LOG_CHANNEL).error(msg)
 
+    @property
+    def enabled_ui_action(self):
+        """
+        Provide a ordered Custom UI action tuple based on the registered commands and the design
+
+        :returns: Custom UI action tuple
+        """
+        # build a list of the matching commands
+        # returns a list of items, each a tuple with (instance_name, name, callback)
+        context_commands = self._get_commands_matching_setting("context_menu")
+
+        # Commands are uniquely identified by name so build a list of them
+        commands = []
+        for (instance_name, command_name, callback) in context_commands:
+            commands.append(command_name)
+
+        # now add any 'normal' registered commands not already in the actions dict
+        # omit system actions that are on the context menu
+        for command_name in self.commands:
+            properties = self.commands[command_name]["properties"]
+            if command_name not in commands and properties.get("type") != "context_menu":
+                commands.append(command_name)
+
+        if not commands:
+            return ()
+
+        actions = self._generate_actions_list(commands)
+
+        if actions:
+            return (
+                {
+                    "name": "Shotgun",
+                    "actions": tuple(actions)
+                },
+            )
+        else:
+            return ()
+
+    @property
+    def ui_command_list(self):
+        """
+        Ordered list of UI command tuples where the first element is the registered command name and the second one is
+        the display name in the Flame UI.
+
+        :return: List of ordered Strings tuple
+        """
+        return [("Shotgun Panel...", "Shotgun Panel"),
+                ("Launch Shotgun in Web Browser", "Jump to Shotgun"),
+                ("Log Out", "Log Out")]
+
+    def _generate_actions_list(self, registered_command_names):
+        """
+        Generate a list of UI commands based on the ordered ui_command_list. The generated list will respect the
+        ui_command_list order and will add to the end every command not in the ui_command_list.
+
+        :param registered_command_names: list of commands registered in the engine
+        :return:
+        """
+        logger = sgtk.LogManager.get_logger(__name__)
+        actions = []
+
+        # Add the ui_command in the list if the command is registered in the engine
+        for ui_command in self.ui_command_list:
+            if ui_command[0] in registered_command_names:
+                actions += [{"name": ui_command[0],  # Registered command in the engine
+                             "caption": ui_command[1]}]  # Name of the command in the UI
+
+        # Add registered command that is not in the ui_command_list
+        ui_command_names = [ui_command[0] for ui_command in self.ui_command_list]
+        for registered_command_name in registered_command_names:
+            if registered_command_name not in ui_command_names:
+                logger.debug("[%s] is not in the ui_command_list. It will be added at the end of the list." % registered_command_name)
+                actions += [{"name": registered_command_name, "caption": registered_command_name}]
+
+        return actions
 
     ################################################################################################################
     # Engine Bootstrap

@@ -63,36 +63,7 @@ def getMainMenuCustomUIActions( ):
     if engine is None:
         return ()
 
-    
-    # build a list of the matching commands
-    # returns a list of items, each a tuple with (instance_name, name, callback)
-    context_commands = engine._get_commands_matching_setting("context_menu")
-
-    # Commands are uniquely identified by name so build a list of them
-    commands = []
-    for (instance_name, command_name, callback) in context_commands:
-        commands.append(command_name)
-
-    # now add any 'normal' registered commands not already in the actions dict
-    # omit system actions that are on the context menu
-    for command_name in engine.commands:
-        properties = engine.commands[command_name]["properties"]
-        if command_name not in commands and properties.get("type") != "context_menu":
-            commands.append(command_name)
-
-    # do not add the menu if there are no matches
-    if not commands:
-        return ()
-
-    # generate flame data structure
-    actions = [{"name": x, "caption": x} for x in commands]
-
-    return (
-        {
-            "name": "Shotgun",
-            "actions": tuple(actions)
-        },
-    )
+    return engine.enabled_ui_action
 
 
 def customUIAction(info, userData):
