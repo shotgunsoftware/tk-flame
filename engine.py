@@ -207,22 +207,27 @@ class FlameEngine(sgtk.platform.Engine):
     def _get_commands_matching_setting(self, setting):
         """
         This expects a list of dictionaries in the form:
-            {name: command-name, app_instance: instance-name }
+            {name: "command-name", app_instance: "instance-name", display_name: "Display Name"  }
 
         The app_instance value will match a particular app instance associated with
-        the engine.  The name is the menu name of the command to run when the engine starts up.
+        the engine. The name is the menu name of the command to run when the engine starts up. The
+        display_name is the menu display name of the command to run.
+
         If name is '' then all commands from the given app instance are returned.
+        If display_name is not present, name will be used instead.
 
         :returns A list of tuples for all commands that match the given setting.
-                 Each tuple will be in the form (instance_name, command_name, callback)
+                 Each tuple will be in the form (instance_name, display_name, command_name, callback)
         """
         # return a dictionary grouping all the commands by instance name
         commands_by_instance = {}
         for (name, value) in self.commands.iteritems():
             app_instance = value["properties"].get("app")
-            if app_instance is None:
-                continue
-            instance_name = app_instance.instance_name
+            if app_instance:
+                instance_name = app_instance.instance_name
+            else:
+                instance_name = "null"
+
             commands_by_instance.setdefault(instance_name, []).append((name, value["callback"]))
 
         # go through the values from the setting and return any matching commands
@@ -231,6 +236,7 @@ class FlameEngine(sgtk.platform.Engine):
         for command in setting_value:
             command_name = command["name"]
             instance_name = command["app_instance"]
+            display_name = command.get("display_name", command_name)
             instance_commands = commands_by_instance.get(instance_name)
 
             if instance_commands is None:
@@ -243,7 +249,7 @@ class FlameEngine(sgtk.platform.Engine):
             for (name, callback) in instance_commands:
                 # add the command if the name from the settings is '' or the name matches
                 if not command_name or (command_name == name):
-                    ret_value.append((instance_name, name, callback))
+                    ret_value.append((instance_name, display_name, name, callback))
 
         return ret_value
 
