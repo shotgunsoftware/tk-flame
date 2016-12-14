@@ -80,6 +80,7 @@ def getMainMenuCustomUIActions( ):
     for engine_command_name in engine.commands:
         properties = engine.commands[engine_command_name]["properties"]
         if engine_command_name not in context_command_names and properties.get("type") != "context_menu":
+            context_command_names.append(engine_command_name)
             context_commands.append((engine_command_name, engine_command_name))
 
     # do not add the menu if there are no matches
