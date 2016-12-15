@@ -226,7 +226,9 @@ class FlameEngine(sgtk.platform.Engine):
             if app_instance:
                 instance_name = app_instance.instance_name
             else:
-                instance_name = "null"
+                # A command without an app instance in the context menu is actually coming from the engine, so we'll
+                # use the engine name instead.
+                instance_name = "tk-flame"
 
             commands_by_instance.setdefault(instance_name, []).append((name, value["callback"]))
 
