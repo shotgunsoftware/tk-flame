@@ -63,29 +63,32 @@ def getMainMenuCustomUIActions( ):
     if engine is None:
         return ()
 
-    
     # build a list of the matching commands
-    # returns a list of items, each a tuple with (instance_name, name, callback)
-    context_commands = engine._get_commands_matching_setting("context_menu")
+    # returns a list of items, each a tuple with (instance_name, display_name, name, callback)
+    commands = engine._get_commands_matching_setting("context_menu")
 
-    # Commands are uniquely identified by name so build a list of them
-    commands = []
-    for (instance_name, command_name, callback) in context_commands:
-        commands.append(command_name)
+    # Commands are uniquely identified by command name and by display name so build a list of them
+    context_commands = []
+    for (instance_name, display_name, command_name, callback) in commands:
+        context_commands.append((command_name, display_name))
+
+
 
     # now add any 'normal' registered commands not already in the actions dict
     # omit system actions that are on the context menu
-    for command_name in engine.commands:
-        properties = engine.commands[command_name]["properties"]
-        if command_name not in commands and properties.get("type") != "context_menu":
-            commands.append(command_name)
+    context_command_names = [context_command[0] for context_command in context_commands]
+    for engine_command_name in engine.commands:
+        properties = engine.commands[engine_command_name]["properties"]
+        if engine_command_name not in context_command_names and properties.get("type") != "context_menu":
+            context_command_names.append(engine_command_name)
+            context_commands.append((engine_command_name, engine_command_name))
 
     # do not add the menu if there are no matches
-    if not commands:
+    if not context_commands:
         return ()
 
     # generate flame data structure
-    actions = [{"name": x, "caption": x} for x in commands]
+    actions = [{"name": command_name, "caption": display_name} for (command_name, display_name) in context_commands]
 
     return (
         {
