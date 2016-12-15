@@ -938,6 +938,9 @@ class FlameEngine(sgtk.platform.Engine):
         self.log_debug("App: %s" % app)
         self.log_debug("Method: %s with args %s" % (method_name, args))
 
+        # Make sure that the session is not expired
+        sgtk.get_authenticated_user().refresh_credentials()
+
         # kick it off        
         if os.system(full_cmd) != 0:
             raise TankError("Shotgun backburner job could not be created. Please see log for details.")
