@@ -15,6 +15,7 @@ A Toolkit engine for Flame
 import os
 import pwd
 import grp
+import pipes
 import re
 import sys
 import uuid
@@ -955,7 +956,7 @@ class FlameEngine(sgtk.platform.Engine):
             e_group = grp.getgrgid(os.getegid()).gr_name
 
             # Run the command as the effective user
-            full_cmd = "sudo -g %s -u %s bash -c \'%s\'" % (e_group, e_user, full_cmd)
+            full_cmd = "sudo -g %s -u %s bash -c %s" % (e_group, e_user, pipes.quote(full_cmd))
             self.log_debug("Running root but will send the job as [%s] of the [%s] group" % (e_user, e_group))
 
         # Make sure that the session is not expired
