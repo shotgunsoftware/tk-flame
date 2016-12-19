@@ -14,6 +14,7 @@ A Toolkit engine for Flame
 
 import os
 import pwd
+import grp
 import re
 import sys
 import uuid
@@ -951,10 +952,11 @@ class FlameEngine(sgtk.platform.Engine):
         if os.getuid() == 0:  # root
             # Getting the user name of the user who started Flame (the effective user)
             e_user = pwd.getpwuid(os.geteuid()).pw_name
+            e_group = grp.getgrgid(os.getegid()).gr_name
 
             # Run the command as the effective user
-            full_cmd = "sudo -u %s bash -c \'%s\'" % (e_user, full_cmd)
-            self.log_debug("Running root but will send the job as %s" % e_user)
+            full_cmd = "sudo -g %s -u %s bash -c \'%s\'" % (e_group, e_user, full_cmd)
+            self.log_debug("Running root but will send the job as [%s] of the [%s] group" % (e_user, e_group))
 
         # Make sure that the session is not expired
         sgtk.get_authenticated_user().refresh_credentials()
