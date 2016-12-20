@@ -962,14 +962,12 @@ class FlameEngine(sgtk.platform.Engine):
         try:
             # Make sure that the session is not expired
             sgtk.get_authenticated_user().refresh_credentials()
-            valid_session = True
         except sgtk.authentication.AuthenticationCancelled:
             self.log_debug("User cancelled auth. No backburner job will be created.")
-            valid_session = False
-
-        # kick it off
-        if valid_session and os.system(full_cmd) != 0:
-            raise TankError("Shotgun backburner job could not be created. Please see log for details.")
+        else:
+            # kick it off
+            if os.system(full_cmd) != 0:
+                raise TankError("Shotgun backburner job could not be created. Please see log for details.")
 
 
     ################################################################################################################
