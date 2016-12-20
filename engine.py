@@ -13,6 +13,9 @@ A Toolkit engine for Flame
 """
 
 import os
+import pwd
+import grp
+import pipes
 import re
 import sys
 import uuid
@@ -933,7 +936,6 @@ class FlameEngine(sgtk.platform.Engine):
         data["args"] = args
         data["sgtk_core_location"] = os.path.dirname(sgtk.__path__[0])
         data["flame_version"] = self._flame_version
-        data["user_home_path"] = os.path.expanduser( "~" )
 
         fh = open(session_file, "wb")
         pickle.dump(data, fh)
@@ -945,6 +947,17 @@ class FlameEngine(sgtk.platform.Engine):
         self.log_debug("Command line: %s" % full_cmd)
         self.log_debug("App: %s" % app)
         self.log_debug("Method: %s with args %s" % (method_name, args))
+
+        # On old Flame version, python hooks are running root. We need to run the command as the effective user to
+        # ensure that backburner is running the job as the user who's using the Software to avoir permissions issues.
+        if os.getuid() == 0:  # root
+            # Getting the user name of the user who started Flame (the effective user)
+            e_user = pwd.getpwuid(os.geteuid()).pw_name
+            e_group = grp.getgrgid(os.getegid()).gr_name
+
+            # Run the command as the effective user
+            full_cmd = "sudo -g %s -u %s bash -c %s" % (e_group, e_user, pipes.quote(full_cmd))
+            self.log_debug("Running root but will send the job as [%s] of the [%s] group" % (e_user, e_group))
 
         # Make sure that the session is not expired
         sgtk.get_authenticated_user().refresh_credentials()
