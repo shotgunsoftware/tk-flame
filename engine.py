@@ -959,12 +959,15 @@ class FlameEngine(sgtk.platform.Engine):
             full_cmd = "sudo -g %s -u %s bash -c %s" % (e_group, e_user, pipes.quote(full_cmd))
             self.log_debug("Running root but will send the job as [%s] of the [%s] group" % (e_user, e_group))
 
-        # Make sure that the session is not expired
-        sgtk.get_authenticated_user().refresh_credentials()
-
-        # kick it off        
-        if os.system(full_cmd) != 0:
-            raise TankError("Shotgun backburner job could not be created. Please see log for details.")
+        try:
+            # Make sure that the session is not expired
+            sgtk.get_authenticated_user().refresh_credentials()
+        except sgtk.authentication.AuthenticationCancelled:
+            self.log_debug("User cancelled auth. No backburner job will be created.")
+        else:
+            # kick it off
+            if os.system(full_cmd) != 0:
+                raise TankError("Shotgun backburner job could not be created. Please see log for details.")
 
 
     ################################################################################################################
