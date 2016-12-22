@@ -49,6 +49,10 @@ app_instance = data["app_instance"]
 method_to_execute = data["method_to_execute"]
 method_args = data["args"]
 flame_version = data["flame_version"]
+user_home = data["home"]
+
+# Make sure that the job is running with the good home
+os.environ["HOME"] = user_home
 
 # add sgtk to our python path
 sys.path.append(sgtk_core_location)
