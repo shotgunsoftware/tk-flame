@@ -28,6 +28,7 @@ import logging.handlers
 import tempfile
 import traceback
 import datetime
+import subprocess
 from sgtk import TankError
 from distutils.version import LooseVersion
 
@@ -905,15 +906,14 @@ class FlameEngine(sgtk.platform.Engine):
         backburner_args.append("-jobName:\"%s\"" % sanitized_job_name)
         backburner_args.append("-description:\"%s\"" % sanitized_job_desc)
 
-        bb_manager = self.get_setting("backburner_manager")
-        if bb_manager:
-            # there is an external backburner manager specified.
-            # this is only supported on 2016.1 and above
-            if self.is_version_less_than("2016.1"):            
-                self.log_warning("Backburner manager specifically set but this "
-                                 "is only supported on Flame 2016.1 and above.")
-            else:
-                backburner_args.append("-manager:\"%s\"" % bb_manager)
+
+        # Specifying a remote backburner manager is only supported on 2016.1 and above
+        if not self.is_version_less_than("2016.1"):
+            # Fetch which backburner manager is currently set up from backburner server.
+            backburner_server_cmd = os.path.join(self._install_root, "backburner", "backburnerServer")
+            bb_manager = subprocess.check_output([backburner_server_cmd, "-q", "MANAGER"])
+            bb_manager = bb_manager.strip("\n")
+            backburner_args.append("-manager:\"%s\"" % bb_manager)
 
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
