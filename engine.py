@@ -854,7 +854,8 @@ class FlameEngine(sgtk.platform.Engine):
         """
         return self.get_setting("backburner_shared_tmp")
         
-    def create_local_backburner_job(self, job_name, description, run_after_job_id, app, method_name, args):
+    def create_local_backburner_job(self, job_name, description, run_after_job_id,
+                                    app, method_name, backburner_server_host, args):
         """
         Run a method in the local backburner queue.
         
@@ -906,14 +907,20 @@ class FlameEngine(sgtk.platform.Engine):
         backburner_args.append("-jobName:\"%s\"" % sanitized_job_name)
         backburner_args.append("-description:\"%s\"" % sanitized_job_desc)
 
-
         # Specifying a remote backburner manager is only supported on 2016.1 and above
         if not self.is_version_less_than("2016.1"):
-            # Fetch which backburner manager is currently set up from backburner server.
-            backburner_server_cmd = os.path.join(self._install_root, "backburner", "backburnerServer")
-            bb_manager = subprocess.check_output([backburner_server_cmd, "-q", "MANAGER"])
-            bb_manager = bb_manager.strip("\n")
+            bb_manager = self.get_setting("backburner_manager")
+            if bb_manager is "" :
+                # No backburner manager speficied in settings. Ask backburnerServer
+                # which manager to choose from. (They might be none running locally)
+                backburner_server_cmd = os.path.join(self._install_root, "backburner", "backburnerServer")
+                bb_manager = subprocess.check_output([backburner_server_cmd, "-q", "MANAGER"])
+                bb_manager = bb_manager.strip("\n")
+
             backburner_args.append("-manager:\"%s\"" % bb_manager)
+
+        if backburner_server_host:
+            backburner_args.append("-servers:\"%s\"" % backburner_server_host)
 
         if run_after_job_id:
             backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
