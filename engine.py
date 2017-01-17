@@ -911,7 +911,7 @@ class FlameEngine(sgtk.platform.Engine):
         if not self.is_version_less_than("2016.1"):
             bb_manager = self.get_setting("backburner_manager")
             if bb_manager is "" :
-                # No backburner manager speficied in settings. Ask backburnerServer
+                # No backburner manager speficied in settings. Ask local backburnerServer
                 # which manager to choose from. (They might be none running locally)
                 backburner_server_cmd = os.path.join(self._install_root, "backburner", "backburnerServer")
                 bb_manager = subprocess.check_output([backburner_server_cmd, "-q", "MANAGER"])
