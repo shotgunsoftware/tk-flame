@@ -855,7 +855,7 @@ class FlameEngine(sgtk.platform.Engine):
         return self.get_setting("backburner_shared_tmp")
         
     def create_local_backburner_job(self, job_name, description, run_after_job_id,
-                                    app, method_name, args, backburner_server_host = None):
+                                    app, method_name, args, backburner_server_host=None):
         """
         Run a method in the local backburner queue.
         
@@ -870,6 +870,7 @@ class FlameEngine(sgtk.platform.Engine):
         :param app: App to remotely call up
         :param method_name: Name of method to remotely execute
         :param args: dictionary or args (**argv style) to pass to method at remote execution
+        :param backburner_server_host: Name of the backburner server host.
         """
         
         # the backburner executable
@@ -910,7 +911,7 @@ class FlameEngine(sgtk.platform.Engine):
         # Specifying a remote backburner manager is only supported on 2016.1 and above
         if not self.is_version_less_than("2016.1"):
             bb_manager = self.get_setting("backburner_manager")
-            if bb_manager is None or bb_manager is "" :
+            if not bb_manager or bb_manager is "" :
                 # No backburner manager speficied in settings. Ask local backburnerServer
                 # which manager to choose from. (They might be none running locally)
                 backburner_server_cmd = os.path.join(self._install_root, "backburner", "backburnerServer")
