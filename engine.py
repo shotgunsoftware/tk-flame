@@ -911,7 +911,7 @@ class FlameEngine(sgtk.platform.Engine):
         # Specifying a remote backburner manager is only supported on 2016.1 and above
         if not self.is_version_less_than("2016.1"):
             bb_manager = self.get_setting("backburner_manager")
-            if not bb_manager or bb_manager is "" :
+            if not bb_manager :
                 # No backburner manager speficied in settings. Ask local backburnerServer
                 # which manager to choose from. (They might be none running locally)
                 backburner_server_cmd = os.path.join(self._install_root, "backburner", "backburnerServer")
