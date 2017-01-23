@@ -26,7 +26,7 @@ def getCustomExportProfiles(profiles):
         return
 
     for preset_title in engine.get_export_presets(): 
-        profiles[preset_title] = {"preset_title": preset_title}
+        profiles[preset_title] = {"sg_preset_title": preset_title}
 
 def preCustomExport(info, userData):
     """
@@ -56,7 +56,10 @@ def preCustomExport(info, userData):
         return
 
     # get the preset that the user selected from the menu
-    current_preset = userData.get("preset_title")
+    current_preset = userData.get("sg_preset_title")
+    # We can get here with a client defined hook. Ignore it if it is not shotgun related.
+    if current_preset is None:
+        return
 
     # create a session object in the engine - this is how we keep track of what is going on
     session_id = engine.create_export_session(current_preset)
