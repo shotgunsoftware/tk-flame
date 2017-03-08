@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
-    <height>496</height>
+    <width>450</width>
+    <height>514</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -103,7 +103,7 @@ height: 100px;
        <item row="1" column="1">
         <widget class="QComboBox" name="volume"/>
        </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_6">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -116,7 +116,7 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="1">
         <widget class="QLabel" name="user_name">
          <property name="toolTip">
           <string>The &lt;b&gt;User Name&lt;/b&gt; associated with your new Flame Project is based on the Shotgun user that matches your current login name.
@@ -130,7 +130,7 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="label_19">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -143,7 +143,7 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="4" column="1">
         <widget class="QLabel" name="host_name">
          <property name="text">
           <string>xxx</string>
@@ -153,7 +153,14 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>&lt;b&gt;Setup Directory&lt;/b&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
         <widget class="QLabel" name="label_17">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -166,7 +173,7 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="5" column="1">
         <widget class="QLabel" name="workspace_name">
          <property name="text">
           <string>xxx</string>
@@ -175,6 +182,19 @@ height: 100px;
           <bool>false</bool>
          </property>
         </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="group_name_label">
+         <property name="text">
+          <string>&lt;b&gt;Group&lt;/b&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QComboBox" name="group_name"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="setup_dir"/>
        </item>
       </layout>
      </widget>
@@ -362,6 +382,11 @@ height: 100px;
          <property name="maxVisibleItems">
           <number>100</number>
          </property>
+         <item>
+          <property name="text">
+           <string>32-bit</string>
+          </property>
+         </item>
          <item>
           <property name="text">
            <string>16-bit fp</string>

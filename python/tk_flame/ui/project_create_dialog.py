@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'project_create_dialog.ui'
 #
-#      by: pyside-uic 0.2.15 running on PySide 1.2.2
+#      by: pyside-uic 0.2.13 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,7 +11,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_ProjectCreateDialog(object):
     def setupUi(self, ProjectCreateDialog):
         ProjectCreateDialog.setObjectName("ProjectCreateDialog")
-        ProjectCreateDialog.resize(446, 496)
+        ProjectCreateDialog.resize(450, 514)
         ProjectCreateDialog.setStyleSheet("/* this is to force the combo box dropdowns to show all items rather than displaying only a few items and a scroll bar */\n"
 "QComboBox QListView {\n"
 "height: 100px;\n"
@@ -71,11 +71,11 @@ class Ui_ProjectCreateDialog(object):
         sizePolicy.setHeightForWidth(self.label_6.sizePolicy().hasHeightForWidth())
         self.label_6.setSizePolicy(sizePolicy)
         self.label_6.setObjectName("label_6")
-        self.formLayout_3.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_6)
+        self.formLayout_3.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_6)
         self.user_name = QtGui.QLabel(self.project_overview_tab)
         self.user_name.setWordWrap(False)
         self.user_name.setObjectName("user_name")
-        self.formLayout_3.setWidget(2, QtGui.QFormLayout.FieldRole, self.user_name)
+        self.formLayout_3.setWidget(3, QtGui.QFormLayout.FieldRole, self.user_name)
         self.label_19 = QtGui.QLabel(self.project_overview_tab)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -83,11 +83,14 @@ class Ui_ProjectCreateDialog(object):
         sizePolicy.setHeightForWidth(self.label_19.sizePolicy().hasHeightForWidth())
         self.label_19.setSizePolicy(sizePolicy)
         self.label_19.setObjectName("label_19")
-        self.formLayout_3.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_19)
+        self.formLayout_3.setWidget(4, QtGui.QFormLayout.LabelRole, self.label_19)
         self.host_name = QtGui.QLabel(self.project_overview_tab)
         self.host_name.setWordWrap(False)
         self.host_name.setObjectName("host_name")
-        self.formLayout_3.setWidget(3, QtGui.QFormLayout.FieldRole, self.host_name)
+        self.formLayout_3.setWidget(4, QtGui.QFormLayout.FieldRole, self.host_name)
+        self.label_4 = QtGui.QLabel(self.project_overview_tab)
+        self.label_4.setObjectName("label_4")
+        self.formLayout_3.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_4)
         self.label_17 = QtGui.QLabel(self.project_overview_tab)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -95,11 +98,20 @@ class Ui_ProjectCreateDialog(object):
         sizePolicy.setHeightForWidth(self.label_17.sizePolicy().hasHeightForWidth())
         self.label_17.setSizePolicy(sizePolicy)
         self.label_17.setObjectName("label_17")
-        self.formLayout_3.setWidget(4, QtGui.QFormLayout.LabelRole, self.label_17)
+        self.formLayout_3.setWidget(5, QtGui.QFormLayout.LabelRole, self.label_17)
         self.workspace_name = QtGui.QLabel(self.project_overview_tab)
         self.workspace_name.setWordWrap(False)
         self.workspace_name.setObjectName("workspace_name")
-        self.formLayout_3.setWidget(4, QtGui.QFormLayout.FieldRole, self.workspace_name)
+        self.formLayout_3.setWidget(5, QtGui.QFormLayout.FieldRole, self.workspace_name)
+        self.group_name_label = QtGui.QLabel(self.project_overview_tab)
+        self.group_name_label.setObjectName("group_name_label")
+        self.formLayout_3.setWidget(6, QtGui.QFormLayout.LabelRole, self.group_name_label)
+        self.group_name = QtGui.QComboBox(self.project_overview_tab)
+        self.group_name.setObjectName("group_name")
+        self.formLayout_3.setWidget(6, QtGui.QFormLayout.FieldRole, self.group_name)
+        self.setup_dir = QtGui.QLineEdit(self.project_overview_tab)
+        self.setup_dir.setObjectName("setup_dir")
+        self.formLayout_3.setWidget(2, QtGui.QFormLayout.FieldRole, self.setup_dir)
         self.tabWidget.addTab(self.project_overview_tab, "")
         self.resolution_tab = QtGui.QWidget()
         self.resolution_tab.setObjectName("resolution_tab")
@@ -173,6 +185,7 @@ class Ui_ProjectCreateDialog(object):
         self.depth = QtGui.QComboBox(self.resolution_tab)
         self.depth.setMaxVisibleItems(100)
         self.depth.setObjectName("depth")
+        self.depth.addItem("")
         self.depth.addItem("")
         self.depth.addItem("")
         self.depth.addItem("")
@@ -379,8 +392,10 @@ class Ui_ProjectCreateDialog(object):
         self.user_name.setText(QtGui.QApplication.translate("ProjectCreateDialog", "xxx", None, QtGui.QApplication.UnicodeUTF8))
         self.label_19.setText(QtGui.QApplication.translate("ProjectCreateDialog", "<b>Host</b>", None, QtGui.QApplication.UnicodeUTF8))
         self.host_name.setText(QtGui.QApplication.translate("ProjectCreateDialog", "xxx", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setText(QtGui.QApplication.translate("ProjectCreateDialog", "<b>Setup Directory</b>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_17.setText(QtGui.QApplication.translate("ProjectCreateDialog", "<b>Workspace</b>", None, QtGui.QApplication.UnicodeUTF8))
         self.workspace_name.setText(QtGui.QApplication.translate("ProjectCreateDialog", "xxx", None, QtGui.QApplication.UnicodeUTF8))
+        self.group_name_label.setText(QtGui.QApplication.translate("ProjectCreateDialog", "<b>Group</b>", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.project_overview_tab), QtGui.QApplication.translate("ProjectCreateDialog", "Project Overview", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Resolution", None, QtGui.QApplication.UnicodeUTF8))
         self.width.setPlaceholderText(QtGui.QApplication.translate("ProjectCreateDialog", "width", None, QtGui.QApplication.UnicodeUTF8))
@@ -402,11 +417,12 @@ class Ui_ProjectCreateDialog(object):
         self.frame_rate.setItemText(8, QtGui.QApplication.translate("ProjectCreateDialog", "59.94 fps NDF", None, QtGui.QApplication.UnicodeUTF8))
         self.frame_rate.setItemText(9, QtGui.QApplication.translate("ProjectCreateDialog", "60 fps", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Depth", None, QtGui.QApplication.UnicodeUTF8))
-        self.depth.setItemText(0, QtGui.QApplication.translate("ProjectCreateDialog", "16-bit fp", None, QtGui.QApplication.UnicodeUTF8))
-        self.depth.setItemText(1, QtGui.QApplication.translate("ProjectCreateDialog", "12-bit", None, QtGui.QApplication.UnicodeUTF8))
-        self.depth.setItemText(2, QtGui.QApplication.translate("ProjectCreateDialog", "12-bit u", None, QtGui.QApplication.UnicodeUTF8))
-        self.depth.setItemText(3, QtGui.QApplication.translate("ProjectCreateDialog", "10-bit", None, QtGui.QApplication.UnicodeUTF8))
-        self.depth.setItemText(4, QtGui.QApplication.translate("ProjectCreateDialog", "8-bit", None, QtGui.QApplication.UnicodeUTF8))
+        self.depth.setItemText(0, QtGui.QApplication.translate("ProjectCreateDialog", "32-bit", None, QtGui.QApplication.UnicodeUTF8))
+        self.depth.setItemText(1, QtGui.QApplication.translate("ProjectCreateDialog", "16-bit fp", None, QtGui.QApplication.UnicodeUTF8))
+        self.depth.setItemText(2, QtGui.QApplication.translate("ProjectCreateDialog", "12-bit", None, QtGui.QApplication.UnicodeUTF8))
+        self.depth.setItemText(3, QtGui.QApplication.translate("ProjectCreateDialog", "12-bit u", None, QtGui.QApplication.UnicodeUTF8))
+        self.depth.setItemText(4, QtGui.QApplication.translate("ProjectCreateDialog", "10-bit", None, QtGui.QApplication.UnicodeUTF8))
+        self.depth.setItemText(5, QtGui.QApplication.translate("ProjectCreateDialog", "8-bit", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Field Dominance", None, QtGui.QApplication.UnicodeUTF8))
         self.field_dominance.setItemText(0, QtGui.QApplication.translate("ProjectCreateDialog", "PROGRESSIVE", None, QtGui.QApplication.UnicodeUTF8))
         self.field_dominance.setItemText(1, QtGui.QApplication.translate("ProjectCreateDialog", "FIELD_1", None, QtGui.QApplication.UnicodeUTF8))
