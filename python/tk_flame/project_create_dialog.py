@@ -260,7 +260,7 @@ class ProjectCreateDialog(QtGui.QWidget):
         """
         settings = {}
         
-        setup_dir = self.ui.setup_dir.text()
+        setup_dir = self.ui.setup_dir.text().strip()
         if setup_dir:
             settings["SetupDir"] = setup_dir
         settings["FrameWidth"] = self.ui.width.text()

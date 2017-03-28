@@ -220,11 +220,11 @@ class WiretapHandler(object):
             else:
                 self._engine.log_debug("Project settings ui will be bypassed.")            
             # create the project : Using the command line tool here instead of the python API because we need root privileges to set the group id. 
-            import subprocess
+            import subprocess, os
             project_create_cmd = [
-                self._engine.wiretap_tools_root + "/wiretap_create_node",
+                os.path.join(self._engine.wiretap_tools_root, "wiretap_create_node"),
                 "-n",
-                "/volumes/" + volume_name,
+                os.path.join("/volumes", volume_name),
                 "-d",
                 project_name ]
 
