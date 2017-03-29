@@ -358,6 +358,20 @@ class FlameEngine(sgtk.platform.Engine):
                 "flame"
             )
 
+    @property
+    def wiretap_tools_root(self):
+        """
+        The location of wiretap tool
+
+        :returns: Path as string
+        """
+        return os.path.join(
+            self.install_root,
+            "wiretap",
+            "tools",
+            self.flame_version
+        )
+
     def is_version_less_than(self, version_str):
         """
         Compares the given version string with the current 

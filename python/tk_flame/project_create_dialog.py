@@ -28,7 +28,10 @@ class ProjectCreateDialog(QtGui.QWidget):
                  default_volume_name, 
                  volume_names, 
                  host_name, 
+                 default_group_name,
+                 group_names,
                  project_settings):
+
         """
         Constructor
         
@@ -61,6 +64,7 @@ class ProjectCreateDialog(QtGui.QWidget):
         
         # populate fixed fields (the first tab)
         self.ui.project_name.setText(project_name)
+        self.ui.setup_dir.setPlaceholderText("<default>")
         self.ui.user_name.setText(user_name)
         if workspace_name:
             self.ui.workspace_name.setText(workspace_name)
@@ -73,7 +77,15 @@ class ProjectCreateDialog(QtGui.QWidget):
         # now select the default value in combo box
         idx = self.ui.volume.findText(default_volume_name)
         self.ui.volume.setCurrentIndex(idx)
-        
+
+        self.ui.group_name.addItems(group_names)
+        idx = self.ui.group_name.findText(default_group_name)
+        self.ui.group_name.setCurrentIndex(idx)
+
+        if self._engine.is_version_less_than("2018.1"):
+            self.ui.group_name_label.setVisible(False)
+            self.ui.group_name.setVisible(False)
+
         # populate the resolution tab
         self.__populate_resolution_tab(project_settings)
                 
@@ -217,6 +229,14 @@ class ProjectCreateDialog(QtGui.QWidget):
         :returns: volume as string
         """
         return str(self.ui.volume.currentText())
+
+    def get_group_name(self):
+        """
+        Returns the selected group
+        
+        :returns: group as string
+        """
+        return str(self.ui.group_name.currentText())
          
     def get_settings(self):
         """
@@ -240,6 +260,9 @@ class ProjectCreateDialog(QtGui.QWidget):
         """
         settings = {}
         
+        setup_dir = self.ui.setup_dir.text().strip()
+        if setup_dir:
+            settings["SetupDir"] = setup_dir
         settings["FrameWidth"] = self.ui.width.text()
         settings["FrameHeight"] = self.ui.height.text()
         settings["FrameDepth"] = self.ui.depth.currentText()

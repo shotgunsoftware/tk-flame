@@ -187,10 +187,11 @@ class WiretapHandler(object):
             
             # now check if we should pop up a ui where the user can tweak the default prefs
             if self._engine.execute_hook_method("project_startup_hook", "use_project_settings_ui"):
-
                 # at this point we don't have a QT application running, because we are still
                 # in the pre-DCC launch phase, so need to wrap our modal dialog call
                 # in a helper method which also creates a QApplication.
+
+                (group_name, groups) = self._get_groups()
                 (return_code, widget) = start_qt_app_and_show_modal("Create Flame Project", 
                                                                     self._engine, 
                                                                     ProjectCreateDialog,
@@ -200,6 +201,8 @@ class WiretapHandler(object):
                                                                     volume_name,
                                                                     volumes,
                                                                     host_name,
+                                                                    group_name,
+                                                                    groups,
                                                                     project_settings
                                                                     )
                 
@@ -212,17 +215,24 @@ class WiretapHandler(object):
                     project_settings[k] = v
                     
                 volume_name = widget.get_volume_name()
+                group_name = widget.get_group_name()
                 
             else:
                 self._engine.log_debug("Project settings ui will be bypassed.")            
-                        
-            # resolve this as an object
-            volume = WireTapNodeHandle(self._server, "/volumes/%s" % volume_name)
-            
-            # create the project
-            project_node = WireTapNodeHandle()
-            if not volume.createNode(project_name, "PROJECT", project_node):
-                raise WiretapError("Unable to create project %s: %s" %  (project_name, volume.lastError()))
+            # create the project : Using the command line tool here instead of the python API because we need root privileges to set the group id. 
+            import subprocess, os
+            project_create_cmd = [
+                os.path.join(self._engine.wiretap_tools_root, "wiretap_create_node"),
+                "-n",
+                os.path.join("/volumes", volume_name),
+                "-d",
+                project_name ]
+
+            if not self._engine.is_version_less_than("2018.1"):
+                project_create_cmd.append("-g")
+                project_create_cmd.append(group_name)
+
+            subprocess.check_call(project_create_cmd)
  
             # create project settings
 
@@ -242,6 +252,7 @@ class WiretapHandler(object):
             
             xml += "<Description>%s</Description>"             % "Created by Shotgun Flame Integration %s" % self._engine.version
             
+            xml += self._append_setting_to_xml(project_settings, "SetupDir")
             xml += self._append_setting_to_xml(project_settings, "FrameWidth")
             xml += self._append_setting_to_xml(project_settings, "FrameHeight")
             xml += self._append_setting_to_xml(project_settings, "FrameDepth")
@@ -249,7 +260,7 @@ class WiretapHandler(object):
             xml += self._append_setting_to_xml(project_settings, "FrameRate")
             xml += self._append_setting_to_xml(project_settings, "ProxyEnable", stops_working_in="2016.1")            
             xml += self._append_setting_to_xml(project_settings, "FieldDominance")            
-            xml += self._append_setting_to_xml(project_settings, "VisualDepth", starts_working_in="2015.3")
+            xml += self._append_setting_to_xml(project_settings, "VisualDepth", starts_working_in="2015.3", stops_working_in="2018.0")
 
             # proxy settings
             xml += self._append_setting_to_xml(project_settings, "ProxyWidthHint")
@@ -272,13 +283,12 @@ class WiretapHandler(object):
 
     
             # Set the project meta data
+            project_node = WireTapNodeHandle(self._server, "/projects/" + project_name)
             if not project_node.setMetaData("XML", xml):
                 raise WiretapError("Error setting metadata for %s: %s" % (project_name, project_node.lastError()))
             
             self._engine.log_debug( "Project successfully created.")
-         
-         
-         
+
     def _append_setting_to_xml(self, project_settings, setting, starts_working_in=None, stops_working_in=None):
         """
         Generates xml for a parameter. May return an empty string if the xml
@@ -344,6 +354,24 @@ class WiretapHandler(object):
             volumes.append(node_name.c_str())
         
         return volumes
+
+    def _get_groups(self):
+        """
+        Return the list of group available for the current user and the current group.
+        
+        :returns: (default_group, groups)
+        """
+
+        import pwd, grp, os
+        # fetch all group which the user is a part of
+        user = pwd.getpwuid(os.geteuid()).pw_name                         # current user
+        groups = [g.gr_name for g in grp.getgrall() if user in g.gr_mem]  # compare user name with group database
+        gid = pwd.getpwnam(user).pw_gid                                   # make sure current group is added if database if incomplete
+        default_group = grp.getgrgid(gid).gr_name
+        if default_group not in groups:
+          groups.append(default_group)
+
+        return (default_group, groups)
 
     def _child_node_exists(self, parent_path, child_name, child_type):
         """
