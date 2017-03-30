@@ -417,7 +417,7 @@ class Ui_ProjectCreateDialog(object):
         self.frame_rate.setItemText(8, QtGui.QApplication.translate("ProjectCreateDialog", "59.94 fps NDF", None, QtGui.QApplication.UnicodeUTF8))
         self.frame_rate.setItemText(9, QtGui.QApplication.translate("ProjectCreateDialog", "60 fps", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("ProjectCreateDialog", "Depth", None, QtGui.QApplication.UnicodeUTF8))
-        self.depth.setItemText(0, QtGui.QApplication.translate("ProjectCreateDialog", "32-bit", None, QtGui.QApplication.UnicodeUTF8))
+        self.depth.setItemText(0, QtGui.QApplication.translate("ProjectCreateDialog", "32-bit fp", None, QtGui.QApplication.UnicodeUTF8))
         self.depth.setItemText(1, QtGui.QApplication.translate("ProjectCreateDialog", "16-bit fp", None, QtGui.QApplication.UnicodeUTF8))
         self.depth.setItemText(2, QtGui.QApplication.translate("ProjectCreateDialog", "12-bit", None, QtGui.QApplication.UnicodeUTF8))
         self.depth.setItemText(3, QtGui.QApplication.translate("ProjectCreateDialog", "12-bit u", None, QtGui.QApplication.UnicodeUTF8))

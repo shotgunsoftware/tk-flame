@@ -384,7 +384,7 @@ height: 100px;
          </property>
          <item>
           <property name="text">
-           <string>32-bit</string>
+           <string>32-bit fp</string>
           </property>
          </item>
          <item>
