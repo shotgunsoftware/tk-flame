@@ -83,8 +83,12 @@ class ProjectCreateDialog(QtGui.QWidget):
         self.ui.group_name.setCurrentIndex(idx)
 
         if self._engine.is_version_less_than("2018.1"):
+            # no security support in wiretap before 2018.1
             self.ui.group_name_label.setVisible(False)
             self.ui.group_name.setVisible(False)
+
+            # no 32-bit fp support in wiretap before 2018.1
+            self.ui.depth.removeItem(0)
 
         # populate the resolution tab
         self.__populate_resolution_tab(project_settings)
