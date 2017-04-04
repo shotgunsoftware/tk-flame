@@ -87,6 +87,9 @@ def getMainMenuCustomUIActions( ):
     if not context_commands:
         return ()
 
+    # sorts the list to have Log out option always appear last, Shotgun Python Console prior, and the rest in same order
+    context_commands.sort(key=lambda el: ('Log Out' in el, 'Shotgun Python Console...' in el, None))
+
     # generate flame data structure
     actions = [{"name": command_name, "caption": display_name} for (command_name, display_name) in context_commands]
 
