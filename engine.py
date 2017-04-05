@@ -925,14 +925,16 @@ class FlameEngine(sgtk.platform.Engine):
         # Specifying a remote backburner manager is only supported on 2016.1 and above
         if not self.is_version_less_than("2016.1"):
             bb_manager = self.get_setting("backburner_manager")
-            if not bb_manager :
+            if not bb_manager and not self.is_version_less_than("2018"):
                 # No backburner manager speficied in settings. Ask local backburnerServer
                 # which manager to choose from. (They might be none running locally)
+                # Before 2018, you needed root privileges to execute this command.
                 backburner_server_cmd = os.path.join(self._install_root, "backburner", "backburnerServer")
                 bb_manager = subprocess.check_output([backburner_server_cmd, "-q", "MANAGER"])
                 bb_manager = bb_manager.strip("\n")
 
-            backburner_args.append("-manager:\"%s\"" % bb_manager)
+            if bb_manager :
+                backburner_args.append("-manager:\"%s\"" % bb_manager)
 
         if backburner_server_host:
             backburner_args.append("-servers:\"%s\"" % backburner_server_host)
