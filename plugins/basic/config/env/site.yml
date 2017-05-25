@@ -1,0 +1,61 @@
+# Copyright (c) 2016 Shotgun Software Inc.
+#
+# CONFIDENTIAL AND PROPRIETARY
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
+# Source Code License included in this distribution package. See LICENSE.
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
+# not expressly granted therein are reserved by Shotgun Software Inc.
+#
+
+description: Apps and Engines when toolkit is run from outside a project.
+
+#################################################################################################
+# define all the items that should appear in this environment
+# By default make the non-project side of the desktop engine available
+
+engines:
+  tk-flame:
+
+    apps:
+      #
+      # Flame review app that sends a sequence to Shotgun Review
+      #
+      tk-flame-projectcreate:
+        location:
+          version: v0.1.0
+          type: manual
+          name: tk-flame-projectcreate
+
+    #
+    # Flame engine settings
+    #
+    debug_logging: false
+    location:
+      path: 'git@github.com:shotgunsoftware/tk-flame.git'
+      version: '22c693f10726697d03ebb68d39aee684043b8a45'
+      type: git_branch
+      branch: register_command
+    project_startup_hook: '{self}/project_startup.py'
+    flame_batch_publish_type: Flame Batch File
+    backburner_shared_tmp: /tmp
+    run_at_startup: []
+    backburner_manager: ''
+    context_menu: [ {app_instance: tk-multi-shotgunpanel, name: ''}]
+    context_menu: [ {app_instance: tk-multi-loader2, name: ''}]
+
+frameworks:
+  tk-framework-qtwidgets_v2.x.x:
+    location:
+      version: v2.2.1
+      type: app_store
+      name: tk-framework-qtwidgets
+  tk-framework-shotgunutils_v4.x.x:
+    location:
+      version: v4.3.1
+      type: app_store
+      name: tk-framework-shotgunutils
+
+
+

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WelcomeDialog</class>
+ <widget class="QDialog" name="WelcomeDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>625</width>
+    <height>305</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Welcome to Shotgun</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QLabel" name="logo_example">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/tk_flame_basic/sg_logo.png</pixmap>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>&lt;big&gt;Welcome to Shotgun&lt;/big&gt;
+
+&lt;p&gt;Shotgun is a review and production tracking toolset that helps you collaborate, communicate and review with other members of your team, directly from Flame. Click Log in to your Shotgun below in order to enable the Shotgun integration in Flame.&lt;/p&gt;</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="login">
+       <property name="text">
+        <string>Log in to my Shotgun Site</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="register_site">
+       <property name="text">
+        <string>Register a new Shotgun Site</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="learn_more">
+       <property name="text">
+        <string>Learn more about Shotgun</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

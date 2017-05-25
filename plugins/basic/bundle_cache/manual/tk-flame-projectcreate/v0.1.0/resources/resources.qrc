@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="tk_flame_projectcreate">
+    <file>sg_logo.png</file>
+    <file>missing_thumbnail_project.png</file>
+  </qresource>
+</RCC>
