@@ -39,7 +39,7 @@ import sys
 
 try:
     import sgtk
-    from sgtk import TankError    
+    from sgtk import TankError
 except ImportError:
     raise Exception("Could not find the sgtk library in the PYTHONPATH")
 
@@ -62,7 +62,7 @@ def launch_flame(dcc_path, dcc_args):
     engine_instance_name = os.environ["TOOLKIT_ENGINE_NAME"]
     context_str = os.environ["TOOLKIT_CONTEXT"]
     context = sgtk.context.deserialize(context_str)
-    
+
     # start up Flame engine
     # set a special environment variable to help hint to the engine
     # that when it is started this time, it is part of the bootstrap
@@ -87,16 +87,18 @@ def launch_flame(dcc_path, dcc_args):
     # and the version number
     major_version_str = os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION")
     minor_version_str = os.environ.get("TOOLKIT_FLAME_MINOR_VERSION")
+    patch_version_str = os.environ.get("TOOLKIT_FLAME_MINOR_VERSION")
     full_version_str = os.environ.get("TOOLKIT_FLAME_VERSION")
-    
-    if None in (major_version_str, minor_version_str, full_version_str):
+
+    if None in (major_version_str, minor_version_str, patch_version_str, full_version_str):
         flame_engine.log_error("Cannot find environment variable TOOLKIT_FLAME_x_VERSION")
     else:
-        flame_engine.set_version_info(major_version_str, minor_version_str, full_version_str)
-        
+        flame_engine.set_version_info(major_version_str=major_version_str, minor_version_str=minor_version_str,
+                                      patch_version_str=patch_version_str, full_version_str=full_version_str)
+
     # and kick off the pre-process - this will ensure that a Flame project exists.
     app_args = flame_engine.pre_dcc_launch_phase()
-    
+
     # now launch Flame!
     flame_engine.log_debug("-" * 60)
     flame_engine.log_debug("About to launch the actual flame DCC.")
@@ -108,7 +110,6 @@ def launch_flame(dcc_path, dcc_args):
     flame_engine.log_debug("-" * 60)
 
     return os.system(cmd_line)
-    
 
 
 if __name__ == "__main__":
@@ -117,10 +118,10 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         print "Invalid syntax: app_launcher /path/to/flame args!"
         sys.exit(1)
-        
+
     # the location of the actual tank core installation
     dcc_path = sys.argv[1]
-    
+
     # rest of the arguments are stuff we should pass to the DCC
     dcc_args = sys.argv[2:]
 
@@ -129,6 +130,5 @@ if __name__ == "__main__":
         exit_code = launch_flame(dcc_path, dcc_args)
     except KeyboardInterrupt, e:
         print "Process cancelled."
-
 
     sys.exit(exit_code)
