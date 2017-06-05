@@ -139,19 +139,22 @@ class FlameEngine(sgtk.platform.Engine):
         std_log_file = os.path.join(install_root, "log", self.SGTK_LOG_FILE)
 
         # test if we can write to the default log file
-        try:
-            fh = open(std_log_file, "at")
-            fh.close()
+        if os.access(os.path.dirname(std_log_file), os.W_OK):
             log_file = std_log_file
             using_safe_log_file = False
-        except IOError:
-            # cannot operate on file (usually related to permissions)
-            # write to tmp instead.
+        else:
+            # cannot rotate file in this directory, write to tmp instead.
             log_file = self.SGTK_LOG_FILE_SAFE
             using_safe_log_file = True
 
         # Set up a rotating logger with 4MiB max file size
-        rotating = logging.handlers.RotatingFileHandler(log_file, maxBytes=4*1024*1024, backupCount=10)
+        if using_safe_log_file:
+            rotating = logging.handlers.RotatingFileHandler(log_file, maxBytes=4*1024*1024, backupCount=10)
+        else:
+            rotating = logging.handlers.RotatingFileHandler(log_file, maxBytes=0, backupCount=50, delay=True)
+            # Always rotate. Current user might not have the correct permission to open this file
+            rotating.doRollover() # Will open file after roll over
+
         rotating.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] PID %(process)d: %(message)s"))
         # create a global logging object
         logger = logging.getLogger(LOG_CHANNEL)
