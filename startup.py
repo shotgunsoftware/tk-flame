@@ -44,9 +44,6 @@ class FlameLauncher(SoftwareLauncher):
     # variable components of the path in one place
     COMPONENT_REGEX_LOOKUP = {
         "version": "[\w.]+",    # word chars and .
-        "product": "[ \w]+",    # spaces and word characters
-        "version2": "[\w.]+",   # word chars and .
-        "product2": "[ \w]+",   # spaces and word characters
         "executable": "[\w]+",  # word characters (a-z0-9)
     }
 
@@ -54,22 +51,15 @@ class FlameLauncher(SoftwareLauncher):
     # of the supported operating systems. The templates are used for both
     # globbing and regex matches by replacing the named format placeholders
     # with an appropriate glob or regex string.
-    EXECUTABLE_TEMPLATES = {
-        "darwin": [
-            # /Applications/Autodesk/Flame 2018/Flame 2018.app
-            # /Applications/Autodesk/Flame 2017.1.pr70/Flame 2017.1.pr70.app
-            # /Applications/Autodesk/Flame Assist 2017.1.pr70/Flame Assist 2017.1.pr70.app
-            "/Applications/Autodesk/{product} {version}/{product2} {version2}.app",
-        ],
-        "linux2": [
+    EXECUTABLE_TEMPLATES = [
             # /usr/discreet/flame_2017.1/bin/startApplication
             # /usr/discreet/flameassist_2017.1.pr70/bin/startApplication
             # /usr/discreet/flare_2017.1/bin/startApplication
             # /usr/discreet/flamepremium_2017.1/bin/startApplication
             "/usr/discreet/{executable}_{version}/bin/startApplication",
             "/opt/Autodesk/{executable}_{version}/bin/startApplication",
-        ]
-    }
+    ]
+
 
     @property
     def minimum_supported_version(self):
@@ -121,7 +111,7 @@ class FlameLauncher(SoftwareLauncher):
     def _find_software(self):
 
         # all the executable templates for the current OS
-        executable_templates = self.EXECUTABLE_TEMPLATES.get(sys.platform, [])
+        executable_templates = self.EXECUTABLE_TEMPLATES
 
         # all the discovered executables
         sw_versions = []
@@ -141,15 +131,10 @@ class FlameLauncher(SoftwareLauncher):
                 # extract the matched keys form the key_dict (default to None if
                 # not included)
                 executable_version = key_dict.get("version")
-                executable_product = key_dict.get("product")
                 executable_name = key_dict.get("executable")
 
-                # we need a product to match against. If that isn't provided,
-                # then an executable name should be available. We can map that
-                # to the proper product.
-                if not executable_product:
-                    executable_product = \
-                        self.EXECUTABLE_TO_PRODUCT.get(executable_name)
+                # With the executable name we can map that to the proper product.
+                executable_product = self.EXECUTABLE_TO_PRODUCT.get(executable_name)
 
                 # only include the products that are covered in the EXECUTABLE_TO_PRODUCT dict
                 if executable_product is None or executable_product not in self.EXECUTABLE_TO_PRODUCT.values():
