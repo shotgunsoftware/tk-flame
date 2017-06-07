@@ -61,7 +61,11 @@ def getMainMenuCustomUIActions( ):
     # We can't do anything without the Shotgun engine. 
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
-        return ()
+        # We provide an interface to the user to start Shotgun
+        return ({   "name": "Shotgun", 
+                    "actions": ({"name": "Log In", 
+                                "caption": "Log In"},
+                                )}, )
 
     # build a list of the matching commands
     # returns a list of items, each a tuple with (instance_name, display_name, name, callback)
@@ -115,13 +119,23 @@ def customUIAction(info, userData):
     import sgtk
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine. 
+    # get the comand name
+    command_name = info["name"]
+
+    if command_name == "Log In":
+        from tk_flame_basic import bootstrap
+
+        # Retrieve the current project name
+        project_name = os.environ["SHOTGUN_FLAME_PROJECTNAME"]
+
+        # Try to log into Shotgun and to link the current project to a Shotgun project
+        return bootstrap.login_bootstrap(project_name, True)
+
+    # We can't do anything without else the Shotgun engine. 
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
 
-    # get the comand name
-    command_name = info["name"]
     # find it in toolkit
     command_obj = engine.commands.get(command_name)
 
