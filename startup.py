@@ -44,10 +44,12 @@ class FlameLauncher(SoftwareLauncher):
     # variable components of the path in one place
     COMPONENT_REGEX_LOOKUP = {
         "version": "[\w.]+",    # word chars and .
-        "product": "[ \w]+",    # spaces and word characters
         "version2": "[\w.]+",   # word chars and .
+        "product": "[ \w]+",    # spaces and word characters
         "product2": "[ \w]+",   # spaces and word characters
         "executable": "[\w]+",  # word characters (a-z0-9)
+        "suffix": "[\w]+",      # word chars
+        "suffix2": "[\w]+"      # word chars
     }
 
     # This dictionary defines a list of executable template strings for each
@@ -57,9 +59,13 @@ class FlameLauncher(SoftwareLauncher):
     EXECUTABLE_TEMPLATES = {
         "darwin": [
             # /Applications/Autodesk/Flame 2018/Flame 2018.app
-            # /Applications/Autodesk/Flame 2017.1.pr70/Flame 2017.1.pr70.app
-            # /Applications/Autodesk/Flame Assist 2017.1.pr70/Flame Assist 2017.1.pr70.app
+            # /Applications/Autodesk/Flame 2018.1.pr70/Flame 2018.1.pr70.app
+            # /Applications/Autodesk/Flame 2018.1.case1234/Flame 2018.1.case1234.app
+            # /Applications/Autodesk/Flame Assist 2018.1.pr70/Flame Assist 2018.1.pr70.app
             "/Applications/Autodesk/{product} {version}/{product2} {version2}.app",
+
+            # /Applications/Autodesk/Flame 2018.1 Update/Flame 2018.1 Update.app
+            "/Applications/Autodesk/{product} {version} {suffix}/{product2} {version2} {suffix2}.app",
         ],
         "linux2": [
             # /usr/discreet/flame_2017.1/bin/startApplication
