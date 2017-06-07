@@ -43,11 +43,17 @@ class FlameLauncher(SoftwareLauncher):
     # strings, these allow us to alter the regex matching for any of the
     # variable components of the path in one place
     COMPONENT_REGEX_LOOKUP = {
-        "version": "[\w.]+",    # word chars and .
-        "product": "[ \w]+",    # spaces and word characters
-        "version2": "[\w.]+",   # word chars and .
-        "product2": "[ \w]+",   # spaces and word characters
-        "executable": "[\w]+",  # word characters (a-z0-9)
+       "darwin": {
+          "version": "\d.*",                # starts with a number followed by anything
+          "product": "[ \w]+",              # spaces and word characters
+          "version2": "\d.*[^e][^m][^o]",   # starts with a number followed by anything but does not finish by emo
+                                            # This is to remove "Technology Demo" applications.
+          "product2": "[ \w]+",             # spaces and word characters
+       },
+       "linux2": {
+          "version": "\d.*",                # starts with a number followed by anything
+          "executable": "[\w]+",            # word characters (a-z0-9)
+       }
     }
 
     # This dictionary defines a list of executable template strings for each
@@ -122,6 +128,7 @@ class FlameLauncher(SoftwareLauncher):
 
         # all the executable templates for the current OS
         executable_templates = self.EXECUTABLE_TEMPLATES.get(sys.platform, [])
+        executable_regexp = self.COMPONENT_REGEX_LOOKUP.get(sys.platform, [])
 
         # all the discovered executables
         sw_versions = []
@@ -132,7 +139,7 @@ class FlameLauncher(SoftwareLauncher):
 
             executable_matches = self._glob_and_match(
                 executable_template,
-                self.COMPONENT_REGEX_LOOKUP
+                executable_regexp
             )
 
             # Extract all products from that executable.
