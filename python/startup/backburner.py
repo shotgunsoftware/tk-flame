@@ -65,7 +65,7 @@ context = sgtk.context.deserialize(serialized_context)
 # that we are running a backburner job
 os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "BACKBURNER"
 engine = sgtk.platform.start_engine(engine_instance, context.sgtk, context)
-engine.set_version_info(flame_version["major"], flame_version["minor"], flame_version["full"])
+engine.set_version_info(major_version_str=flame_version["major"], minor_version_str=flame_version["minor"], patch_version_str=flame_version["patch"], full_version_str=flame_version["full"])
 del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
 engine.log_debug("Engine launched for backburner process.")
 

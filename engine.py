@@ -30,7 +30,6 @@ import traceback
 import datetime
 import subprocess
 from sgtk import TankError
-from distutils.version import LooseVersion
 
 LOG_CHANNEL = "sgtk.tk-flame"
 
@@ -183,16 +182,17 @@ class FlameEngine(sgtk.platform.Engine):
         self._python_executable_path = python_path
         self.log_debug("This engine is running python interpreter '%s'" % self._python_executable_path )
         
-    def set_version_info(self, major_version_str, minor_version_str, full_version_str):
+    def set_version_info(self, major_version_str, minor_version_str, full_version_str, patch_version_str="0"):
         """
         Specifies which version of Flame this engine is running.
         This is typically populated as part of the engine startup.
         
         :param major_version_str: Major version number as string 
         :param minor_version_str: Minor version number as string
+        :param patch_version_str: Patch version number as string
         :param full_version_str: Full version number as string
         """
-        self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str}
+        self._flame_version = {"full": full_version_str, "major": major_version_str, "minor": minor_version_str, "patch": patch_version_str}
         self.log_debug("This engine is running with Flame version '%s'" % self._flame_version )
 
     def set_install_root(self, install_root):
@@ -375,6 +375,31 @@ class FlameEngine(sgtk.platform.Engine):
             self.flame_version
         )
 
+    def _is_version_less_than(self, major, minor, patch):
+        """
+        Compares the given version numbers with the current 
+        flame version and returns False if the given version is 
+        greater than the current version.
+
+        Example:
+
+        - Flame: '2016.1.0.278', version str: '2016.1' => False
+        - Flame: '2016',  version str: '2016.1' => True
+
+        :param version_str: Version to run comparison against
+        """
+        if int(self.flame_major_version) != int(major):
+            return int(self.flame_major_version) < int(major)
+
+        if int(self.flame_minor_version) != int(minor):
+            return int(self.flame_minor_version) < int(minor)
+
+        if int(self.flame_patch_version) != int(patch):
+            return int(self.flame_patch_version) < int(patch)
+
+        # Same version
+        return False
+
     def is_version_less_than(self, version_str):
         """
         Compares the given version string with the current 
@@ -388,11 +413,25 @@ class FlameEngine(sgtk.platform.Engine):
         
         :param version_str: Version to run comparison against
         """
-        if self._flame_version is None:
-            raise TankError("No Flame DCC version specified!")
-        
-        curr_version = self._flame_version["full"]
-        return LooseVersion(curr_version) < LooseVersion(version_str)
+
+        major_ver = 0
+        minor_ver = 0
+        patch_ver = 0
+
+        chunks = version_str.split(".")
+        if len(chunks) > 0:
+            if chunks[0].isdigit():
+                major_ver = int(chunks[0])
+
+        if len(chunks) > 1:
+            if chunks[1].isdigit():
+                minor_ver = int(chunks[1])
+
+        if len(chunks) > 2:
+            if chunks[2].isdigit():
+                patch_ver = int(chunks[2])
+
+        return self._is_version_less_than(major_ver, minor_ver, patch_ver)
 
     @property
     def flame_major_version(self):
@@ -418,6 +457,18 @@ class FlameEngine(sgtk.platform.Engine):
         
         return self._flame_version["minor"]
     
+    @property
+    def flame_patch_version(self):
+        """
+        Returns Flame's patch version number as a string.
+
+        :returns: String (e.g. '2')
+        """
+        if self._flame_version is None:
+            raise TankError("No Flame DCC version specified!")
+
+        return self._flame_version["patch"]
+
     @property
     def flame_version(self):
         """

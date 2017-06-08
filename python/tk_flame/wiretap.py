@@ -258,7 +258,7 @@ class WiretapHandler(object):
             xml += self._append_setting_to_xml(project_settings, "FrameDepth")
             xml += self._append_setting_to_xml(project_settings, "AspectRatio")
             xml += self._append_setting_to_xml(project_settings, "FrameRate")
-            xml += self._append_setting_to_xml(project_settings, "ProxyEnable", stops_working_in="2016.1")            
+            xml += self._append_setting_to_xml(project_settings, "ProxyEnable", stops_working_in="2016.1")
             xml += self._append_setting_to_xml(project_settings, "FieldDominance")            
             xml += self._append_setting_to_xml(project_settings, "VisualDepth", starts_working_in="2015.3", stops_working_in="2018.0")
 
@@ -321,7 +321,6 @@ class WiretapHandler(object):
                 
             else:
                 xml = "<%s>%s</%s>" % (setting, project_settings.get(setting), setting)
-    
         return xml
     
 

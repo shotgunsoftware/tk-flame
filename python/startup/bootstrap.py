@@ -20,16 +20,16 @@ def _get_flame_version(flame_path):
     """
     Returns the version string for the given Flame path
     
-    <INSTALL_ROOT>/flameassist_2016.2/bin/startApplication        --> (2016, 2, "2016.2")
-    <INSTALL_ROOT>/flameassist_2016.3/bin/startApplication        --> (2016, 3, "2016.3")
-    <INSTALL_ROOT>/flameassist_2016.0.0.322/bin/startApplication  --> (2016, 0, "2016.0.0.322")
-    <INSTALL_ROOT>/flameassist_2016.2.pr99/bin/startApplication   --> (2016, 2, "2016.2.pr99")
-    <INSTALL_ROOT>/flame_2016.pr50/bin/start_Flame                --> (2016, 0, "2016.pr50")
+    <INSTALL_ROOT>/flameassist_2016.2/bin/startApplication        --> (2016, 2, 0, "2016.2")
+    <INSTALL_ROOT>/flameassist_2016.3/bin/startApplication        --> (2016, 3, 0, "2016.3")
+    <INSTALL_ROOT>/flameassist_2016.0.3.322/bin/startApplication  --> (2016, 0, 3, "2016.0.3.322")
+    <INSTALL_ROOT>/flameassist_2016.2.pr99/bin/startApplication   --> (2016, 2, 0, "2016.2.pr99")
+    <INSTALL_ROOT>/flame_2016.pr50/bin/start_Flame                --> (2016, 0, 0, "2016.pr50")
 
-    If the minor or major version cannot be extracted, it will be set to zero.
+    If the patch, minor or major version cannot be extracted, it will be set to zero.
 
     :param flame_path: path to executable
-    :returns: (major, minor, full_str)
+    :returns: (major, minor, patch, full_str)
     """
 
     # do a quick check to ensure that we are running 2015.2 or later
@@ -46,6 +46,7 @@ def _get_flame_version(flame_path):
 
     major_ver = 0
     minor_ver = 0
+    patch_ver = 0
 
     chunks = version_str.split(".")
     if len(chunks) > 0:
@@ -56,7 +57,11 @@ def _get_flame_version(flame_path):
         if chunks[1].isdigit():
             minor_ver = int(chunks[1])
 
-    return (major_ver, minor_ver, version_str)
+    if len(chunks) > 2:
+        if chunks[2].isdigit():
+            patch_ver = int(chunks[2])
+
+    return (major_ver, minor_ver, patch_ver, version_str)
 
 
 def bootstrap(engine_instance_name, context, app_path, app_args):
@@ -100,7 +105,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     app_path = os.path.realpath(app_path)
 
     # do a quick check to ensure that we are running 2015.2 or later
-    (major_ver, minor_ver, version_str) = _get_flame_version(app_path)
+    (major_ver, minor_ver, patch_ver, version_str) = _get_flame_version(app_path)
 
     if major_ver < 2016:
         raise TankError("In order to run the Shotgun integration, you need at least Flame 2016!")
@@ -165,6 +170,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     # also pass the version of Flame in the same manner
     os.environ["TOOLKIT_FLAME_MAJOR_VERSION"] = str(major_ver)
     os.environ["TOOLKIT_FLAME_MINOR_VERSION"] = str(minor_ver)
+    os.environ["TOOLKIT_FLAME_PATCH_VERSION"] = str(patch_ver)
     os.environ["TOOLKIT_FLAME_VERSION"] = version_str
 
     # and the install location

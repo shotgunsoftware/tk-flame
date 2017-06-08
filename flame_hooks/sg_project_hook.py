@@ -74,11 +74,12 @@ def appInitialized(projectName):
         # and the version number
         major_version_str = os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION")
         minor_version_str = os.environ.get("TOOLKIT_FLAME_MINOR_VERSION")
+        patch_version_str = os.environ.get("TOOLKIT_FLAME_PATCH_VERSION")
         full_version_str = os.environ.get("TOOLKIT_FLAME_VERSION")
         
-        if None in (major_version_str, minor_version_str, full_version_str):
+        if None in (major_version_str, minor_version_str, patch_version_str, full_version_str):
             e.log_error("Cannot find environment variable TOOLKIT_FLAME_x_VERSION")
         else:
-            e.set_version_info(major_version_str, minor_version_str, full_version_str)
+            e.set_version_info(major_version_str=major_version_str, minor_version_str=minor_version_str, patch_version_str=patch_version_str, full_version_str=full_version_str)
         
         
