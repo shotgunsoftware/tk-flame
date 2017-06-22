@@ -152,7 +152,8 @@ class FlameEngine(sgtk.platform.Engine):
         else:
             rotating = logging.handlers.RotatingFileHandler(log_file, maxBytes=0, backupCount=50, delay=True)
             # Always rotate. Current user might not have the correct permission to open this file
-            rotating.doRollover() # Will open file after roll over
+            if os.path.exists(log_file):
+                rotating.doRollover() # Will open file after roll over
 
         rotating.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] PID %(process)d: %(message)s"))
         # create a global logging object
