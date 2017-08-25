@@ -100,7 +100,15 @@ class FlameLauncher(SoftwareLauncher):
         """
         # flame comes with toolkit built-in, so no need to
         # run any startup logic.
-        return LaunchInformation(exec_path, args, {})
+
+        env = {
+            "SHOTGUN_SITE": self.sgtk.shotgun_url,
+            "SHOTGUN_ENTITY_ID": str(self.context.project["id"]),
+            "SHOTGUN_ENTITY_TYPE": str(self.context.project["type"]),
+            "SHOTGUN_ENTITY_NAME": str(self.context.project["name"])
+        }
+
+        return LaunchInformation(exec_path, args, env)
 
     def scan_software(self):
         """
