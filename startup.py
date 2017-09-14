@@ -43,17 +43,15 @@ class FlameLauncher(SoftwareLauncher):
     # strings, these allow us to alter the regex matching for any of the
     # variable components of the path in one place
     COMPONENT_REGEX_LOOKUP = {
-       "darwin": {
-          "version": "\d.*",                # starts with a number followed by anything
-          "product": "[ \w]+",              # spaces and word characters
-          "version2": "\d.*[^e][^m][^o]",   # starts with a number followed by anything but does not finish by emo
-                                            # This is to remove "Technology Demo" applications.
-          "product2": "[ \w]+",             # spaces and word characters
-       },
-       "linux2": {
-          "version": "\d.*",                # starts with a number followed by anything
-          "executable": "[\w]+",            # word characters (a-z0-9)
-       }
+        "darwin": {
+            "version": "\d.*",  # starts with a number followed by anything
+            "product": "[ \w]+",  # spaces and word characters
+            "app": ".*",  # spaces and word characters
+        },
+        "linux2": {
+            "version": "\d.*",  # starts with a number followed by anything
+            "executable": "[\w]+",  # word characters (a-z0-9)
+        }
     }
 
     # This dictionary defines a list of executable template strings for each
@@ -65,7 +63,7 @@ class FlameLauncher(SoftwareLauncher):
             # /Applications/Autodesk/Flame 2018/Flame 2018.app
             # /Applications/Autodesk/Flame 2017.1.pr70/Flame 2017.1.pr70.app
             # /Applications/Autodesk/Flame Assist 2017.1.pr70/Flame Assist 2017.1.pr70.app
-            "/Applications/Autodesk/{product} {version}/{product2} {version2}.app",
+            "/Applications/Autodesk/{product} {version}/{app}.app",
         ],
         "linux2": [
             # /usr/discreet/flame_2017.1/bin/startApplication
@@ -150,6 +148,7 @@ class FlameLauncher(SoftwareLauncher):
                 executable_version = key_dict.get("version")
                 executable_product = key_dict.get("product")
                 executable_name = key_dict.get("executable")
+                executable_app = key_dict.get("app")
 
                 # we need a product to match against. If that isn't provided,
                 # then an executable name should be available. We can map that
@@ -158,18 +157,34 @@ class FlameLauncher(SoftwareLauncher):
                     executable_product = \
                         self.EXECUTABLE_TO_PRODUCT.get(executable_name)
 
+                # Unknown product
+                if not executable_product:
+                    continue
+
+                # Adapt the FlameAssist product name
+                if executable_product == "FlameAssist":
+                    executable_product = "Flame Assist"
+
                 # only include the products that are covered in the EXECUTABLE_TO_PRODUCT dict
-                if executable_product is None or executable_product not in self.EXECUTABLE_TO_PRODUCT.values():
+                if not executable_product.startswith("Flame") and not executable_product.startswith("Flare"):
                     self.logger.debug(
                         "Product '%s' is unrecognized. Skipping." %
                         (executable_product,)
                     )
                     continue
 
+                # exclude Technology demo apps
+                if executable_app and "Technology Demo" in executable_app:
+                    self.logger.debug(
+                        "Ignoring '%s %s - %s'" %
+                        (executable_product, executable_version, executable_app)
+                    )
+                    continue
+
                 # figure out which icon to use
                 icon_path = os.path.join(
                     self.disk_location,
-                    self.ICON_LOOKUP[executable_product]
+                    self.ICON_LOOKUP.get(executable_product, self.ICON_LOOKUP["Flame"])
                 )
                 self.logger.debug("Using icon path: %s" % (icon_path,))
 
