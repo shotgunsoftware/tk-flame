@@ -70,7 +70,7 @@ class FlameEngine(sgtk.platform.Engine):
 
             {
                 "name": "Flame",
-                "version": "1.2.3",
+                "version": "2018.3.pr84",
             }
 
         The returned dictionary is of following form on an error preventing
@@ -84,7 +84,13 @@ class FlameEngine(sgtk.platform.Engine):
         host_info = {"name": "Flame", "version": "unknown"}
 
         try:
-            host_info["version"] = os.environ.get("TOOLKIT_FLAME_VERSION")
+            # The 'SHOTGUN_FLAME_VERSION' environment variable comes from Flame plugin
+            # The 'TOOLKIT_FLAME_VERSION' environment variable comes from Flame classic config
+            if os.environ.has_key("SHOTGUN_FLAME_VERSION"):
+                host_info["version"] = os.environ.get("SHOTGUN_FLAME_VERSION", "unknown")
+
+            elif os.environ.has_key("TOOLKIT_FLAME_VERSION"):
+                host_info["version"] = os.environ.get("TOOLKIT_FLAME_VERSION", "unknown")
 
         except:
             # Fallback to initialization value above
