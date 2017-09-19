@@ -86,10 +86,10 @@ class FlameEngine(sgtk.platform.Engine):
         try:
             # The 'SHOTGUN_FLAME_VERSION' environment variable comes from Flame plugin
             # The 'TOOLKIT_FLAME_VERSION' environment variable comes from Flame classic config
-            if os.environ.has_key("SHOTGUN_FLAME_VERSION"):
+            if "SHOTGUN_FLAME_VERSION" in os.environ:
                 host_info["version"] = os.environ.get("SHOTGUN_FLAME_VERSION", "unknown")
 
-            elif os.environ.has_key("TOOLKIT_FLAME_VERSION"):
+            elif "TOOLKIT_FLAME_VERSION" in os.environ:
                 host_info["version"] = os.environ.get("TOOLKIT_FLAME_VERSION", "unknown")
 
         except:
