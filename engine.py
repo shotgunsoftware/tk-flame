@@ -991,11 +991,23 @@ class FlameEngine(sgtk.platform.Engine):
             if bb_manager :
                 backburner_args.append("-manager:\"%s\"" % bb_manager)
 
+        # Set the server group to the backburner job
+        bb_server_group = self.get_setting("backburner_server_group")
+        if bb_server_group:
+            backburner_args.append("-group:\"%s\"" % bb_server_group)
+
+        # Specify the backburner server if provided
         if backburner_server_host:
             backburner_args.append("-servers:\"%s\"" % backburner_server_host)
+        # Otherwise, fallback to the global backburner servers setting
+        else:
+            bb_servers = self.get_setting("backburner_servers")
+            if bb_servers:
+                backburner_args.append("-servers:\"%s\"" % bb_servers)
 
+        # Set the backburner job dependencies
         if run_after_job_id:
-            backburner_args.append("-dependencies:%s" % run_after_job_id) # run after another job
+            backburner_args.append("-dependencies:%s" % run_after_job_id)
 
         # call the bootstrap script
         backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")
