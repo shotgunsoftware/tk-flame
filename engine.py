@@ -292,6 +292,17 @@ class FlameEngine(sgtk.platform.Engine):
         Called when the engine is being destroyed
         """
         self.log_debug("%s: Destroying..." % self)
+
+        # Remove the current engine python hooks from the flame python hooks path
+        env_var_sep = ":"
+        env_var_name = "DL_PYTHON_HOOK_PATH"
+        flame_hooks_folder = os.path.join(self.disk_location, self.FLAME_HOOKS_FOLDER)
+        paths = os.environ.get(env_var_name, "").split(env_var_sep)
+        paths = [path for path in paths if path != flame_hooks_folder]
+        os.environ[env_var_name] = env_var_sep.join(paths)
+        self.log_debug("Removed to hook paths: %s" % flame_hooks_folder)
+
+        # Close every app windows
         self.close_windows()
 
     @property
