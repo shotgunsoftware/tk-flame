@@ -12,6 +12,7 @@ import os
 import sys
 
 import sgtk
+from sgtk import TankError
 from sgtk.platform import SoftwareLauncher, SoftwareVersion, LaunchInformation
 
 
@@ -96,15 +97,48 @@ class FlameLauncher(SoftwareLauncher):
 
         :returns: :class:`LaunchInformation` instance
         """
-        # flame comes with toolkit built-in, so no need to
-        # run any startup logic.
+        find_plugins = self.get_setting("launch_builtin_plugins")
 
-        env = {
-            "SHOTGUN_SITE": self.sgtk.shotgun_url,
-            "SHOTGUN_ENTITY_ID": str(self.context.project["id"]),
-            "SHOTGUN_ENTITY_TYPE": str(self.context.project["type"]),
-            "SHOTGUN_ENTITY_NAME": str(self.context.project["name"])
-        }
+        # If there is a plugin to launch with, we don't have much in the
+        # way of prep work to do.
+        if find_plugins:
+            # flame comes with toolkit built-in, so no need to
+            # run any startup logic.
+            env = {
+                "SHOTGUN_SITE": self.sgtk.shotgun_url,
+                "SHOTGUN_ENTITY_ID": str(self.context.project["id"]),
+                "SHOTGUN_ENTITY_TYPE": str(self.context.project["type"]),
+                "SHOTGUN_ENTITY_NAME": str(self.context.project["name"])
+            }
+        else:
+            # Classic launch situation, so we use the old prep logic
+            # prior to the bootstrap.
+            env = dict()
+            engine_path = os.path.dirname(__file__)
+
+            # find bootstrap file located in the engine and load that up
+            startup_path = os.path.join(engine_path, "python", "startup", "bootstrap.py")
+            if not os.path.exists(startup_path):
+                raise TankError("Cannot find bootstrap script '%s'" % startup_path)
+
+            python_path = os.path.dirname(startup_path)
+
+            # add our bootstrap location to the pythonpath
+            sys.path.insert(0, python_path)
+            try:
+                import bootstrap
+                (exec_path, args) = bootstrap.bootstrap(
+                    self.engine_name,
+                    self.context,
+                    exec_path,
+                    args,
+                )
+            except Exception, e:
+                self.logger.exception("Error executing engine bootstrap script.")
+                raise TankError("Error executing bootstrap script. Please see log for details.")
+            finally:
+                # remove bootstrap from sys.path
+                sys.path.pop(0)
 
         return LaunchInformation(exec_path, args, env)
 
