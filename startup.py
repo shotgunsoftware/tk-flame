@@ -117,14 +117,10 @@ class FlameLauncher(SoftwareLauncher):
             engine_path = os.path.dirname(__file__)
 
             # find bootstrap file located in the engine and load that up
-            startup_path = os.path.join(engine_path, "python", "startup", "bootstrap.py")
-            if not os.path.exists(startup_path):
-                raise TankError("Cannot find bootstrap script '%s'" % startup_path)
-
-            python_path = os.path.dirname(startup_path)
+            startup_path = os.path.join(engine_path, "python", "startup")
 
             # add our bootstrap location to the pythonpath
-            sys.path.insert(0, python_path)
+            sys.path.insert(0, startup_path)
             try:
                 import bootstrap
                 (exec_path, args) = bootstrap.bootstrap(
