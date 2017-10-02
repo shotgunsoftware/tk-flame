@@ -62,6 +62,16 @@ configuration:
         default_value: ""
         description: The group name of the servers to use when submitting a backburner job.
 
+    launch_builtin_plugins:
+        type: list
+        description: Comma-separated list of tk-flame plugins to load when launching Flame. Use
+                     of this feature disables the classic mechanism for bootstrapping Toolkit
+                     when Flame is launched.
+        allows_empty: True
+        default_value: []
+        values:
+            type: str
+
     run_at_startup:
         type: list
         description: "Controls what apps will run on startup.  This is a list where each element

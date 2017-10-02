@@ -135,6 +135,15 @@ class FlameLauncher(SoftwareLauncher):
                 )
             except Exception, e:
                 self.logger.exception("Error executing engine bootstrap script.")
+
+                if sgtk.platform.current_engine().has_ui:
+                    # We have UI support. Launch a dialog with a nice message.
+                    from sgtk.platform.qt import QtGui
+                    msg = ("<b style='color: rgb(252, 98, 70)'>Failed to launch "
+                           "Flame!</b><br><br>The following error was reported: "
+                           "<b>%s</b>" %
+                            str(e))
+                    QtGui.QMessageBox.critical(None, "Flame launch failed!", msg)
                 raise TankError("Error executing bootstrap script. Please see log for details.")
             finally:
                 # remove bootstrap from sys.path
