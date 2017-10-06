@@ -97,11 +97,11 @@ class FlameLauncher(SoftwareLauncher):
 
         :returns: :class:`LaunchInformation` instance
         """
-        find_plugins = self.get_setting("launch_builtin_plugins")
+        plugin_based_launch = self.get_setting("plugin_based_launch")
 
         # If there is a plugin to launch with, we don't have much in the
         # way of prep work to do.
-        if find_plugins:
+        if plugin_based_launch:
             # flame comes with toolkit built-in, so no need to
             # run any startup logic.
             env = {
