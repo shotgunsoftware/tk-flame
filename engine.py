@@ -964,6 +964,9 @@ class FlameEngine(sgtk.platform.Engine):
         # run as current user, not as root
         backburner_args.append("-userRights")
 
+        # attach the executable to the backburner job
+        backburner_args.append("-attach")
+
         # increase the max task length to 600 minutes
         backburner_args.append("-timeout:600")
 
@@ -1023,9 +1026,6 @@ class FlameEngine(sgtk.platform.Engine):
         # call the bootstrap script
         backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")
         
-        # assemble full cmd
-        farm_cmd = "%s '%s'" % (self.python_executable, backburner_bootstrap)
-        
         # now we need to capture all of the environment and everything in a file
         # (thanks backburner!) so that we can replay it later when the task wakes up
         session_file = os.path.join(self.get_backburner_tmp(), "tk_backburner_%s.pickle" % uuid.uuid4().hex)
@@ -1043,7 +1043,7 @@ class FlameEngine(sgtk.platform.Engine):
         pickle.dump(data, fh)
         fh.close()
         
-        full_cmd = "%s %s %s %s" % (backburner_job_cmd, " ".join(backburner_args), farm_cmd, session_file)
+        full_cmd = "%s %s %s %s" % (backburner_job_cmd, " ".join(backburner_args), backburner_bootstrap, session_file)
 
         self.log_debug("Starting backburner job '%s'" % job_name)
         self.log_debug("Command line: %s" % full_cmd)

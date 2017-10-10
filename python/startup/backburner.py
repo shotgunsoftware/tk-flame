@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright (c) 2014 Shotgun Software Inc.
 # 
 # CONFIDENTIAL AND PROPRIETARY
@@ -87,4 +89,4 @@ try:
     engine.log_debug("Temporary pickle job successfully deleted.")
 except Exception, e:
     engine.log_warning("Could not remove temporary file '%s': %s" % (pickle_file, e))
-    
+
