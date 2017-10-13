@@ -9,6 +9,9 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # Note! This file implements the exportHook interface from Flame 2015.2
+import os
+
+
 def getCustomExportProfiles(profiles):
     """
     Hook returning the custom export profiles to display to the user in the
@@ -25,8 +28,9 @@ def getCustomExportProfiles(profiles):
     if engine is None:
         return
 
-    for preset_title in engine.get_export_presets(): 
+    for preset_title in engine.get_export_presets():
         profiles[preset_title] = {"sg_preset_title": preset_title}
+
 
 def preCustomExport(info, userData):
     """
@@ -45,7 +49,7 @@ def preCustomExport(info, userData):
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
-    
+
     # first, get the toolkit engine
     import sgtk
     engine = sgtk.platform.current_engine()
@@ -68,9 +72,11 @@ def preCustomExport(info, userData):
     # tell the engine to dispatch the request to the correct toolkit app
     engine.trigger_export_callback("preCustomExport", session_id, info)
 
+
 # tell Flame not to display the fish cursor while we process the hook
-preCustomExport.func_dict["waitCursor"] = False  
- 
+preCustomExport.func_dict["waitCursor"] = False
+
+
 def postCustomExport(info, userData):
     """
     Hook called after a custom export ends. The export will be blocked
@@ -99,6 +105,7 @@ def postCustomExport(info, userData):
     session_id = userData.get("session_id")
     if session_id:
         engine.trigger_export_callback("postCustomExport", session_id, info)
+
 
 def preExport(info, userData):
     """
@@ -159,6 +166,12 @@ def postExport(info, userData):
     if session_id:
         engine.trigger_export_callback("postExport", session_id, info)
 
+    publisher = engine.apps.get("tk-multi-publish2")
+
+    if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_EXPORT_PUBLISH"):
+        if engine.export_cache:
+            publisher.import_module("tk_multi_publish2").show_dialog(publisher)
+
 
 def preExportSequence(info, userData):
     """
@@ -194,7 +207,8 @@ def preExportSequence(info, userData):
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
-        engine.trigger_export_callback("preExportSequence", session_id, info)        
+        engine.trigger_export_callback("preExportSequence", session_id, info)
+
 
 def postExportSequence(info, userData):
     """
@@ -225,7 +239,8 @@ def postExportSequence(info, userData):
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
-        engine.trigger_export_callback("postExportSequence", session_id, info)        
+        engine.trigger_export_callback("postExportSequence", session_id, info)
+
 
 def preExportAsset(info, userData):
     """    
@@ -278,10 +293,11 @@ def preExportAsset(info, userData):
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
-        engine.trigger_export_callback("preExportAsset", session_id, info)        
+        engine.trigger_export_callback("preExportAsset", session_id, info)
+
 
 def postExportAsset(info, userData):
-    """    
+    """
     Hook called after an asset export ends. The export will be blocked
     until this function returns.
     
@@ -334,8 +350,11 @@ def postExportAsset(info, userData):
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
-        engine.trigger_export_callback("postExportAsset", session_id, info)        
-   
+        engine.trigger_export_callback("postExportAsset", session_id, info)
+
+    engine.cache_export_asset(info)
+
+
 def useBackburnerPostExportAsset():
     """
     Use this method to instruct Flame to run all post-export callbacks

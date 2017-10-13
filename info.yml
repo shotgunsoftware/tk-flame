@@ -28,7 +28,13 @@ configuration:
         default_value: "{self}/project_startup.py"
         description: Contains the logic for determining and creating the workspace and 
                      users to use when launching into a Flame project. 
-    
+
+    backburner_hooks:
+        type: hook
+        default_value: "{self}/backburner.py"
+        description: Contains the logic for determining and creating the workspace and
+                             users to use when launching into a Flame project.
+
     flame_batch_publish_type:
         type: tank_type
         description: The publish type associated with Flame batch scripts. This parameter is used
