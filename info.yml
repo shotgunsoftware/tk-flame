@@ -62,7 +62,7 @@ configuration:
         default_value: ""
         description: The group name of the servers to use when submitting a backburner job.
 
-    plugin_based_launch:
+    use_builtin_plugin:
         type: bool
         description: Whether to prepare the launch of Flame to make use of its builtin Toolkit
                      plugin or not. If false, the classic-style Toolkit integration will be

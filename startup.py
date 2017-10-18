@@ -96,13 +96,14 @@ class FlameLauncher(SoftwareLauncher):
 
         :returns: :class:`LaunchInformation` instance
         """
-        plugin_based_launch = self.get_setting("plugin_based_launch")
+        use_builtin_plugin = self.get_setting("use_builtin_plugin")
 
         # If there is a plugin to launch with, we don't have much in the
         # way of prep work to do.
-        if plugin_based_launch:
+        if use_builtin_plugin:
             # flame comes with toolkit built-in, so no need to
             # run any startup logic.
+            self.logger.debug("Using the builtin plugin on Flame launch.")
             env = {
                 "SHOTGUN_SITE": self.sgtk.shotgun_url,
                 "SHOTGUN_ENTITY_ID": str(self.context.project["id"]),
@@ -110,6 +111,8 @@ class FlameLauncher(SoftwareLauncher):
                 "SHOTGUN_ENTITY_NAME": str(self.context.project["name"])
             }
         else:
+            self.logger.debug("Using the legacy bootstrap on Flame launch.")
+
             # We have a list of environment variables that we need to
             # gather and return. These are various bits of data that
             # the python/startup/app_launcher.py script uses during
@@ -138,7 +141,11 @@ class FlameLauncher(SoftwareLauncher):
                 app_path = os.path.realpath(flame_path)
             else:
                 app_path = os.path.realpath(exec_path)
+
+            self.logger.debug("Parsing Flame (%s) to determine Flame version...", app_path)
             major, minor, patch, version_str = _get_flame_version(app_path)
+            self.logger.debug("Found Flame version: %s", version_str)
+
             env.update(
                 dict(
                     TOOLKIT_FLAME_VERSION=version_str,
@@ -161,6 +168,7 @@ class FlameLauncher(SoftwareLauncher):
                     app_folder,
                     "python",
                 )
+                self.logger.debug("Adding wiretap root path to PYTHONPATH: %s", wiretap_path)
                 sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
             else:
                 raise TankError(
@@ -173,9 +181,6 @@ class FlameLauncher(SoftwareLauncher):
                 env["TOOLKIT_FLAME_INSTALL_ROOT"],
                 version_str
             )
-
-            sgtk_root = "/shotgun/configs/devosx/install/core/python"
-            sgtk.util.prepend_path_to_env_var("PYTHONPATH", sgtk_root)
 
             # We need to override the exec_path and args that will be used
             # to launch Flame. We launch using the Python bundled with Flame
