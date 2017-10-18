@@ -10,9 +10,8 @@
 
 import mimetypes
 import os
-import sys
-
 import re
+
 import sgtk
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -94,9 +93,8 @@ class FlameItemCollector(HookBaseClass):
         engine = publisher.engine
         project = publisher.context.project
         export_context = engine.export_cache
-        engine.clean_export_cache()
 
-        shared_information = {}
+        shared_dict = {}
 
         if type(export_context) is dict:
             for sequence_name, sequence_info in sorted(export_context.items()):
@@ -139,9 +137,10 @@ class FlameItemCollector(HookBaseClass):
                         elif len(shots) == 1:
                             shot = shots[0]
 
+                    job_ids = []
                     key_order = ["batch", "batchOpenClip", "openClip", "video", "audio", "sequence"]
                     for asset_type, asset_type_info in sorted(shot_info.items(), key=lambda i: key_order.index(i[0])):
-                        for asset_info, asset_info_list in asset_type_info.items():
+                        for _, asset_info_list in asset_type_info.items():
                             for asset_info in asset_info_list:
 
                                 create_item = getattr(self, "create_{}_items".format(asset_type))
@@ -149,11 +148,19 @@ class FlameItemCollector(HookBaseClass):
                                 for item in items:
                                     item.properties["fromBatch"] = False
                                     item.properties["assetInfo"] = asset_info
-                                    item.properties["lastJobID"] = asset_info.get("backgroundJobID")
-                                    item.properties["shared"] = shared_information
-                                    item.properties["Shot"] = shot
-                                    item.properties["Sequence"] = sequence
+                                    item.properties["backgroundJobId"] = job_ids
 
+                                    job_id = asset_info.get("backgroundJobId")
+                                    if job_id:
+                                        item.properties["backgroundJobId"].append(job_id)
+
+                                    item.properties["shared"] = shared_dict
+                                    item.properties["Shot"] = publisher.shotgun.find_one("Shot",
+                                                                                         [["id", "is", shot["id"]]],
+                                                                                         ["code"]) if shot else None
+                                    item.properties["Sequence"] = publisher.shotgun.find_one("Sequence", [
+                                        ["id", "is", sequence["id"]]],
+                                                                                             ["code"]) if sequence else None
                                     is_sequence = item.properties.get("is_sequence", False)
 
                                     if is_sequence:
@@ -215,10 +222,10 @@ class FlameItemCollector(HookBaseClass):
                 for item in items:
                     item.properties["fromBatch"] = True
                     item.properties["assetInfo"] = asset_info
-                    item.properties["lastJobID"] = asset_info.get("backgroundJobID")
-                    item.properties["shared"] = shared_information
-                    item.properties["Shot"] = shot
-                    item.properties["Sequence"] = sequence
+                    item.properties["shared"] = shared_dict
+                    item.properties["Shot"] = publisher.shotgun.find_one("Shot", [["id", "is", shot["id"]]], ["code"]) if shot else None
+                    item.properties["Sequence"] = publisher.shotgun.find_one("Sequence", [["id", "is", sequence["id"]]],
+                                                                             ["code"]) if sequence else None
 
                     is_sequence = item.properties.get("is_sequence", False)
 

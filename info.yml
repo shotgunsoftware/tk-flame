@@ -57,6 +57,17 @@ configuration:
                      a larger backburner setup, this path must be some sort of shared network
                      location. 
 
+    backburner_servers:
+        type: str
+        default_value: ""
+        description: Comma separated list of servers to use when submitting a backburner job.
+                     (Ignored if a group is used)
+
+    backburner_server_group:
+        type: str
+        default_value: ""
+        description: The group name of the servers to use when submitting a backburner job.
+
     run_at_startup:
         type: list
         description: "Controls what apps will run on startup.  This is a list where each element

@@ -88,6 +88,8 @@ def batchExportBegin(info, userData):
     if engine is None:
         return
 
+    engine.clear_export_cache()
+
     engine.trigger_batch_callback("batchExportBegin", info)
 
 

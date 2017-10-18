@@ -79,7 +79,7 @@ class CreateVersionPlugin(HookBaseClass):
         accept() method. Strings can contain glob patters such as *, for example
         ["maya.*", "file.maya"]
         """
-        return ["flame.video"]
+        return ["flame.video", "flame.openClip", "flame.batchOpenClip"]
 
     def accept(self, settings, item):
         """
@@ -141,7 +141,7 @@ class CreateVersionPlugin(HookBaseClass):
         publish_type = item.properties.get("type")
         name = item.properties["name"]
 
-        version_data = dict(
+        ver_data = dict(
             project=item.context.project,
             code=name,
             description=item.description,
@@ -150,39 +150,35 @@ class CreateVersionPlugin(HookBaseClass):
             sg_path_to_frames=path
         )
 
-        version_data["sg_department"] = "Flame"
+        ver_data["sg_department"] = "Flame"
 
-        asset_info = item.properties.get("assetInfo")
+        asset_info = item.properties.get("assetInfo", {})
 
         frame_rate = asset_info.get("fps")
         if frame_rate:
-            version_data["sg_uploaded_movie_frame_rate"] = float(frame_rate)
+            ver_data["sg_uploaded_movie_frame_rate"] = float(frame_rate)
 
         aspect_ratio = asset_info.get("aspectRatio")
         if asset_info:
-            version_data["sg_frames_aspect_ratio"] = float(aspect_ratio)
-            version_data["sg_movie_aspect_ratio"] = float(aspect_ratio)
-
-        first_frame = asset_info.get("sourceIn")
-        last_frame = asset_info.get("sourceOut")
+            ver_data["sg_frames_aspect_ratio"] = float(aspect_ratio)
+            ver_data["sg_movie_aspect_ratio"] = float(aspect_ratio)
 
         re_match = re.search("(\[[0-9]+-[0-9]+\])\.", path)
         if re_match:
-            version_data["frame_range"] = re_match.group(1)[1:-1]
-            first_frame, last_frame = re_match.group(1)[1:-1].split("-")
-            version_data["sg_first_frame"] = int(first_frame)
-            version_data["sg_last_frame"] = int(last_frame)
+            ver_data["frame_range"] = re_match.group(1)[1:-1]
+            ver_data["sg_first_frame"], ver_data["sg_last_frame"] = map(int, ver_data["frame_range"].split("-"))
+            ver_data["frame_count"] = int(ver_data["sg_last_frame"]) - int(ver_data["sg_first_frame"]) + 1
 
-        if first_frame and last_frame:
-            version_data["frame_count"] = int(last_frame) - int(first_frame) + 1
-
-        version = publisher.shotgun.create("Version", version_data)
+        version = publisher.shotgun.create("Version", ver_data)
         item.properties["Version"] = version
+
+        job_ids = item.properties.get("backgroundJobId")
+        job_ids_str = ",".join(job_ids) if job_ids else None
 
         engine.create_local_backburner_job(
             "Upload Version Image Preview",
             "%s: %s" % (publish_type, name),
-            asset_info.get("backgroundJobID"),
+            job_ids_str,
             "backburner_hooks",
             "attach_jpg_preview",
             {
@@ -197,7 +193,7 @@ class CreateVersionPlugin(HookBaseClass):
         engine.create_local_backburner_job(
             "Upload Version Movie Preview",
             "%s: %s" % (publish_type, name),
-            asset_info.get("backgroundJobID"),
+            job_ids_str,
             "backburner_hooks",
             "attach_mov_preview",
             {

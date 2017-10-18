@@ -175,15 +175,19 @@ class PublishFlameAsset(HookBaseClass):
             "version_number": version_number,
             "thumbnail_path": item.get_thumbnail_as_path(),
             "published_file_type": publish_type,
+            "version_entity": item.properties.get("Version")
         }
 
         published_file = sgtk.util.register_publish(**publish_data)
 
         if publish_type != "Flame Batch File":
+            job_ids = item.properties.get("backgroundJobId")
+            job_ids_str = ",".join(job_ids) if job_ids else None
+
             engine.create_local_backburner_job(
                 "Upload PublishedFile Image Preview",
                 "%s: %s" % (publish_type, name),
-                asset_info.get("backgroundJobID"),
+                job_ids_str,
                 "backburner_hooks",
                 "attach_jpg_preview",
                 {

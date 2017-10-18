@@ -161,10 +161,13 @@ class PushShotMetadataPlugin(HookBaseClass):
 
         self.parent.shotgun.update("Shot", item.context.entity['id'], shot_data)
 
+        job_ids = item.properties.get("backgroundJobId")
+        job_ids_str = ",".join(job_ids) if job_ids else None
+
         engine.create_local_backburner_job(
             "Upload Shot Image Preview",
             "%s: %s" % (publish_type, name),
-            asset_info.get("backgroundJobID"),
+            job_ids_str,
             "backburner_hooks",
             "attach_jpg_preview",
             {
@@ -175,7 +178,24 @@ class PushShotMetadataPlugin(HookBaseClass):
                 "name": name
             }
         )
+        if asset_info["segmentIndex"] == 1:
+            sequence = item.properties.get("Sequence")
 
+            if sequence:
+                engine.create_local_backburner_job(
+                    "Upload Sequence Image Preview",
+                    "%s: %s" % (publish_type, name),
+                    job_ids_str,
+                    "backburner_hooks",
+                    "attach_jpg_preview",
+                    {
+                        "targets": [sequence],
+                        "width": asset_info["width"],
+                        "height": asset_info["height"],
+                        "path": path,
+                        "name": name
+                    }
+                )
 
     def finalize(self, settings, item):
         """
@@ -191,15 +211,16 @@ class PushShotMetadataPlugin(HookBaseClass):
         pass
 
     def _shot_data(self, item):
-        item_asset_info = item.properties["assetInfo"]
+        asset_info = item.properties["assetInfo"]
 
         shot_data = {
-            "sg_cut_in": item_asset_info["sourceIn"],
-            "sg_cut_out": item_asset_info["sourceOut"],
-            "sg_head_in": item_asset_info["recordIn"],
-            "sg_tail_out": item_asset_info["recordOut"],
-            "sg_cut_duration": item_asset_info["recordOut"] - item_asset_info["recordIn"] + 1,
-            "sg_cut_order": item_asset_info["segmentIndex"]
+            "description": item.description,
+            "sg_cut_in": asset_info["handleIn"],
+            "sg_head_in": 0,
+            "sg_cut_order": asset_info["segmentIndex"]
         }
+        shot_data["sg_cut_out"] = shot_data["sg_cut_in"] + (asset_info["recordOut"] - asset_info["recordIn"] - 1 )
+        shot_data["sg_cut_duration"] = shot_data["sg_cut_out"] - shot_data["sg_cut_in"] + 1
+        shot_data["sg_tail_out"] = shot_data["sg_cut_out"] + asset_info["handleOut"]
 
         return shot_data

@@ -131,11 +131,14 @@ def preExport(info, userData):
     if engine is None:
         return
 
+    engine.clear_export_cache()
+
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
     session_id = userData.get("session_id")
     if session_id:
         engine.trigger_export_callback("preExport", session_id, info)
+
 
 
 def postExport(info, userData):
@@ -165,12 +168,11 @@ def postExport(info, userData):
     session_id = userData.get("session_id")
     if session_id:
         engine.trigger_export_callback("postExport", session_id, info)
-
-    publisher = engine.apps.get("tk-multi-publish2")
-
-    if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_EXPORT_PUBLISH"):
-        if engine.export_cache:
-            publisher.import_module("tk_multi_publish2").show_dialog(publisher)
+    else:
+        publisher = engine.apps.get("tk-multi-publish2")
+        if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_EXPORT_PUBLISH"):
+            if engine.export_cache:
+                publisher.import_module("tk_multi_publish2").show_dialog(publisher)
 
 
 def preExportSequence(info, userData):
@@ -345,6 +347,7 @@ def postExportAsset(info, userData):
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
+    engine.cache_export_asset(info)
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
@@ -352,7 +355,6 @@ def postExportAsset(info, userData):
     if session_id:
         engine.trigger_export_callback("postExportAsset", session_id, info)
 
-    engine.cache_export_asset(info)
 
 
 def useBackburnerPostExportAsset():
