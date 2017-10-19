@@ -133,7 +133,8 @@ class FlameLauncher(SoftwareLauncher):
             # startApplication executable, which is what we'll extract the
             # version components from. Examples of what this path can be and
             # how it's parsed can be found in the docstring of _get_flame_version
-            # function.
+            # method.
+            self.logger.debug("Flame app executable: %s", exec_path)
             if exec_path.endswith(".app"):
                 # The flame executable contained withing the .app will be a
                 # symlink to the startApplication path we're interested in.
@@ -142,8 +143,15 @@ class FlameLauncher(SoftwareLauncher):
             else:
                 app_path = os.path.realpath(exec_path)
 
+            if app_path != exec_path:
+                self.logger.debug(
+                    "Flame app executable has been flattened. The flattened "
+                    "path that will be parsed and used at launch time is: %s",
+                    app_path
+                )
+
             self.logger.debug("Parsing Flame (%s) to determine Flame version...", app_path)
-            major, minor, patch, version_str = _get_flame_version(app_path)
+            major, minor, patch, version_str = self._get_flame_version(app_path)
             self.logger.debug("Found Flame version: %s", version_str)
 
             env.update(
@@ -300,49 +308,49 @@ class FlameLauncher(SoftwareLauncher):
 
         return sw_versions
 
-def _get_flame_version(flame_path):
-    """
-    Returns the version string for the given Flame path
-    
-    <INSTALL_ROOT>/flameassist_2016.2/bin/startApplication        --> (2016, 2, 0, "2016.2")
-    <INSTALL_ROOT>/flameassist_2016.3/bin/startApplication        --> (2016, 3, 0, "2016.3")
-    <INSTALL_ROOT>/flameassist_2016.0.3.322/bin/startApplication  --> (2016, 0, 3, "2016.0.3.322")
-    <INSTALL_ROOT>/flameassist_2016.2.pr99/bin/startApplication   --> (2016, 2, 0, "2016.2.pr99")
-    <INSTALL_ROOT>/flame_2016.pr50/bin/start_Flame                --> (2016, 0, 0, "2016.pr50")
+    def _get_flame_version(self, flame_path):
+        """
+        Returns the version string for the given Flame path
+        
+        <INSTALL_ROOT>/flameassist_2016.2/bin/startApplication        --> (2016, 2, 0, "2016.2")
+        <INSTALL_ROOT>/flameassist_2016.3/bin/startApplication        --> (2016, 3, 0, "2016.3")
+        <INSTALL_ROOT>/flameassist_2016.0.3.322/bin/startApplication  --> (2016, 0, 3, "2016.0.3.322")
+        <INSTALL_ROOT>/flameassist_2016.2.pr99/bin/startApplication   --> (2016, 2, 0, "2016.2.pr99")
+        <INSTALL_ROOT>/flame_2016.pr50/bin/start_Flame                --> (2016, 0, 0, "2016.pr50")
 
-    If the patch, minor or major version cannot be extracted, it will be set to zero.
+        If the patch, minor or major version cannot be extracted, it will be set to zero.
 
-    :param flame_path: path to executable
-    :returns: (major, minor, patch, full_str)
-    """
+        :param flame_path: path to executable
+        :returns: (major, minor, patch, full_str)
+        """
 
-    # do a quick check to ensure that we are running 2015.2 or later
-    re_match = re.search("/fla[mr]e[^_]*_([^/]+)/bin", flame_path)
-    if not re_match:
-        raise TankError("Cannot extract Flame version number from the path '%s'!" % flame_path)
-    version_str = re_match.group(1)
+        # do a quick check to ensure that we are running 2015.2 or later
+        re_match = re.search("/fla[mr]e[^_]*_([^/]+)/bin", flame_path)
+        if not re_match:
+            raise TankError("Cannot extract Flame version number from the path '%s'!" % flame_path)
+        version_str = re_match.group(1)
 
-    # Examples:
-    # 2016
-    # 2016.2
-    # 2016.pr99
-    # 2015.2.pr99
+        # Examples:
+        # 2016
+        # 2016.2
+        # 2016.pr99
+        # 2015.2.pr99
 
-    major_ver = 0
-    minor_ver = 0
-    patch_ver = 0
+        major_ver = 0
+        minor_ver = 0
+        patch_ver = 0
 
-    chunks = version_str.split(".")
-    if len(chunks) > 0:
-        if chunks[0].isdigit():
-            major_ver = int(chunks[0])
+        chunks = version_str.split(".")
+        if len(chunks) > 0:
+            if chunks[0].isdigit():
+                major_ver = int(chunks[0])
 
-    if len(chunks) > 1:
-        if chunks[1].isdigit():
-            minor_ver = int(chunks[1])
+        if len(chunks) > 1:
+            if chunks[1].isdigit():
+                minor_ver = int(chunks[1])
 
-    if len(chunks) > 2:
-        if chunks[2].isdigit():
-            patch_ver = int(chunks[2])
+        if len(chunks) > 2:
+            if chunks[2].isdigit():
+                patch_ver = int(chunks[2])
 
-    return (major_ver, minor_ver, patch_ver, version_str)
+        return (major_ver, minor_ver, patch_ver, version_str)
