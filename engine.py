@@ -119,7 +119,7 @@ class FlameEngine(sgtk.platform.Engine):
         self._registered_batch_instances = []
 
         # maintain the export cache
-        self._export_cache = {}
+        self._export_info = None
 
         if self.has_ui:
             # tell QT to interpret C strings as utf-8
@@ -743,23 +743,22 @@ class FlameEngine(sgtk.platform.Engine):
         asset_name = asset_info.get("assetName")
 
         # reinitialize the export cache if the format doesn't fit the current asset
-        if type(self._export_cache) is not dict:
-            self._export_cache = {}
+        if type(self.export_info) is not dict:
+            self._export_info = {}
 
-        #
-        if sequence_name not in self._export_cache:
-            self._export_cache[sequence_name] = {shot_name: {asset_type: {asset_name: [asset_info]}}}
+        if sequence_name not in self.export_info:
+            self.export_info[sequence_name] = {shot_name: {asset_type: {asset_name: [asset_info]}}}
 
-        elif shot_name not in self._export_cache[sequence_name]:
-            self._export_cache[sequence_name][shot_name] = {asset_type: {asset_name: [asset_info]}}
+        elif shot_name not in self.export_info[sequence_name]:
+            self.export_info[sequence_name][shot_name] = {asset_type: {asset_name: [asset_info]}}
 
-        elif asset_type not in self._export_cache[sequence_name][shot_name]:
-            self._export_cache[sequence_name][shot_name][asset_type] = {asset_name: [asset_info]}
+        elif asset_type not in self.export_info[sequence_name][shot_name]:
+            self.export_info[sequence_name][shot_name][asset_type] = {asset_name: [asset_info]}
 
-        elif asset_name not in self._export_cache[sequence_name][shot_name][asset_type]:
-            self._export_cache[sequence_name][shot_name][asset_type][asset_name] = [asset_info]
+        elif asset_name not in self.export_info[sequence_name][shot_name][asset_type]:
+            self.export_info[sequence_name][shot_name][asset_type][asset_name] = [asset_info]
         else:
-            self._export_cache[sequence_name][shot_name][asset_type][asset_name].append(asset_info)
+            self.export_info[sequence_name][shot_name][asset_type][asset_name].append(asset_info)
 
     def cache_batch_export_asset(self, info):
         """
@@ -767,10 +766,10 @@ class FlameEngine(sgtk.platform.Engine):
 
         :param info: Information dictionary of the asset
         """
-        if type(self._export_cache) is not list:
-            self._export_cache = []
+        if type(self.export_info) is not list:
+            self._export_info = []
 
-        self._export_cache.append(info)
+        self.export_info.append(info)
 
     ################################################################################################################
     # export callbacks handling
@@ -881,18 +880,18 @@ class FlameEngine(sgtk.platform.Engine):
             tk_callbacks[callback_name](session_id, info)
 
     @property
-    def export_cache(self):
+    def export_info(self):
         """
         :return: Flame export cache
         """
-        return self._export_cache
+        return self._export_info
 
-    def clear_export_cache(self):
+    def clear_export_info(self):
         """
         Clear the Flame export cache
         """
 
-        self._export_cache = None
+        self._export_info = None
 
     ################################################################################################################
     # batch callbacks handling
@@ -1110,7 +1109,6 @@ class FlameEngine(sgtk.platform.Engine):
         except sgtk.authentication.AuthenticationCancelled:
             self.log_debug("User cancelled auth. No backburner job will be created.")
         else:
-            print "Command line:", full_cmd
             self.log_debug("Starting backburner job '%s'" % job_name)
             self.log_debug("Command line: %s" % full_cmd)
             self.log_debug("App: %s" % instance)

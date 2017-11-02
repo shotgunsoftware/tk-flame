@@ -9,15 +9,23 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+
 import sgtk
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
-class PushShotMetadataPlugin(HookBaseClass):
+class UpdateShotPlugin(HookBaseClass):
     """
     Plugin for pushing Shot metadata in Shotgun
     """
+
+    def __init__(self, *args, **kwrds):
+        super(UpdateShotPlugin, self).__init__(*args, **kwrds)
+
+        self.publisher = self.parent
+        self.engine = self.publisher.engine
+        self.sg = self.engine.shotgun
 
     @property
     def icon(self):
@@ -37,7 +45,7 @@ class PushShotMetadataPlugin(HookBaseClass):
         """
         One line display name describing the plugin
         """
-        return "Update Shot metadata"
+        return "Update Shot"
 
     @property
     def description(self):
@@ -105,26 +113,10 @@ class PushShotMetadataPlugin(HookBaseClass):
         :returns: dictionary with boolean keys accepted, required and enabled
         """
 
+        # Only available on a Shot Context and from a batch render
         is_accepted = item.context.entity["type"] == "Shot" and not item.properties["fromBatch"]
 
-        if is_accepted:
-            is_checked = False
-            shot_data = self._shot_data(item)
-            query_filter = [["id", "is", item.context.entity["id"]]]
-            query_fields = shot_data.keys()
-            shot_info = self.parent.shotgun.find_one("Shot", fields=query_fields, filters=query_filter)
-
-            for k, v in shot_data.items():
-                if shot_info[k] != v:
-                    is_checked = True
-                    break
-        else:
-            is_checked = False
-
-        return {
-            "accepted": is_accepted,
-            "checked": is_checked
-        }
+        return {"accepted": is_accepted}
 
     def validate(self, settings, item):
         """
@@ -139,7 +131,25 @@ class PushShotMetadataPlugin(HookBaseClass):
 
         :returns: True if item is valid, False otherwise.
         """
-        return item.context.entity["type"] == "Shot"
+        # Make sure that we have the context dict in the item properties
+        if "context" not in item.properties:
+            self.cache_entities(item.parent, [item.context.entity])
+            item.properties["context"] = item.parent.properties[item.context.entity["type"]][item.context.entity["id"]]
+
+        # Make sure that we have the Sequence in our context dict
+        if "Sequence" not in item.properties["context"]:
+            sequence_fields = ["cuts", "shots", "code"]
+            sequence = self.sg.find_one("Sequence", [["shots", "is", item.context.entity]], sequence_fields)
+            self.cache_entities(item.parent, [sequence])
+
+            if sequence \
+                    and sequence["type"] in item.parent.properties and \
+                            sequence["id"] in item.parent.properties[sequence["type"]]:
+                item.properties["context"]["Sequence"] = item.parent.properties[sequence["type"]][sequence["id"]]
+            else:
+                pass
+
+        return "Sequence" in item.properties["context"]
 
     def publish(self, settings, item):
         """
@@ -150,52 +160,40 @@ class PushShotMetadataPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
-
-        publisher = self.parent
-        engine = publisher.engine
         shot_data = self._shot_data(item)
         asset_info = item.properties["assetInfo"]
         path = item.properties["path"]
-        publish_type = item.properties.get("type")
-        name = item.properties["name"]
 
-        self.parent.shotgun.update("Shot", item.context.entity['id'], shot_data)
+        # Build the thumbnail generation target list
+        target = [item.context.entity]
 
+        # If this is the first Shot of the Sequence, we update the Sequence thumbnail
+        if asset_info["segmentIndex"] == 1:
+            sequence = item.properties["context"]["Sequence"]
+            target.append(sequence)
+
+        # Update the Shot on shotgun
+        self.sg.update("Shot", item.context.entity['id'], shot_data)
+
+        # Extract the Backburner dependencies
         job_ids = item.properties.get("backgroundJobId")
         job_ids_str = ",".join(job_ids) if job_ids else None
 
-        engine.create_local_backburner_job(
+        # Create the Image thumbnail in background
+        self.engine.create_local_backburner_job(
             "Upload Shot Image Preview",
-            "%s: %s" % (publish_type, name),
+            item.name,
             job_ids_str,
             "backburner_hooks",
             "attach_jpg_preview",
             {
-                "targets": [item.context.entity],
+                "targets": target,
                 "width": asset_info["width"],
                 "height": asset_info["height"],
                 "path": path,
-                "name": name
+                "name": item.name
             }
         )
-        if asset_info["segmentIndex"] == 1:
-            sequence = item.properties.get("Sequence")
-
-            if sequence:
-                engine.create_local_backburner_job(
-                    "Upload Sequence Image Preview",
-                    "%s: %s" % (publish_type, name),
-                    job_ids_str,
-                    "backburner_hooks",
-                    "attach_jpg_preview",
-                    {
-                        "targets": [sequence],
-                        "width": asset_info["width"],
-                        "height": asset_info["height"],
-                        "path": path,
-                        "name": name
-                    }
-                )
 
     def finalize(self, settings, item):
         """
@@ -211,16 +209,41 @@ class PushShotMetadataPlugin(HookBaseClass):
         pass
 
     def _shot_data(self, item):
+        """
+        Extract the Shot metadata from the item assetInfo
+
+        :param item: Current Item
+        :return: Shot metadata dictionary
+        """
         asset_info = item.properties["assetInfo"]
 
         shot_data = {
             "description": item.description,
-            "sg_cut_in": asset_info["handleIn"],
-            "sg_head_in": 0,
-            "sg_cut_order": asset_info["segmentIndex"]
+            "sg_cut_in": asset_info["recordIn"],
+            "sg_cut_out": asset_info["recordOut"] - 1,
+            "sg_cut_order": asset_info["segmentIndex"],
         }
-        shot_data["sg_cut_out"] = shot_data["sg_cut_in"] + (asset_info["recordOut"] - asset_info["recordIn"] - 1 )
-        shot_data["sg_cut_duration"] = shot_data["sg_cut_out"] - shot_data["sg_cut_in"] + 1
+
+        shot_data["sg_head_in"] = shot_data["sg_cut_in"] - asset_info["handleIn"]
         shot_data["sg_tail_out"] = shot_data["sg_cut_out"] + asset_info["handleOut"]
 
+        shot_data["sg_cut_duration"] = shot_data["sg_cut_out"] - shot_data["sg_cut_in"] + 1
+
         return shot_data
+
+    def cache_entities(self, parent_item, entities):
+        """
+        Cache the entity list on the item properties to avoid redundant database query.
+
+        :param item: Item instance where the entities should be cached on
+        :param entities: List of entity to cache
+        """
+        for entity in entities:
+            entity_type = entity["type"]
+            entity_id = entity["id"]
+            if entity_type not in parent_item.properties:
+                parent_item.properties[entity_type] = {entity_id: dict(entity)}
+            elif entity_id not in parent_item.properties[entity_type]:
+                parent_item.properties[entity_type][entity_id] = dict(entity)
+            else:
+                parent_item.properties[entity_type][entity_id].update(entity)

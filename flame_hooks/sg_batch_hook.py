@@ -88,7 +88,7 @@ def batchExportBegin(info, userData):
     if engine is None:
         return
 
-    engine.clear_export_cache()
+    engine.clear_export_info()
 
     engine.trigger_batch_callback("batchExportBegin", info)
 
@@ -152,5 +152,7 @@ def renderEnded(module_name, sequence_name, elapsed):
     publisher = engine.apps.get("tk-multi-publish2")
 
     if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_RENDER_PUBLISH"):
-        if engine.export_cache:
+        if engine.export_info:
+            import gc; gc.disable()  # SMOK-46824 - PySide garbage collection issue
             publisher.import_module("tk_multi_publish2").show_dialog(publisher)
+            gc.enable()

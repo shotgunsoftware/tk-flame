@@ -64,17 +64,7 @@ COMMON_FILE_INFO = {
         "extensions": ["tiff", "tx", "tga", "dds", "rat"],
         "icon": "texture.png",
         "item_type": "file.texture",
-    },
-    "Flame Batch File": {
-        "extensions": ["batch"],
-        "icon": "texture.png",
-        "item_type": "file.texture",
-    },
-    "Open Clip": {
-        "extensions": ["clip"],
-        "icon": "texture.png",
-        "item_type": "file.texture",
-    },
+    }
 }
 
 
@@ -83,167 +73,216 @@ class FlameItemCollector(HookBaseClass):
     A basic collector that handles files and general objects.
     """
 
+    def __init__(self, *args, **kwrds):
+        super(FlameItemCollector, self).__init__(*args, **kwrds)
+
+        self.publisher = self.parent
+        self.engine = self.publisher.engine
+        self.sg = self.engine.shotgun
+
     def process_current_session(self, parent_item):
-        # go ahead and build the path to the icon for use by any documents
+        """
+        Create Items from the flame latest export action.
+
+        This action could be an Export from the MediaLibrary or a Render from Batch.
+
+        :param parent_item: Invisible root item of the publisher app
         """
 
-        :param parent_item:
-        """
-        publisher = self.parent
-        engine = publisher.engine
-        project = publisher.context.project
-        export_context = engine.export_cache
+        # Current project
+        project = self.publisher.context.project
 
-        shared_dict = {}
+        # Flame export last export info
+        export_context = self.engine.export_info
 
+        # Shotgun queries constants
+        shot_fields = ["code", "sg_cut_in", "sg_cut_out", "sg_head_in", "sg_tail_out"]
+        sequence_fields = ["cuts", "shots", "code"]
+        sort_by_fields = [{"field_name": "created_at", "direction": "desc"}]
+
+        # When the action is an Export, the export_info is an embedded dictionary structure
         if type(export_context) is dict:
+
+            # The first level of dictionary have the Sequence name as key and another dictionary as value
             for sequence_name, sequence_info in sorted(export_context.items()):
                 sequence = None
+
+                # If the sequence_name is not ""
                 if sequence_name:
+
+                    # We try to find a Sequence with the right code. The latest if there's more thant one Sequence.
                     sg_filter = [["code", "is", sequence_name], ["project", "is", project]]
+                    sequence = self.sg.find_one("Sequence", sg_filter, sequence_fields, sort_by_fields)
 
-                    sequences = publisher.shotgun.find("Sequence", sg_filter)
-
-                    if not sequences:
+                    if not sequence:
+                        # There's no Sequence with the right code... Let's create one!
                         seq_data = {
                             "code": sequence_name,
                             "project": project
                         }
 
-                        sequence = publisher.shotgun.create("Sequence", seq_data)
-                    elif len(sequences) == 1:
-                        sequence = sequences[0]
+                        sequence = self.sg.create("Sequence", seq_data)
 
+                    # Let's cache this Sequence information
+                    self.cache_entities(parent_item, [sequence])
+
+                # The second level of dictionary have the Shot name as key and another dictionary as value
                 for shot_name, shot_info in sorted(sequence_info.items()):
                     shot = None
+
+                    # If the shot_name is not ""
                     if shot_name:
+                        # The Shot should have the right code name
                         sg_filter = [["code", "is", shot_name]]
 
                         if sequence:
+                            # The shot should be linked to the right Sequence
                             sg_filter.append(["sg_sequence", "is", sequence])
 
-                        shots = publisher.shotgun.find("Shot", sg_filter)
+                            # We try to find the right Shot. The latest if there's more thant one Shot.
+                            shot = self.sg.find_one("Shot", sg_filter, shot_fields, sort_by_fields)
 
-                        if not shots:
+                        if not shot:
+                            # There's no Shot that match our needs... so let's create it !
                             shot_data = {
                                 "code": shot_name,
                                 "project": project
                             }
 
                             if sequence:
+                                # It should be linked to the sequence that we fount previously
                                 shot_data["sg_sequence"] = sequence
 
-                            shot = publisher.shotgun.create("Shot", shot_data)
-                        elif len(shots) == 1:
-                            shot = shots[0]
+                            shot = self.sg.create("Shot", shot_data)
 
-                    job_ids = []
-                    key_order = ["batch", "batchOpenClip", "openClip", "video", "audio", "sequence"]
+                        # Let's cache this Shot information
+                        self.cache_entities(parent_item, [shot])
+
+                    # We use a shared job_id_list on a Shot level because there's no background job ID associated to a
+                    # OpenClip file export. If we trigger a thumbnail generation when the real media is not available,
+                    # it fail. Making a long dependency list ensure that every video item is rendered before we try to
+                    # generate the thumbnails.
+                    job_id_list = []
+
+                    # Whe want to have the items in a sorted way
+                    key_order = ["batchOpenClip", "batch", "openClip", "video", "audio", "sequence"]
+
+                    # The next level of dictionary have the asset type as key and a dictionary as value
                     for asset_type, asset_type_info in sorted(shot_info.items(), key=lambda i: key_order.index(i[0])):
+
+                        # The next level of dictionary have the asset name as key and a list as value
                         for _, asset_info_list in asset_type_info.items():
+
+                            # Finally, this is a list of asset with the same name, type, shot and sequence.
                             for asset_info in asset_info_list:
 
-                                create_item = getattr(self, "create_{}_items".format(asset_type))
-                                items = create_item(parent_item, asset_info)
-                                for item in items:
-                                    item.properties["fromBatch"] = False
-                                    item.properties["assetInfo"] = asset_info
-                                    item.properties["backgroundJobId"] = job_ids
+                                # Dynamically get the right function based on the type
+                                if hasattr(self, "create_{}_items".format(asset_type)):
+                                    create_items = getattr(self, "create_{}_items".format(asset_type))
+                                else:
+                                    # This is a new assetType and not supported by the this collector
+                                    continue
 
+                                # Get the items that can be created from this asset
+                                items = create_items(parent_item, asset_info)
+                                for item in items:
+                                    # This is not an item from a batch render
+                                    item.properties["fromBatch"] = False
+
+                                    # Let's keep a reference to the asset info dict
+                                    item.properties["assetInfo"] = asset_info
+
+                                    # Let's keep a reference to the shared job id list
+                                    item.properties["backgroundJobId"] = job_id_list
+
+                                    # Add the current asset job id if there's one
                                     job_id = asset_info.get("backgroundJobId")
                                     if job_id:
                                         item.properties["backgroundJobId"].append(job_id)
 
-                                    item.properties["shared"] = shared_dict
-                                    item.properties["Shot"] = publisher.shotgun.find_one("Shot",
-                                                                                         [["id", "is", shot["id"]]],
-                                                                                         ["code"]) if shot else None
-                                    item.properties["Sequence"] = publisher.shotgun.find_one("Sequence", [
-                                        ["id", "is", sequence["id"]]],
-                                                                                             ["code"]) if sequence else None
-                                    is_sequence = item.properties.get("is_sequence", False)
-
-                                    if is_sequence:
-                                        # generate the name from one of the actual files in the sequence
-                                        name_path = item.properties["sequence_files"][0]
-                                    else:
-                                        name_path = item.properties["path"]
-
-                                    # get the publish name for this file path. this will ensure we get a
-                                    # consistent name across version publishes of this file.
-                                    item.properties["name"] = publisher.util.get_publish_name(
-                                        name_path, sequence=is_sequence)
-
+                                    # Set the context based on the most precise entity available
                                     if shot:
-                                        item.context = publisher.sgtk.context_from_entity(shot["type"], shot["id"])
+                                        item.context = self.publisher.sgtk.context_from_entity_dictionary(shot)
                                     elif sequence:
-                                        item.context = publisher.sgtk.context_from_entity(sequence["type"],
-                                                                                          sequence["id"])
+                                        item.context = self.publisher.sgtk.context_from_entity_dictionary(sequence)
+                                    else:
+                                        item.context = self.publisher.sgtk.context_from_entity_dictionary(project)
 
+        # When the action is a render, the export_info is a list of asset
         elif type(export_context) == list:
+            # We have a list of asset
             for asset_info in export_context:
                 shot = None
-                sequence = None
                 shot_name = asset_info.get("shotName", "")
 
+                # We try to find the right Shot. The latest if there's more thant one Shot.
                 if shot_name:
                     sg_filter = [["code", "is", shot_name]]
-                    shots = publisher.shotgun.find("Shot", sg_filter, ["sg_sequence"])
+                    shot = self.sg.find_one("Shot", sg_filter, shot_fields, sort_by_fields)
 
-                    if len(shots) == 1:
-                        shot = shots[0]
-                        sequence = shot["sg_sequence"]
-
-                if shot is None and "openClipResolvedPath" in asset_info:
+                # The fallback is to try to find the PublishedFile linked to the shot OpenClip and use the same entity
+                if not shot and "openClipResolvedPath" in asset_info:
                     filters = [["project", "is", project]]
                     fields = ["path", "entity"]
-                    entity_type = "PublishedFile"
 
+                    # Get all PublishedFile of the current project
                     published_files = self.parent.shotgun.find(
-                        entity_type, filters=filters, fields=fields
+                        "PublishedFile", filters=filters, fields=fields
                     )
+
+                    # Try to find a PublishedFile with the same path as the OpenClip
                     for publish_file in published_files:
                         if asset_info["openClipResolvedPath"] in publish_file.get("path", {}).get("url", ""):
                             shot = publish_file.get("entity", None)
+                            break
 
-                if shot and not sequence:
-                    filter = [["id", "is", shot["id"]]]
-                    fields = ["sg_sequence"]
-                    entity_type = "Shot"
-
-                    shots = self.parent.shotgun.find(
-                        entity_type, filters=filter, fields=fields
-                    )
-
-                    if len(shots) == 1:
-                        sequence = shots[0]["sg_sequence"]
-
+                # Get the items that can be created from this asset dictionary
                 items = self.create_render_items(parent_item, asset_info)
                 for item in items:
+                    # This item is from a batch render
                     item.properties["fromBatch"] = True
+
+                    # Let's keep a reference to the asset info dict
                     item.properties["assetInfo"] = asset_info
-                    item.properties["shared"] = shared_dict
-                    item.properties["Shot"] = publisher.shotgun.find_one("Shot", [["id", "is", shot["id"]]], ["code"]) if shot else None
-                    item.properties["Sequence"] = publisher.shotgun.find_one("Sequence", [["id", "is", sequence["id"]]],
-                                                                             ["code"]) if sequence else None
 
-                    is_sequence = item.properties.get("is_sequence", False)
+                    # TODO: Rendering with Background Reactor trigger the postRender hook and start the publish
+                    # process. This implies that the media might not be ready at the thumbnail generation and return
+                    # an error. Right now, the background job fail and retry later until the moment when the media is
+                    # ready, but we might want to have a cleaner way to handle this case.
 
-                    if is_sequence:
-                        # generate the name from one of the actual files in the sequence
-                        name_path = item.properties["sequence_files"][0]
-                    else:
-                        name_path = item.properties["path"]
-
-                    # get the publish name for this file path. this will ensure we get a
-                    # consistent name across version publishes of this file.
-                    item.properties["name"] = publisher.util.get_publish_name(
-                        name_path, sequence=is_sequence)
-
+                    # Set the context based on the most precise entity available
                     if shot:
-                        item.context = publisher.sgtk.context_from_entity(shot["type"], shot["id"])
+                        self.cache_entities(parent_item, [shot])
+                        item.context = self.publisher.sgtk.context_from_entity_dictionary(shot)
+                    else:
+                        item.context = self.publisher.sgtk.context_from_entity_dictionary(project)
+
+    def cache_entities(self, item, entities):
+        """
+        Cache the entity list on the item properties to avoid redundant database query.
+
+        :param item: Item instance where the entities should be cached on
+        :param entities: List of entity to cache
+        """
+        for entity in entities:
+            entity_type = entity["type"]
+            entity_id = entity["id"]
+
+            if entity_type not in item.properties:
+                item.properties[entity_type] = {entity_id: dict(entity)}
+            elif entity_id not in item.properties[entity_type]:
+                item.properties[entity_type][entity_id] = dict(entity)
+            else:
+                item.properties[entity_type][entity_id].update(entity)
 
     def create_render_items(self, parent_item, asset_info):
+        """
+        Create the items associated to a render information dictionary.
+
+        :param parent_item: Parent of the items to create
+        :param asset_info: Information dictionary related to a render action
+        :return: List of Item
+        """
         video_info = asset_info.copy()
         video_info["path"] = video_info["resolvedPath"]
         video = self.create_video_items(parent_item, asset_info, is_batch_render=True)
@@ -262,58 +301,76 @@ class FlameItemCollector(HookBaseClass):
         return [item for item in video + batch + openclip if item is not None]
 
     def create_batch_items(self, parent_item, asset_info):
-        type = "Flame Batch File"
+        """
+        Create items based on a batch asset dictionary.
+
+        :param parent_item: Parent of the items to create
+        :param asset_info: Information dictionary related to a batch asset
+        :return: List of Item
+        """
         path = self._path_from_asset(asset_info)
         icon = os.path.join(self.disk_location, "icons", "SG_Batch.png")
 
         name = asset_info.get("shotName", self.parent.util.get_publish_name(path))
 
-        item = parent_item.create_item("flame.batch", type, name)
+        item = parent_item.create_item("flame.batch", "Flame Batch File", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
-        item.properties["name"] = name
-        item.properties["type"] = type
 
         return [item]
 
     def create_batchOpenClip_items(self, parent_item, asset_info):
-        type = "Flame Batch OpenClip"
+        """
+        Create items based on a batchOpenClip asset dictionary.
+
+        :param parent_item: Parent of the items to create
+        :param asset_info: Information dictionary related to a batchOpenClip asset
+        :return: List of Item
+        """
         path = self._path_from_asset(asset_info)
         icon = os.path.join(self.disk_location, "icons", "flame.png")
 
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item("flame.batchOpenClip", type, name)
+        item = parent_item.create_item("flame.batchOpenClip", "Flame Batch OpenClip", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
-        item.properties["name"] = name
-        item.properties["type"] = type
 
         return [item]
 
     def create_openClip_items(self, parent_item, asset_info):
-        type = "Flame OpenClip"
+        """
+        Create items based on an openClip asset dictionary.
+
+        :param parent_item: Parent of the items to create
+        :param asset_info: Information dictionary related to an openClip asset
+        :return: List of Item
+        """
         path = self._path_from_asset(asset_info)
         icon = os.path.join(self.disk_location, "icons", "flame.png")
 
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item("flame.openClip", type, name)
+        item = parent_item.create_item("flame.openClip", "Flame OpenClip", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
-        item.properties["name"] = name
-        item.properties["type"] = type
 
         return [item]
 
     def create_video_items(self, parent_item, asset_info, is_batch_render=False):
-        type = "Flame Render"
+        """
+        Create items based on a video asset dictionary.
+
+        :param parent_item: Parent of the items to create
+        :param asset_info: Information dictionary related to a video asset
+        :return: List of Item
+        """
         path = self._path_from_asset(asset_info)
         sequence = self._get_file_sequence(path)
         icon = os.path.join(self.disk_location, "icons", "image_sequence.png")
@@ -332,7 +389,7 @@ class FlameItemCollector(HookBaseClass):
         name = self.parent.util.get_publish_name(
             name_path, sequence=is_sequence)
 
-        item = parent_item.create_item("flame.video", type, name)
+        item = parent_item.create_item("flame.video", "Flame Render", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
@@ -341,50 +398,65 @@ class FlameItemCollector(HookBaseClass):
             item.properties["sequence_files"] = sequence
 
         item.properties["path"] = path
-        item.properties["name"] = name
-        item.properties["type"] = type
 
         return [item]
 
     def create_audio_items(self, parent_item, asset_info):
-        type = "Flame Audio"
+        """
+        Create items based on an audio asset dictionary.
+
+        :param parent_item: Parent of the items to create
+        :param asset_info: Information dictionary related to an audio asset
+        :return: List of Item
+        """
         path = self._path_from_asset(asset_info)
         icon = os.path.join(self.disk_location, "icons", "audio.png")
 
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item("flame.audio", type, name)
+        item = parent_item.create_item("flame.audio", "Flame Audio", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
-        item.properties["name"] = name
-        item.properties["type"] = type
 
         return [item]
 
     def create_sequence_items(self, parent_item, asset_info):
-        type = "Flame Sequence"
+        """
+        Create items based on a sequence asset dictionary.
+
+        :param parent_item: Parent of the items to create
+        :param asset_info: Information dictionary related to a sequence asset
+        :return: List of Item
+        """
         path = self._path_from_asset(asset_info)
         icon = os.path.join(self.disk_location, "icons", "flame.png")
 
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item("flame.sequence", type, name)
+        item = parent_item.create_item("flame.sequence", "Flame Sequence", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
-        item.properties["name"] = name
-        item.properties["type"] = type
 
         return [item]
 
     def _path_from_asset(self, asset_info):
+        """
+        Extract the path from the given asset information dictionary
+
+        :param asset_info: Asset information dictionary
+        :return: Path of the asset
+        """
+        # If the path key is present on the asset_info dictionary, let's use it
         if "path" in asset_info:
             path = asset_info["path"]
         else:
-            path = os.path.join(asset_info.get("destinationPath", ""), asset_info["resolvedPath"])
+            # Avoiding the os.path.join because resolvedPath might start with /
+            path = os.path.normpath(
+                os.path.sep.join([asset_info.get("destinationPath", ""), asset_info["resolvedPath"]]))
 
         return path
 
@@ -457,6 +529,9 @@ class FlameItemCollector(HookBaseClass):
         # properties for the plugins to use for processing.
         file_item.properties["path"] = evaluated_path
 
+        icon = os.path.join(self.disk_location, "icons", item_info["icon_name"])
+        file_item.set_icon_from_path(icon)
+
         if is_sequence:
             # include an indicator that this is an image sequence and the known
             # file that belongs to this sequence
@@ -497,6 +572,7 @@ class FlameItemCollector(HookBaseClass):
             type_display = "%s Sequence" % (type_display,)
             item_type = "%s.%s" % (item_type, "sequence")
             icon_name = "image_sequence.png"
+            icon = os.path.join(self.disk_location, "icons", icon_name)
 
             # get the first frame of the sequence. we'll use this for the
             # thumbnail and to generate the display name
@@ -511,6 +587,8 @@ class FlameItemCollector(HookBaseClass):
                 type_display,
                 display_name
             )
+
+            file_item.set_icon_from_path(icon_name)
 
             # use the first frame of the seq as the thumbnail
             file_item.set_thumbnail_from_path(first_frame_file)
@@ -604,10 +682,20 @@ class FlameItemCollector(HookBaseClass):
         # everything should be populated. return the dictionary
         return dict(
             item_type=item_type,
-            type_display=type_display
+            type_display=type_display,
+            icon_name=icon_name,
+            path=path
         )
 
     def _get_file_sequence(self, path):
+        """
+        Return a list of path from a file sequence path.
+
+        "/a/b.[01-02].jpg" -> ["/a/b.01.jpg", "/a/b.02.jpg"]
+
+        :param path: Path of the file sequence
+        :return: List of path
+        """
         file_sequence = []
 
         match = re.match(r"(.*\.)((?:\[\d+-\d+\])|(?:\d+))(\..*)", path)

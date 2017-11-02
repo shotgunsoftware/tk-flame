@@ -9,16 +9,23 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+
 import sgtk
-import urllib
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
-class PublishFlameAsset(HookBaseClass):
+class CreatePublishPlugin(HookBaseClass):
     """
     Plugin for creating generic publishes in Shotgun
     """
+
+    def __init__(self, *args, **kwrds):
+        super(CreatePublishPlugin, self).__init__(*args, **kwrds)
+
+        self.publisher = self.parent
+        self.engine = self.publisher.engine
+        self.sg = self.engine.shotgun
 
     @property
     def icon(self):
@@ -39,7 +46,7 @@ class PublishFlameAsset(HookBaseClass):
         """
         One line display name describing the plugin
         """
-        return "Create new PublishedFile"
+        return "Create PublishedFile"
 
     @property
     def description(self):
@@ -47,7 +54,7 @@ class PublishFlameAsset(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return ""
+        return "TBD"
 
     @property
     def settings(self):
@@ -79,7 +86,7 @@ class PublishFlameAsset(HookBaseClass):
         accept() method. Strings can contain glob patters such as *, for example
         ["maya.*", "file.maya"]
         """
-        return ["flame.*"]
+        return ["*"]
 
     def accept(self, settings, item):
         """
@@ -107,25 +114,16 @@ class PublishFlameAsset(HookBaseClass):
         :returns: dictionary with boolean keys accepted, required and enabled
         """
 
-        path = item.properties["path"]
-        context = item.context.entity
-        query_fields = ["path"]
-        query_filter = [["entity", "is", context]]
-        entity_type = "PublishedFile"
-
-        published_files = self.parent.shotgun.find(entity_type, filters=query_filter, fields=query_fields)
-
-        is_checked = True
-        for published_file in published_files:
-            if urllib.quote(path) in published_file.get("path", {}).get("url", ""):
-                is_checked = False
-                break
-
-        item.properties["require_version"] = is_checked
+        publishes = self.publisher.util.get_conflicting_publishes(
+            item.context,
+            item.properties["path"],
+            item.name,
+            filters=["sg_status_list", "is_not", None]
+        )
 
         return {
             "accepted": True,
-            "checked": is_checked
+            "checked": len(publishes) == 0  # Checked if there's no conflicting PublishedFiles
         }
 
     def validate(self, settings, item):
@@ -153,40 +151,39 @@ class PublishFlameAsset(HookBaseClass):
             instances.
         :param item: Item to process
         """
-
-        publisher = self.parent
-        engine = publisher.engine
-
         path = item.properties["path"]
-        publish_type = item.properties.get("type")
-        name = item.properties["name"]
-        asset_info = item.properties["assetInfo"]
+        asset_info = item.properties.get("assetInfo", {})
         version_number = asset_info.get("versionNumber", 0)
 
-        # arguments for publish registration
+        # Build the PublishedFile metadata
         publish_data = {
-            "tk": publisher.sgtk,
+            "tk": self.publisher.sgtk,
             "context": item.context,
             "comment": item.description,
+            "entity": item.context.entity,
             "path": path,
-            "name": name,
-            "code": name,
+            "name": item.name,
+            "code": item.name,
             "description": item.description,
             "version_number": version_number,
+            "published_file_type": item.display_type,
+            "version_entity": item.properties.get("Version"),  # Available if the CreateVersionPlugin was enabled
             "thumbnail_path": item.get_thumbnail_as_path(),
-            "published_file_type": publish_type,
-            "version_entity": item.properties.get("Version")
         }
 
+        # Create the PublishedFile
         published_file = sgtk.util.register_publish(**publish_data)
 
-        if publish_type != "Flame Batch File":
+        # Create a Thumbnail in Background for compatible Flame related PublishedFile
+        if item.display_type in ["Flame OpenClip", "Flame Render", "Flame Batch OpenClip"]:
+            # Extract the Backburner dependencies
             job_ids = item.properties.get("backgroundJobId")
             job_ids_str = ",".join(job_ids) if job_ids else None
 
-            engine.create_local_backburner_job(
+            # Create the Image thumbnail in background
+            self.engine.create_local_backburner_job(
                 "Upload PublishedFile Image Preview",
-                "%s: %s" % (publish_type, name),
+                item.name,
                 job_ids_str,
                 "backburner_hooks",
                 "attach_jpg_preview",
@@ -195,12 +192,12 @@ class PublishFlameAsset(HookBaseClass):
                     "width": asset_info["width"],
                     "height": asset_info["height"],
                     "path": path,
-                    "name": name
+                    "name": item.name
                 }
             )
 
+        # Save the PublishedFile for the others plugins
         item.properties["PublishedFile"] = published_file
-
 
     def finalize(self, settings, item):
         """

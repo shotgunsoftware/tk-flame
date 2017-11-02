@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+
 import sgtk
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -19,13 +20,18 @@ class CreateCutPlugin(HookBaseClass):
     Plugin for creating generic publishes in Shotgun
     """
 
+    def __init__(self, *args, **kwrds):
+        super(CreateCutPlugin, self).__init__(*args, **kwrds)
+
+        self.publisher = self.parent
+        self.engine = self.publisher.engine
+        self.sg = self.engine.shotgun
+
     @property
     def icon(self):
         """
         Path to an png icon on disk
         """
-
-        # look for icon one level up from this hook's folder in "icons" folder
         return os.path.join(
             self.disk_location,
             os.pardir,
@@ -46,12 +52,12 @@ class CreateCutPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return ""
+        return "TBD"
 
     @property
     def settings(self):
         """
-        Dictionary defining the settings that this plugin expects to recieve
+        Dictionary defining the settings that this plugin expects to receive
         through the settings parameter in the accept, validate, publish and
         finalize methods.
 
@@ -106,12 +112,14 @@ class CreateCutPlugin(HookBaseClass):
         :returns: dictionary with boolean keys accepted, required and enabled
         """
 
-        MIN_CUT_SG_VERSION = (7, 0, 0)
+        # Make sure that the Shotgun backend support Cuts
+        cut_supported = self.sg.server_caps.version >= (7, 0, 0)
 
-        sg = sgtk.platform.current_engine().shotgun
-        cut_supported = sg.server_caps.version >= MIN_CUT_SG_VERSION
-        shot_context = item.context.entity["type"] == "Shot"
-        accepted = cut_supported and shot_context
+        # Only available on Shot entity
+        shot_context = item.context.entity and item.context.entity.get("type", "") == "Shot"
+
+        # Not available from batch render
+        accepted = cut_supported and shot_context and not item.properties.get("fromBatch", False)
 
         return {"accepted": accepted}
 
@@ -129,10 +137,25 @@ class CreateCutPlugin(HookBaseClass):
         :returns: True if item is valid, False otherwise.
         """
 
-        if "created_cut" not in item.properties["shared"]:
-            item.properties["shared"]["cuts"] = {}
+        # Make sure that we have the context dict in the item properties
+        if "context" not in item.properties:
+            self.cache_entities(item.parent, [item.context.entity])
+            item.properties["context"] = item.parent.properties["Shot"][item.context.entity["id"]]
 
-        return True
+        # Make sure that we have the Sequence in our context dict
+        if "Sequence" not in item.properties["context"]:
+            sequence_fields = ["cuts", "shots", "code"]
+            sequence = self.sg.find_one("Sequence", [["shots", "is", item.context.entity]], sequence_fields)
+            self.cache_entities(item.parent, [sequence])
+
+            if sequence \
+                    and sequence["type"] in item.parent.properties and \
+                            sequence["id"] in item.parent.properties[sequence["type"]]:
+                item.properties["context"]["Sequence"] = item.parent.properties[sequence["type"]][sequence["id"]]
+            else:
+                pass  # TODO
+
+        return "Sequence" in item.properties["context"]
 
     def publish(self, settings, item):
         """
@@ -143,79 +166,95 @@ class CreateCutPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
-        publisher = self.parent
-        engine = publisher.engine
-        sg = engine.shotgun
         asset_info = item.properties["assetInfo"]
         path = item.properties["path"]
-        publish_type = item.properties.get("type")
-        name = item.properties["name"]
-        asset_info = item.properties["assetInfo"]
-        cut_code = item.properties["Sequence"]["code"]
-        cut = item.properties["shared"]["cuts"].get(cut_code)
 
-        if not cut:
-            entity = sg.find_one("Sequence", [["code", "is", cut_code]])
+        # Check if a previous run had already created the Cut
+        if "Cut" in item.properties["context"]["Sequence"]:
+            cut = item.properties["context"]["Sequence"]["Cut"]
 
-            prev_cut = sg.find_one(
+        # This is the first item creating the CutItem so we need to create the Cut
+        else:
+            # The cut name have the same code than the Sequence
+            cut_code = item.properties["context"]["Sequence"]["code"]
+            cut_fields = ["revision_number"]
+
+            # Try to find the previous cut to determine the Cut revision number
+            prev_cut = self.sg.find_one(
                 "Cut",
                 [["code", "is", cut_code],
-                 ["entity", "is", entity]],
-                ["revision_number"],
+                 ["entity", "is", item.properties["context"]["Sequence"]]],
+                cut_fields,
                 [{"field_name": "revision_number", "direction": "desc"}]
             )
 
+            # Determine the revision number based on the previous Cut
             if prev_cut is None:
                 next_revision_number = 1
             else:
                 next_revision_number = prev_cut["revision_number"] + 1
 
-            cut = sg.create(
+            # Create the Cut
+            cut = self.sg.create(
                 "Cut",
                 {
                     "project": item.context.project,
-                    "entity": entity,
+                    "entity": item.properties["context"]["Sequence"],
                     "code": cut_code,
-                    "description": item.description,
                     "revision_number": next_revision_number,
-                    "fps": float(asset_info["fps"])
+                    "fps": float(asset_info["sequenceFps"])
                 }
             )
 
-            item.properties["shared"]["cuts"][cut_code] = cut
+            # Cache this cut!
+            self.cache_entities(item.parent, [cut])
 
-        item.properties["Cut"] = cut
+            # Save this Cut on the context to share it to the other items of the Sequence context
+            item.properties["context"]["Sequence"]["Cut"] = item.parent.properties[cut["type"]][cut["id"]]
 
-        cut_item_data = {
-            "project": item.context.project,
-            "cut": cut,
-            "description": item.description,
-            "shot": item.properties.get("Shot"),
-            "code": asset_info["assetName"],
-            "version": item.properties.get("Version"),
-            "cut_order": asset_info["segmentIndex"]
-        }
+        # Build the CutItem information dictionary
+        cut_item_data = self._cutitem_data(item)
+        cut_item_data["cut"] = cut
+        cut_item_data["shot"] = item.context.entity
 
+        # Extract the Backburner dependencies
         job_ids = item.properties.get("backgroundJobId")
         job_ids_str = ",".join(job_ids) if job_ids else None
 
-        engine.create_local_backburner_job(
+        # Build the thumbnail generation target list
+        targets = []
+
+        # If this CutItem is the first element of the cut, update the thumbnail of the Cut
+        if asset_info["segmentIndex"] == 1:
+            targets.append(cut)
+
+        # Create the CutItem
+        cut_item = self.sg.create("CutItem", cut_item_data)
+
+        # Cache that CutItem
+        self.cache_entities(item.parent, [cut_item])
+
+        # Save that CutItem in the Context
+        item.properties["context"]["CutItem"] = item.parent.properties[cut_item["type"]][cut_item["id"]]
+
+        # Add the CutItem to the thumbnail generation target list
+        targets.append(cut_item)
+
+        # Create the Image thumbnail in background
+        self.engine.create_local_backburner_job(
             "Upload Cut Item Image Preview",
-            "%s: %s" % (publish_type, name),
+            item.name,
             job_ids_str,
             "backburner_hooks",
             "attach_jpg_preview",
             {
-                "targets": [cut],
+                "targets": targets,
                 "width": asset_info["width"],
                 "height": asset_info["height"],
                 "path": path,
-                "name": name
+                "name": item.name
             }
         )
-
-        cut_item = sg.create("CutItem", cut_item_data)
-        item.properties["CutItem"] = cut_item
 
     def finalize(self, settings, item):
         """
@@ -228,8 +267,71 @@ class CreateCutPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
+        # We only want to run that finalize step once
+        if "Cut" in item.properties["context"]["Sequence"]:
+            # Get all CutItem linked to this Cut
+            cut_items = self.sg.find(
+                "CutItem",
+                [["cut", "is", item.properties["context"]["Sequence"]["Cut"]]],
+                ["timecode_edit_in_text", "timecode_edit_out_text", "cut_item_duration"],
+                [{"field_name": "cut_order", "direction": "asc"}]  # We want them sorted to save time later
+            )
 
-        pass
+            # Build the Cut metadata
+            cut_data = {
+                "duration": sum([int(cut_item["cut_item_duration"]) for cut_item in cut_items]),  # Sum of the CutItems
+                "timecode_start_text": cut_items[0]["timecode_edit_in_text"],  # Beginning of the first CutItem
+                "timecode_end_text": cut_items[-1]["timecode_edit_out_text"]  # End of the last CutItem
+            }
+
+            # Update teh Cut metadata
+            self.sg.update("Cut", item.properties["context"]["Sequence"]["Cut"]["id"], cut_data)
+
+            # Delete the Cut in the context to ensure that the finalization step is not repeated
+            del item.properties["context"]["Sequence"]["Cut"]
+
+    def _cutitem_data(self, item):
+        """
+        Extract the CutItem metadata from the item assetInfo
+
+        :param item: Current Item
+        :return: CutItem metadata dictionary
+        """
+        asset_info = item.properties["assetInfo"]
+
+        cutitem_data = {
+            "cut_item_in": asset_info["sourceIn"] + asset_info["handleIn"],
+            "cut_item_out": asset_info["sourceOut"] - asset_info["handleOut"] - 1,
+            "edit_in": asset_info["recordIn"],
+            "edit_out": asset_info["recordOut"] - 1,
+            "project": item.context.project,
+            "description": item.description,
+            "shot": item.properties.get("Shot"),
+            "code": asset_info["assetName"],
+            "version": item.properties.get("Version"),
+            "cut_order": asset_info["segmentIndex"]
+        }
+
+        cutitem_data["cut_item_duration"] = cutitem_data["cut_item_out"] - cutitem_data["cut_item_in"] + 1
+
+        # Generate the timecode based fields
+        cutitem_data["timecode_cut_item_in_text"] = self._frames_to_timecode(cutitem_data["cut_item_in"],
+                                                                             drop=asset_info["drop"],
+                                                                             frame_rate=float(asset_info["fps"]))
+
+        cutitem_data["timecode_cut_item_out_text"] = self._frames_to_timecode(cutitem_data["cut_item_out"],
+                                                                              drop=asset_info["drop"],
+                                                                              frame_rate=float(asset_info["fps"]))
+
+        cutitem_data["timecode_edit_in_text"] = self._frames_to_timecode(cutitem_data["edit_in"],
+                                                                         drop=asset_info["drop"],
+                                                                         frame_rate=float(asset_info["sequenceFps"]))
+
+        cutitem_data["timecode_edit_out_text"] = self._frames_to_timecode(cutitem_data["edit_out"],
+                                                                          drop=asset_info["drop"],
+                                                                          frame_rate=float(asset_info["sequenceFps"]))
+
+        return cutitem_data
 
     def _frames_to_timecode(self, total_frames, frame_rate, drop):
         """
@@ -328,3 +430,19 @@ class CreateCutPlugin(HookBaseClass):
         frames = int(total_frames % fps_int)
         return "%02d:%02d:%02d%s%02d" % (hours, minutes, seconds, smpte_token, frames)
 
+    def cache_entities(self, parent_item, entities):
+        """
+        Cache the entity list on the item properties to avoid redundant database query.
+
+        :param item: Item instance where the entities should be cached on
+        :param entities: List of entity to cache
+        """
+        for entity in entities:
+            entity_type = entity["type"]
+            entity_id = entity["id"]
+            if entity_type not in parent_item.properties:
+                parent_item.properties[entity_type] = {entity_id: dict(entity)}
+            elif entity_id not in parent_item.properties[entity_type]:
+                parent_item.properties[entity_type][entity_id] = dict(entity)
+            else:
+                parent_item.properties[entity_type][entity_id].update(entity)

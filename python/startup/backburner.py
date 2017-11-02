@@ -28,7 +28,7 @@
 # /var/folders/fq/65bs7wwx3mz7jdsh4vxm34xc0000gn/T/tk_backburner_f6a70d85fecf420a979357c9d9dd9278.pickle
 
 # this script will unpack the pickle parameters file, add sgtk to the pythonpath, 
-# start an engine and finally run an app method.
+# start an engine and finally run an app or engine hook method.
 
 import os
 import sys
@@ -66,22 +66,33 @@ context = sgtk.context.deserialize(serialized_context)
 # set a special environment variable to help hint to the engine
 # that we are running a backburner job
 os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "BACKBURNER"
+
+# set the flame version environment variable to ensure that the pick environment select the right config
+os.environ["SHOTGUN_FLAME_MAJOR_VERSION"] = flame_version["major"]
+os.environ["SHOTGUN_FLAME_MINOR_VERSION"] = flame_version["minor"]
+os.environ["SHOTGUN_FLAME_PATCH_VERSION"] = flame_version["patch"]
+os.environ["SHOTGUN_FLAME_VERSION"] = flame_version["full"]
+
 engine = sgtk.platform.start_engine(engine_instance, context.sgtk, context)
 engine.set_version_info(major_version_str=flame_version["major"], minor_version_str=flame_version["minor"],
                         patch_version_str=flame_version["patch"], full_version_str=flame_version["full"])
 del os.environ["TOOLKIT_FLAME_ENGINE_MODE"]
 engine.log_debug("Engine launched for backburner process.")
 
-# execute method
+# get the app from the instance_name
 app = engine.apps.get(instance, None)
 
+# if the instance is an app, execute the method
 if app:
     method = getattr(app, method_to_execute)
     engine.log_debug("Executing remote callback for app instance %s (%s)" % (instance, app))
     engine.log_debug("Executing callback %s with args %s" % (method, method_args))
 
     method(**method_args)
+# if the instance is not an app, it's a hook
 else:
+    engine.log_debug("Executing remote callback for hook %s" % instance)
+    engine.log_debug("Executing callback %s with args %s" % (method_to_execute, method_args))
     engine.execute_hook_method(instance, method_to_execute, **method_args)
 
 # all done

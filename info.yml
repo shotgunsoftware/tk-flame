@@ -32,8 +32,7 @@ configuration:
     backburner_hooks:
         type: hook
         default_value: "{self}/backburner.py"
-        description: Contains the logic for determining and creating the workspace and
-                             users to use when launching into a Flame project.
+        description: Contains the Backburner background job logic
 
     flame_batch_publish_type:
         type: tank_type

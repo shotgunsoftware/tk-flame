@@ -9,20 +9,19 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
-import re
 
 import sgtk
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
-class CreateVersionPlugin(HookBaseClass):
+class UpdateCutPlugin(HookBaseClass):
     """
     Plugin for creating generic publishes in Shotgun
     """
 
     def __init__(self, *args, **kwrds):
-        super(CreateVersionPlugin, self).__init__(*args, **kwrds)
+        super(UpdateCutPlugin, self).__init__(*args, **kwrds)
 
         self.publisher = self.parent
         self.engine = self.publisher.engine
@@ -47,7 +46,7 @@ class CreateVersionPlugin(HookBaseClass):
         """
         One line display name describing the plugin
         """
-        return "Create Version"
+        return "Update Cut Item"
 
     @property
     def description(self):
@@ -55,7 +54,7 @@ class CreateVersionPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "TBD"
+        return ""
 
     @property
     def settings(self):
@@ -87,7 +86,7 @@ class CreateVersionPlugin(HookBaseClass):
         accept() method. Strings can contain glob patters such as *, for example
         ["maya.*", "file.maya"]
         """
-        return ["flame.video", "flame.openClip", "flame.batchOpenClip"]
+        return ["flame.batchOpenClip"]
 
     def accept(self, settings, item):
         """
@@ -114,8 +113,25 @@ class CreateVersionPlugin(HookBaseClass):
 
         :returns: dictionary with boolean keys accepted, required and enabled
         """
+        # Make sure that the Shotgun backend support Cuts
+        cut_supported = self.sg.server_caps.version >= (7, 0, 0)
 
-        return {"accepted": True}
+        # Only available on Shot context
+        shot_context = item.context.entity["type"] == "Shot"
+
+        accepted = cut_supported and shot_context and item.properties["fromBatch"]
+
+        # If the context is correct, try to find the CutItem to Update
+        if accepted:
+            item.properties["CutItem"] = self.sg.find_one("CutItem", [["shot", "is", item.context.entity]],
+                                                          ["cut_order", "cut"], [
+                                                              {"field_name": "cut.Cut.revision_number",
+                                                               "direction": "desc"}])
+
+            # Accept only if we know what CutItem to update
+            accepted = item.properties["CutItem"] is not None
+
+        return {"accepted": accepted}
 
     def validate(self, settings, item):
         """
@@ -142,45 +158,23 @@ class CreateVersionPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
+        asset_info = item.properties["assetInfo"]
         path = item.properties["path"]
 
-        # Build the Version metadata dictionary
-        ver_data = dict(
-            project=item.context.project,
-            code=item.name,
-            description=item.description,
-            entity=item.context.entity,
-            sg_task=item.context.task,
-            sg_path_to_frames=path
-        )
+        cut_item = item.properties["CutItem"]
+        version = item.properties.get("Version")
 
-        # TODO: Might be a setting
-        ver_data["sg_department"] = "Flame"
+        # If the current Publish session had created a Version, we push it to the CutItem to update
+        if version:
+            self.sg.update("CutItem", cut_item["id"], {"version": version})
 
-        asset_info = item.properties.get("assetInfo", {})
+        # Build the thumbnail generation target list
+        targets = [cut_item]
 
-        frame_rate = asset_info.get("fps")
-        if frame_rate:
-            ver_data["sg_uploaded_movie_frame_rate"] = float(frame_rate)
-
-        aspect_ratio = asset_info.get("aspectRatio")
-        if asset_info:
-            ver_data["sg_frames_aspect_ratio"] = float(aspect_ratio)
-            ver_data["sg_movie_aspect_ratio"] = float(aspect_ratio)
-
-        re_match = re.search("(\[[0-9]+-[0-9]+\])\.", path)
-        if re_match:
-            ver_data["frame_range"] = re_match.group(1)[1:-1]
-
-        ver_data["sg_first_frame"] = asset_info["sourceIn"]
-        ver_data["sg_last_frame"] = asset_info["sourceOut"] - 1
-        ver_data["frame_count"] = int(ver_data["sg_last_frame"]) - int(ver_data["sg_first_frame"]) + 1
-
-        # Create the Version
-        version = self.sg.create("Version", ver_data)
-
-        # Keep the version reference for the other plugins
-        item.properties["Version"] = version
+        # If the CutItem is the first one of the Cut, we update the Cut preview
+        if cut_item["cut_order"] == 1:
+            cut = cut_item["cut"]
+            targets.append(cut)
 
         # Extract the Backburner dependencies
         job_ids = item.properties.get("backgroundJobId")
@@ -188,34 +182,17 @@ class CreateVersionPlugin(HookBaseClass):
 
         # Create the Image thumbnail in background
         self.engine.create_local_backburner_job(
-            "Upload Version Image Preview",
+            "Upload Cut Item Image Preview",
             item.name,
             job_ids_str,
             "backburner_hooks",
             "attach_jpg_preview",
             {
-                "targets": [version],
+                "targets": targets,
                 "width": asset_info["width"],
                 "height": asset_info["height"],
                 "path": path,
                 "name": item.name
-            }
-        )
-
-        # Create the Video thumbnail in background
-        self.engine.create_local_backburner_job(
-            "Upload Version Movie Preview",
-            item.name,
-            job_ids_str,
-            "backburner_hooks",
-            "attach_mov_preview",
-            {
-                "targets": [version],
-                "width": asset_info["width"],
-                "height": asset_info["height"],
-                "path": path,
-                "name": item.name,
-                "fps": asset_info["fps"]
             }
         )
 

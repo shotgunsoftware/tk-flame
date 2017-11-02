@@ -131,7 +131,7 @@ def preExport(info, userData):
     if engine is None:
         return
 
-    engine.clear_export_cache()
+    engine.clear_export_info()
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
@@ -171,8 +171,10 @@ def postExport(info, userData):
     else:
         publisher = engine.apps.get("tk-multi-publish2")
         if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_EXPORT_PUBLISH"):
-            if engine.export_cache:
+            if engine.export_info:
+                import gc; gc.disable()  # SMOK-46824 - PySide garbage collection issue
                 publisher.import_module("tk_multi_publish2").show_dialog(publisher)
+                gc.enable()
 
 
 def preExportSequence(info, userData):
