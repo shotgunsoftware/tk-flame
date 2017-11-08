@@ -31,7 +31,7 @@ configuration:
 
     backburner_hooks:
         type: hook
-        default_value: "{self}/backburner.py"
+        default_value: "{self}/backburner_hooks.py"
         description: Contains the Backburner background job logic
 
     flame_batch_publish_type:
