@@ -21,7 +21,7 @@ import subprocess
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
-class Backburner(HookBaseClass):
+class BackburnerHooks(HookBaseClass):
     # constants
     # default height for Shotgun uploads
     # see https://support.shotgunsoftware.com/entries/26303513-Transcoding

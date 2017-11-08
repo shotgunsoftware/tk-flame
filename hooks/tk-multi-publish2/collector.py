@@ -64,6 +64,16 @@ COMMON_FILE_INFO = {
         "extensions": ["tiff", "tx", "tga", "dds", "rat"],
         "icon": "texture.png",
         "item_type": "file.texture",
+    },
+    "Open Clip": {
+        "extensions": ["clip"],
+        "icon": "flame.png",
+        "item_type": "file.openClip",
+    },
+    "Flame Batch File": {
+        "extensions": ["batch"],
+        "icon": "SG_Batch.png",
+        "item_type": "file.batch",
     }
 }
 

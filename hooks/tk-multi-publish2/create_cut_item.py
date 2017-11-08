@@ -61,7 +61,7 @@ class CreateCutPlugin(HookBaseClass):
         through the settings parameter in the accept, validate, publish and
         finalize methods.
 
-        A dictionary on the following form::
+        A dictionary on the following form:
 
             {
                 "Settings Name": {

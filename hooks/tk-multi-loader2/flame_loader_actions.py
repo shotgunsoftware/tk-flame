@@ -36,11 +36,11 @@ SHOT_LOAD_ACTION = "load_batch"
 SHOT_CREATE_ACTION = "create_batch"
 
 
-class FlameActionError(Exception):
+class FlameLoaderActionError(Exception):
     pass
 
 
-class FlameActions(HookBaseClass):
+class FlameLoaderActions(HookBaseClass):
     ##############################################################################################################
     # public interface - to be overridden by deriving classes
     def generate_actions(self, sg_publish_data, actions, ui_area):
@@ -177,8 +177,8 @@ class FlameActions(HookBaseClass):
                 self._add_batch_group_from_shot(sg_publish_data, False)
 
             else:
-                raise FlameActionError("Unknown action name: '%s'".format(name))
-        except FlameActionError, error:
+                raise FlameLoaderActionError("Unknown action name: '%s'".format(name))
+        except FlameLoaderActionError, error:
             # A FlameActionError reaching here means that something major have stopped the current action
             app.log_error(error)
 
@@ -202,10 +202,10 @@ class FlameActions(HookBaseClass):
         # Directly load the setup if exists
         if setup_path and os.path.exists(setup_path):
             if not flame.batch.append_setup(setup_path):
-                raise FlameActionError("Unable to load a Batch Setup")
+                raise FlameLoaderActionError("Unable to load a Batch Setup")
 
         else:
-            raise FlameActionError("File not found on disk - '%s'" % setup_path)
+            raise FlameLoaderActionError("File not found on disk - '%s'" % setup_path)
 
     def _import_clip(self, sg_publish_data):
         """
@@ -225,7 +225,7 @@ class FlameActions(HookBaseClass):
         if clip_path and self._exists(clip_path):
             # The clip path exists so we can import it into Flame!
             if not flame.batch.import_clip(clip_path, self.import_location):
-                raise FlameActionError("Unable to import '%s'" % clip_path)
+                raise FlameLoaderActionError("Unable to import '%s'" % clip_path)
 
         # The clip name doesn't directly exists, but it might contain a pattern that we need to resolve.
         elif clip_path and '%' in clip_path:
@@ -234,15 +234,15 @@ class FlameActions(HookBaseClass):
             # The sequence exists on disk
             if self._exists(new_path):
                 if not flame.batch.import_clip(new_path, self.import_location):
-                    raise FlameActionError("Unable to import '%s'" % clip_path)
+                    raise FlameLoaderActionError("Unable to import '%s'" % clip_path)
 
             # The sequence doesn't exist on disk
             else:
-                raise FlameActionError("Sequence not found on disk - '%s'" % new_path)
+                raise FlameLoaderActionError("Sequence not found on disk - '%s'" % new_path)
 
         # Clip path doesn't exists and doesn't contain any pattern
         else:
-            raise FlameActionError("File not found on disk - '%s'" % clip_path)
+            raise FlameLoaderActionError("File not found on disk - '%s'" % clip_path)
 
     def _add_batch_group_from_shot(self, sg_publish_data, build_new):
         """
@@ -273,7 +273,7 @@ class FlameActions(HookBaseClass):
 
         # Checks that we have the necessary info to proceed.
         if not all(f in sg_info for f in sg_fields):
-            raise FlameActionError("Cannot load a Batch Group from Shotgun using this {}".format(sg_type))
+            raise FlameLoaderActionError("Cannot load a Batch Group from Shotgun using this {}".format(sg_type))
 
         # Create a new batch_group using this Shot
         if build_new:
@@ -289,11 +289,11 @@ class FlameActions(HookBaseClass):
                 app.log_debug("Creating the '%s' batch group using '%s'" % (sg_publish_data['code'], batch_path))
                 flame.batch.create_batch_group(sg_publish_data["code"])
                 if not flame.batch.load_setup(batch_path):
-                    raise FlameActionError("Unable to load the Batch Setup")
+                    raise FlameLoaderActionError("Unable to load the Batch Setup")
 
             # No batch file found
             else:
-                raise FlameActionError("No setup to load")
+                raise FlameLoaderActionError("No setup to load")
 
     ##############################################################################################################
     # interface to the action hook configuration
@@ -330,7 +330,7 @@ class FlameActions(HookBaseClass):
         :rtype: str
         """
 
-        return "Schematic Reel 1"
+        return os.environ.get("SHOTGUN_FLAME_IMPORT_LOCATION", "Schematic Reel 1")
 
     @property
     def want_write_file_node(self):
@@ -343,7 +343,7 @@ class FlameActions(HookBaseClass):
         :rtype: bool
         """
 
-        return True
+        return bool(os.environ.get("SHOTGUN_FLAME_WANT_WRITE_FILE_NODE", True))
 
     @property
     def use_template(self):
@@ -354,7 +354,7 @@ class FlameActions(HookBaseClass):
         :rtype: bool
         """
 
-        return True
+        return bool(os.environ.get("SHOTGUN_FLAME_USE_TEMPLATE", True))
 
     @property
     def media_path_root(self):
@@ -364,7 +364,7 @@ class FlameActions(HookBaseClass):
         :return: Media path root
         :type: str
         """
-        return "/var/tmp"
+        return os.environ.get("SHOTGUN_FLAME_MEDIA_PATH_ROOT", "/var/tmp")
 
     @property
     def media_path_pattern(self):
@@ -374,7 +374,7 @@ class FlameActions(HookBaseClass):
         :return: Media path pattern
         :type: str
         """
-        return "<shot name>_{segment_name}_v<version>.<frame>"
+        return os.environ.get("SHOTGUN_FLAME_MEDIA_PATH_PATTERN", "<shot name>_{segment_name}_v<version>.<frame>")
 
     @property
     def media_file_type(self):
@@ -385,7 +385,7 @@ class FlameActions(HookBaseClass):
         :rtype: str
         """
 
-        return "OpenEXR"
+        return os.environ.get("SHOTGUN_FLAME_MEDIA_FILE_TYPE", "OpenEXR")
 
     @property
     def clip_path_pattern(self):
@@ -395,7 +395,7 @@ class FlameActions(HookBaseClass):
         :return: Clip path pattern
         :type: str
         """
-        return "<shot name>"
+        return os.environ.get("SHOTGUN_FLAME_CLIP_PATH_PATTERN", "<shot name>")
 
     @property
     def setup_path_pattern(self):
@@ -405,7 +405,7 @@ class FlameActions(HookBaseClass):
         :return: Setup path pattern
         :type: str
         """
-        return "<shot name>.v<version>"
+        return os.environ.get("SHOTGUN_FLAME_SETUP_PATH_PATTERN", "<shot name>.v<version>")
 
     @property
     def media_path_template(self):
@@ -449,7 +449,7 @@ class FlameActions(HookBaseClass):
         :rtype: int
         """
 
-        return 3
+        return int(os.environ.get("SHOTGUN_FLAME_VERSION_PADDING", 3))
 
     @property
     def frame_padding(self):
@@ -460,7 +460,7 @@ class FlameActions(HookBaseClass):
         :rtype: int
         """
 
-        return 4
+        return int(os.environ.get("SHOTGUN_FLAME_FRAME_PADDING", 4))
 
     ##############################################################################################################
     # helper methods which can be subclassed in custom hooks to fine tune the behavior of things
@@ -481,7 +481,7 @@ class FlameActions(HookBaseClass):
         app.log_debug("Found clips %s" % clips)
 
         if not clips:
-            raise FlameActionError("No clip to load")
+            raise FlameLoaderActionError("No clip to load")
 
         # Get the frame information of the Batch group from the sg_versions
         start_frame, last_frame = self._extract_frame_range_from_version(shot_info)
@@ -495,7 +495,7 @@ class FlameActions(HookBaseClass):
             batch_group_info["duration"] = (int(last_frame) - int(start_frame)) + 1
 
         if not flame.batch.create_batch_group(**batch_group_info):
-            raise FlameActionError("Unable to create a Batch Group")
+            raise FlameLoaderActionError("Unable to create a Batch Group")
 
         have_write_file = False
 
@@ -628,7 +628,7 @@ class FlameActions(HookBaseClass):
         write_node = flame.batch.create_node("Write File")
 
         if not write_node:
-            raise FlameActions("Unable to create Write File node")
+            raise FlameLoaderActions("Unable to create Write File node")
 
         # Param is a OrderedDict so the attributes are set in the right order
         for attribute, value in param.items():
@@ -780,7 +780,7 @@ class FlameActions(HookBaseClass):
 
                 # Checks that we have the necessary info to proceed.
                 if not all(f in version_data for f in fields):
-                    raise FlameActionError("Cannot extract frame range for \n {}".format(sg_info))
+                    raise FlameLoaderActionError("Cannot extract frame range for \n {}".format(sg_info))
 
                 # Only if the frame_range is defined
                 if version_data["frame_range"] is not None:
@@ -840,7 +840,7 @@ class FlameActions(HookBaseClass):
         :rtype: dict
         """
 
-        ranges = FlameActions._guess_frame_range(path)
+        ranges = FlameLoaderActions._guess_frame_range(path)
 
         # Cuts off everything after the position of the formatting char.
         path_end = path[path.find('%'):]
@@ -853,7 +853,7 @@ class FlameActions(HookBaseClass):
         end_frame = formatting_str % int(ranges[1])
 
         if None in [start_frame, end_frame]:
-            raise FlameActionError("File not found on disk - '%s'" % path)
+            raise FlameLoaderActionError("File not found on disk - '%s'" % path)
         elif start_frame == end_frame:
             frame_range = start_frame
         else:
@@ -877,7 +877,7 @@ class FlameActions(HookBaseClass):
         match = re.match(r"(.*)(%\d+d)(.+)", file_name)
 
         if not match:
-            raise FlameActionError("Cannot detect frame pattern for '%s'" % path)
+            raise FlameLoaderActionError("Cannot detect frame pattern for '%s'" % path)
 
         frame_list = []
 
@@ -888,7 +888,7 @@ class FlameActions(HookBaseClass):
         try:
             files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
         except OSError, e:
-            raise FlameActionError("Unable to guess the frame range for '%s'" % path)
+            raise FlameLoaderActionError("Unable to guess the frame range for '%s'" % path)
 
         for f in files:
             # It doesn't match our pattern
@@ -936,7 +936,7 @@ class FlameActions(HookBaseClass):
         # Try to check if the path is a sequence
         match = re.match(r"(.*)(\[\d+-\d+\])(.+)", file_name)
 
-        if not match:
+        if not match or not os.path.exists(folder):
             # The path is not a sequence
             return False
 
@@ -975,10 +975,5 @@ class FlameActions(HookBaseClass):
         path = template._apply_fields(fields, ignore_types=["version", "SEQ", "Shot", "segment_name"]) \
                    .replace(template.root_path, "", 1)[1:]  # remove the root path from the path and the first "/"
 
-        # Get the extension
-        ext = path.split(".")[-1]
-
-        # Remove the extension
-        path = ".".join(path.split(".")[0:-1])
-
+        path, ext = os.path.splitext(path)
         return template.root_path, path, ext.lower()
