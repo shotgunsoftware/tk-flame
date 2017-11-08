@@ -293,9 +293,16 @@ class FlameItemCollector(HookBaseClass):
         :param asset_info: Information dictionary related to a render action
         :return: List of Item
         """
+        source_info = re.match(r".*\[(\d+)-(\d+)\].+", asset_info["resolvedPath"])
+        if source_info:
+            asset_info["sourceIn"] = int(source_info.group(1))
+            asset_info["sourceOut"] = int(source_info.group(2)) + 1
+
         video_info = asset_info.copy()
         video_info["path"] = video_info["resolvedPath"]
         video = self.create_video_items(parent_item, asset_info, is_batch_render=True)
+
+        re.match(r"(.*)(\[\d+-\d+\])(.+)", asset_info["resolvedPath"])
 
         batch, openclip = [None], [None]
         if "setupResolvedPath" in asset_info:
