@@ -9,6 +9,9 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # Note! This file implements the batchHook interface from Flame 2015.2
+import os
+
+
 def batchSetupLoaded(setupPath):
     """
     Hook called when a batch setup is loaded.
@@ -17,13 +20,14 @@ def batchSetupLoaded(setupPath):
     """
     import sgtk
     engine = sgtk.platform.current_engine()
-    
+
     # We can't do anything without the Shotgun engine. 
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
 
-    engine.trigger_batch_callback("batchSetupLoaded", {"setupPath": setupPath})        
+    engine.trigger_batch_callback("batchSetupLoaded", {"setupPath": setupPath})
+
 
 def batchSetupSaved(setupPath):
     """
@@ -39,7 +43,8 @@ def batchSetupSaved(setupPath):
     if engine is None:
         return
 
-    engine.trigger_batch_callback("batchSetupSaved", {"setupPath": setupPath})        
+    engine.trigger_batch_callback("batchSetupSaved", {"setupPath": setupPath})
+
 
 def batchExportBegin(info, userData):
     """    
@@ -83,7 +88,10 @@ def batchExportBegin(info, userData):
     if engine is None:
         return
 
-    engine.trigger_batch_callback("batchExportBegin", info)        
+    engine.clear_export_info()
+
+    engine.trigger_batch_callback("batchExportBegin", info)
+
 
 def batchExportEnd(info, userData):
     """    
@@ -128,4 +136,23 @@ def batchExportEnd(info, userData):
     if engine is None:
         return
 
-    engine.trigger_batch_callback("batchExportEnd", info)        
+    engine.cache_batch_export_asset(info)
+    engine.trigger_batch_callback("batchExportEnd", info)
+
+
+def renderEnded(module_name, sequence_name, elapsed):
+    import sgtk
+    engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine.
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
+    publisher = engine.apps.get("tk-multi-publish2")
+
+    if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_RENDER_PUBLISH"):
+        if engine.export_info:
+            import gc; gc.disable()  # SMOK-46824 - PySide garbage collection issue
+            publisher.import_module("tk_multi_publish2").show_dialog(publisher)
+            gc.enable()
