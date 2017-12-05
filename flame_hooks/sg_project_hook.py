@@ -23,21 +23,57 @@ def appInitialized(projectName):
     import os    
 
     engine = sgtk.platform.current_engine()
+    logger = sgtk.LogManager.get_logger(__name__)
 
     if engine:
         # there is already an engine running.
         # TODO: later on, allow for switching of engines as projects 
-        #       are being switched. For now, issue a warning
-        
-        # Note - Since Flame is a PySide only environment, we import it directly
-        # rather than going through the sgtk wrappers. 
+        # are being switched. For now, issue a warning
+        #
+        # NOTE/UPDATE: Cross-project changes actually partially work
+        # now. It appears as though the Toolkit portion of the process
+        # works fine, in that the old engine is torn down and sgtk is
+        # re-bootstrapped into the new project/environment without any
+        # problems. However, it looks as though the classic sg shots
+        # export right-click-menu action doesn't show up when switching
+        # from a zero config project to a classic config project.
+        #
+        # NOTE: We also don't know that the Flame hooks are properly
+        # repopulated when switching across project boundaries. That is
+        # something that will need to be investigated before we can be
+        # certain that it's entirely safe.
+        #
+        # We only care to alert the user if the change in Flame project
+        # is going to send us to a different Shotgun project. If we're
+        # not crossing project boundaries, there are no concerns about
+        # hooks, paths (for classic projects), and the like.
+        project_is_changing = True
 
-        if engine.get_setting("project_switching") is False:
+        try:
+            import flame
+        except ImportError:
+            pass
+        else:
+            try:
+                current_flame_project = flame.project.current_project
+                new_sg_project = current_flame_project.shotgun_project_name.get_value()
+                project_is_changing = (new_sg_project != engine.context.project.get("name"))
+            except Exception:
+                logger.debug(
+                    "Failed to get the SG project from the current Flame project. "
+                    "As a result, falling back on the engine's project_switching "
+                    "setting to determine whether to show the user a warning stating "
+                    "that project switching might not behave as expected."
+                )
+
+        # Note - Since Flame is a PySide only environment, we import it directly
+        # rather than going through the sgtk wrappers.
+        if engine.get_setting("project_switching") is False and project_is_changing:
             from PySide import QtGui
             QtGui.QMessageBox.warning(None,
                                       "No project switching!",
                                       "The Shotgun integration does not currently support project switching.\n"
-                                      "Even if you switch projects, any Shotgun specific configuration will\n"
+                                      "Even if you switch projects, any Shotgun-specific configuration will\n"
                                       "remain connected to the initially loaded project.")
     
     else:
@@ -46,7 +82,6 @@ def appInitialized(projectName):
         toolkit_context = os.environ.get("TOOLKIT_CONTEXT")
         
         if toolkit_context is None:
-            logger = sgtk.LogManager.get_logger(__name__)
             logger.debug("No toolkit context, can't initialize the engine")
             return
         
