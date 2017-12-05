@@ -52,7 +52,13 @@ def appInitialized(projectName):
         try:
             import flame
         except Exception:
-            pass
+            logger.debug(
+                "Was unable to import the flame Python module. As such, "
+                "it must be assumed that the Flame project change is "
+                "resulting in a change in Shotgun project. This means "
+                "that the user will see a QMessageBox warning if the "
+                "tk-flame engine's project_switching setting is false."
+            )
         else:
             try:
                 current_flame_project = flame.project.current_project
@@ -70,11 +76,13 @@ def appInitialized(projectName):
         # rather than going through the sgtk wrappers.
         if engine.get_setting("project_switching") is False and project_is_changing:
             from PySide import QtGui
-            QtGui.QMessageBox.warning(None,
-                                      "No project switching!",
-                                      "The Shotgun integration does not currently support project switching.\n"
-                                      "Even if you switch projects, any Shotgun-specific configuration will\n"
-                                      "remain connected to the initially loaded project.")
+            QtGui.QMessageBox.warning(
+                None,
+                "No project switching!",
+                "The Shotgun integration does not currently support project switching.\n"
+                "Even if you switch projects, any Shotgun-specific configuration will\n"
+                "remain connected to the initially loaded project."
+            )
     
     else:
         # no engine running - so start one!
@@ -115,6 +123,11 @@ def appInitialized(projectName):
         if None in (major_version_str, minor_version_str, patch_version_str, full_version_str):
             e.log_error("Cannot find environment variable TOOLKIT_FLAME_x_VERSION")
         else:
-            e.set_version_info(major_version_str=major_version_str, minor_version_str=minor_version_str, patch_version_str=patch_version_str, full_version_str=full_version_str)
+            e.set_version_info(
+                major_version_str=major_version_str,
+                minor_version_str=minor_version_str,
+                patch_version_str=patch_version_str,
+                full_version_str=full_version_str
+            )
         
         
