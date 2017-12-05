@@ -51,7 +51,7 @@ def appInitialized(projectName):
 
         try:
             import flame
-        except ImportError:
+        except Exception:
             pass
         else:
             try:
