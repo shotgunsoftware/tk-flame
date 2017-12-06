@@ -1100,7 +1100,7 @@ class FlameEngine(sgtk.platform.Engine):
             e_user = pwd.getpwuid(os.geteuid()).pw_name
 
             # Run the command as the effective user
-            full_cmd = "sudo -u %s bash -c %s" % (e_user, full_cmd)
+            full_cmd = "sudo -u %s %s" % (e_user, full_cmd)
             self.log_debug("Running root but will send the job as [%s]" % e_user)
 
         try:
