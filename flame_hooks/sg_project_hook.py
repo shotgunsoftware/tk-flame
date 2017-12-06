@@ -27,18 +27,63 @@ def appInitialized(projectName):
     if engine:
         # there is already an engine running.
         # TODO: later on, allow for switching of engines as projects 
-        #       are being switched. For now, issue a warning
-        
-        # Note - Since Flame is a PySide only environment, we import it directly
-        # rather than going through the sgtk wrappers. 
+        # are being switched. For now, issue a warning
+        #
+        # NOTE/UPDATE: Cross-project changes actually partially work
+        # now. It appears as though the Toolkit portion of the process
+        # works fine, in that the old engine is torn down and sgtk is
+        # re-bootstrapped into the new project/environment without any
+        # problems. However, it looks as though the classic sg shots
+        # export right-click-menu action doesn't show up when switching
+        # from a zero config project to a classic config project.
+        #
+        # NOTE: We also don't know that the Flame hooks are properly
+        # repopulated when switching across project boundaries. That is
+        # something that will need to be investigated before we can be
+        # certain that it's entirely safe.
+        #
+        # We only care to alert the user if the change in Flame project
+        # is going to send us to a different Shotgun project. If we're
+        # not crossing project boundaries, there are no concerns about
+        # hooks, paths (for classic projects), and the like.
+        project_is_changing = True
 
-        if engine.get_setting("project_switching") is False:
+        try:
+            import flame
+        except Exception:
+            engine.logger.debug(
+                "Was unable to import the flame Python module. As such, "
+                "it must be assumed that the Flame project change is "
+                "resulting in a change in Shotgun project. This means "
+                "that the user will see a QMessageBox warning if the "
+                "tk-flame engine's project_switching setting is false. "
+                "The API to allow this was introduced in 2018.2."
+            )
+        else:
+            try:
+                current_flame_project = flame.project.current_project
+                new_sg_project = current_flame_project.shotgun_project_name.get_value()
+            except Exception:
+                engine.logger.debug(
+                    "Failed to get the SG project from the current Flame project. "
+                    "As a result, falling back on the engine's project_switching "
+                    "setting to determine whether to show the user a warning stating "
+                    "that project switching might not behave as expected."
+                )
+            else:
+                project_is_changing = (new_sg_project != engine.context.project.get("name"))
+
+        # Note - Since Flame is a PySide only environment, we import it directly
+        # rather than going through the sgtk wrappers.
+        if engine.get_setting("project_switching") is False and project_is_changing:
             from PySide import QtGui
-            QtGui.QMessageBox.warning(None,
-                                      "No project switching!",
-                                      "The Shotgun integration does not currently support project switching.\n"
-                                      "Even if you switch projects, any Shotgun specific configuration will\n"
-                                      "remain connected to the initially loaded project.")
+            QtGui.QMessageBox.warning(
+                None,
+                "No project switching!",
+                "The Shotgun integration does not currently support project switching.\n"
+                "Even if you switch projects, any Shotgun-specific configuration will\n"
+                "remain connected to the initially loaded project."
+            )
     
     else:
         # no engine running - so start one!
@@ -80,6 +125,11 @@ def appInitialized(projectName):
         if None in (major_version_str, minor_version_str, patch_version_str, full_version_str):
             e.log_error("Cannot find environment variable TOOLKIT_FLAME_x_VERSION")
         else:
-            e.set_version_info(major_version_str=major_version_str, minor_version_str=minor_version_str, patch_version_str=patch_version_str, full_version_str=full_version_str)
+            e.set_version_info(
+                major_version_str=major_version_str,
+                minor_version_str=minor_version_str,
+                patch_version_str=patch_version_str,
+                full_version_str=full_version_str
+            )
         
         

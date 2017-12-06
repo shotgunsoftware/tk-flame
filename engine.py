@@ -129,6 +129,48 @@ class FlameEngine(sgtk.platform.Engine):
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)
 
+        # Assuming we're in a new enough version of Flame (2018.3+) we'll
+        # be able to link the Flame project to our SG project. This will
+        # ensure that is a use launches Flame's plugin-based Shotgun
+        # integration that they will be bootstrapped into the correct
+        # project and won't be prompted to choose an SG project to link to.
+        #
+        # NOTE: We only take the initiative here and create the project
+        # link if this is a classic config launch of Flame. One quick way
+        # to knwo that is to just refer to the environment, where we know
+        # that the classic startup script sets some variables.
+        if "TOOLKIT_ENGINE_NAME" in os.environ:
+            try:
+                import flame
+            except Exception:
+                self.logger.debug(
+                    "Was unable to import the flame Python module. As a result, "
+                    "the Flame project will not be linked to associated Shotgun "
+                    "project using the Flame Python API. This shouldn't cause "
+                    "any problems in the current session, but it does mean "
+                    "that the user might be prompted to link this project to a "
+                    "Shotgun project if they launch Flame using the Toolkit "
+                    "plugin and open this same Flame project."
+                )
+            else:
+                try:
+                    current_flame_project = flame.project.current_project
+                    current_flame_project.shotgun_project_name = self.context.project.get("name")
+                except Exception:
+                    self.logger.debug(
+                        "Was unable to set the current Flame project's "
+                        "shotgun_project_name property. This shouldn't cause "
+                        "any problems in the current session, but it does mean "
+                        "that the user might be prompted to link this project to a "
+                        "Shotgun project if they launch Flame using the Toolkit "
+                        "plugin and open this same Flame project."
+                    )
+                else:
+                    self.logger.debug(
+                        "Successfully linked the Flame project to its associated "
+                        "Shotgun project."
+                    )
+
     def _initialize_logging(self, install_root):
         """
         Set up logging for the engine
