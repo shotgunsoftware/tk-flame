@@ -23,7 +23,6 @@ def appInitialized(projectName):
     import os    
 
     engine = sgtk.platform.current_engine()
-    logger = sgtk.LogManager.get_logger(__name__)
 
     if engine:
         # there is already an engine running.
@@ -52,25 +51,27 @@ def appInitialized(projectName):
         try:
             import flame
         except Exception:
-            logger.debug(
+            engine.logger.debug(
                 "Was unable to import the flame Python module. As such, "
                 "it must be assumed that the Flame project change is "
                 "resulting in a change in Shotgun project. This means "
                 "that the user will see a QMessageBox warning if the "
-                "tk-flame engine's project_switching setting is false."
+                "tk-flame engine's project_switching setting is false. "
+                "The API to allow this was introduced in 2018.2."
             )
         else:
             try:
                 current_flame_project = flame.project.current_project
                 new_sg_project = current_flame_project.shotgun_project_name.get_value()
-                project_is_changing = (new_sg_project != engine.context.project.get("name"))
             except Exception:
-                logger.debug(
+                engine.logger.debug(
                     "Failed to get the SG project from the current Flame project. "
                     "As a result, falling back on the engine's project_switching "
                     "setting to determine whether to show the user a warning stating "
                     "that project switching might not behave as expected."
                 )
+            else:
+                project_is_changing = (new_sg_project != engine.context.project.get("name"))
 
         # Note - Since Flame is a PySide only environment, we import it directly
         # rather than going through the sgtk wrappers.
@@ -90,6 +91,7 @@ def appInitialized(projectName):
         toolkit_context = os.environ.get("TOOLKIT_CONTEXT")
         
         if toolkit_context is None:
+            logger = sgtk.LogManager.get_logger(__name__)
             logger.debug("No toolkit context, can't initialize the engine")
             return
         
