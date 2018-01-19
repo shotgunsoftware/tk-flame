@@ -11,7 +11,10 @@
 import os
 
 def getCustomUIActions():
-    major_version = os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION")
+
+    version = [os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION"), os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION")]
+    major_version = next((v for v in version), None)
+
     if major_version is not None and int(major_version) >= 2018:
         # Bypass getCustomUIActions contextual hook from version 2018.
         # More recent version will use the main menu instead.

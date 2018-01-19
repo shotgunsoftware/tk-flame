@@ -15,6 +15,11 @@ import os
 import re
 import sys
 
+# NOTE: This bootstrap process is left in place for legacy purposes. It
+# will be used by older versions of the tk-multi-launchapp app from
+# prior to the release of Software entity launchers. Much of the logic
+# in this script has been reproduced in tk-flame/startup.py as part of
+# the classic configuration launch process.
 
 def _get_flame_version(flame_path):
     """

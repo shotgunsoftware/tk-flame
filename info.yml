@@ -28,7 +28,12 @@ configuration:
         default_value: "{self}/project_startup.py"
         description: Contains the logic for determining and creating the workspace and 
                      users to use when launching into a Flame project. 
-    
+
+    backburner_hooks:
+        type: hook
+        default_value: "{self}/backburner_hooks.py"
+        description: Contains the Backburner background job logic
+
     flame_batch_publish_type:
         type: tank_type
         description: The publish type associated with Flame batch scripts. This parameter is used
@@ -50,6 +55,24 @@ configuration:
                      needs to be accessible from all backburner nodes, so if you are running
                      a larger backburner setup, this path must be some sort of shared network
                      location. 
+
+    backburner_servers:
+        type: str
+        default_value: ""
+        description: Comma separated list of servers to use when submitting a backburner job.
+                     (Ignored if a group is used)
+
+    backburner_server_group:
+        type: str
+        default_value: ""
+        description: The group name of the servers to use when submitting a backburner job.
+
+    use_builtin_plugin:
+        type: bool
+        description: Whether to prepare the launch of Flame to make use of its builtin Toolkit
+                     plugin or not. If false, the classic-style Toolkit integration will be
+                     initialized when Flame is launched.
+        default_value: False
 
     run_at_startup:
         type: list

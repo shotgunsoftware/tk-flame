@@ -10,8 +10,10 @@
 
 import os
 import sys
+import re
 
 import sgtk
+from sgtk import TankError
 from sgtk.platform import SoftwareLauncher, SoftwareVersion, LaunchInformation
 
 
@@ -88,23 +90,122 @@ class FlameLauncher(SoftwareLauncher):
         Prepares the given software for launch
 
         :param str exec_path: Path to DCC executable to launch
-
         :param str args: Command line arguments as strings
-
         :param str file_to_open: (optional) Full path name of a file to open on
             launch
 
         :returns: :class:`LaunchInformation` instance
         """
-        # flame comes with toolkit built-in, so no need to
-        # run any startup logic.
+        use_builtin_plugin = self.get_setting("use_builtin_plugin")
 
-        env = {
-            "SHOTGUN_SITE": self.sgtk.shotgun_url,
-            "SHOTGUN_ENTITY_ID": str(self.context.project["id"]),
-            "SHOTGUN_ENTITY_TYPE": str(self.context.project["type"]),
-            "SHOTGUN_ENTITY_NAME": str(self.context.project["name"])
-        }
+        # If there is a plugin to launch with, we don't have much in the
+        # way of prep work to do.
+        if use_builtin_plugin:
+            # flame comes with toolkit built-in, so no need to
+            # run any startup logic.
+            self.logger.debug("Using the builtin plugin on Flame launch.")
+            env = {
+                "SHOTGUN_SITE": self.sgtk.shotgun_url,
+                "SHOTGUN_ENTITY_ID": str(self.context.project["id"]),
+                "SHOTGUN_ENTITY_TYPE": str(self.context.project["type"]),
+                "SHOTGUN_ENTITY_NAME": str(self.context.project["name"])
+            }
+        else:
+            self.logger.debug("Using the legacy bootstrap on Flame launch.")
+
+            # We have a list of environment variables that we need to
+            # gather and return. These are various bits of data that
+            # the python/startup/app_launcher.py script uses during
+            # its bootstrapping of SGTK during launch.
+            env = {
+                "TOOLKIT_ENGINE_NAME": self.engine_name,
+                "TOOLKIT_CONTEXT": sgtk.context.serialize(self.context)
+            }
+
+            # We also need to store the various components of the Flame
+            # version in the environment. The app_launcher.py script that
+            # launches and bootstraps SGTK registers these with the engine,
+            # and the engine then logs metrics about what version of Flame
+            # has been launched.
+            #
+            # The exec_path is likely a path to the .app that will be launched.
+            # What we need instead of is the fully-qualified path to the Flame
+            # startApplication executable, which is what we'll extract the
+            # version components from. Examples of what this path can be and
+            # how it's parsed can be found in the docstring of _get_flame_version
+            # method.
+            self.logger.debug("Flame app executable: %s", exec_path)
+            if exec_path.endswith(".app"):
+                # The flame executable contained withing the .app will be a
+                # symlink to the startApplication path we're interested in.
+                flame_path = os.path.join(exec_path, "Contents", "MacOS", "flame")
+                app_path = os.path.realpath(flame_path)
+            else:
+                app_path = os.path.realpath(exec_path)
+
+            if app_path != exec_path:
+                self.logger.debug(
+                    "Flame app executable has been flattened. The flattened "
+                    "path that will be parsed and used at launch time is: %s",
+                    app_path
+                )
+
+            self.logger.debug("Parsing Flame (%s) to determine Flame version...", app_path)
+            major, minor, patch, version_str = self._get_flame_version(app_path)
+            self.logger.debug("Found Flame version: %s", version_str)
+
+            env.update(
+                dict(
+                    TOOLKIT_FLAME_VERSION=version_str,
+                    TOOLKIT_FLAME_MAJOR_VERSION=str(major),
+                    TOOLKIT_FLAME_MINOR_VERSION=str(minor),
+                    TOOLKIT_FLAME_PATCH_VERSION=str(patch),
+                )
+            )
+
+            # The install root of Flame is also used by the app_launcher
+            # script, which registers it with the engine after bootstrapping.
+            # The path is used by the engine when submitting render jobs
+            # to Backburner.
+            match = re.search("(^.*)/(fla[mr]e[^_]*_[^/]+)/bin", app_path)
+            if match:
+                env["TOOLKIT_FLAME_INSTALL_ROOT"] = match.group(1)
+                app_folder = match.group(2)
+                wiretap_path = os.path.join(
+                    env["TOOLKIT_FLAME_INSTALL_ROOT"],
+                    app_folder,
+                    "python",
+                )
+                self.logger.debug("Adding wiretap root path to PYTHONPATH: %s", wiretap_path)
+                sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
+            else:
+                raise TankError(
+                    "Cannot extract install root from the path: %s" % app_path
+                )
+
+            # The Python executable bundled with Flame is used by the engine
+            # when submitting Backburner jobs.
+            env["TOOLKIT_FLAME_PYTHON_BINARY"] = "%s/python/%s/bin/python" % (
+                env["TOOLKIT_FLAME_INSTALL_ROOT"],
+                version_str
+            )
+
+            # We need to override the exec_path and args that will be used
+            # to launch Flame. We launch using the Python bundled with Flame
+            # and the app_launcher.py script bundled with the engine. That
+            # app_launcher script will do some prep work prior to launching
+            # Flame itself.
+            #
+            # <flame python> <tk-flame>/python/startup/app_launcher.py dcc_path dcc_args
+            #
+            launch_script = os.path.join(
+                os.path.dirname(__file__),
+                "python",
+                "startup",
+                "app_launcher.py",
+            )
+            exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
+            args = "'%s' %s %s" % (launch_script, app_path, args)
 
         return LaunchInformation(exec_path, args, env)
 
@@ -206,3 +307,50 @@ class FlameLauncher(SoftwareLauncher):
                 )
 
         return sw_versions
+
+    def _get_flame_version(self, flame_path):
+        """
+        Returns the version string for the given Flame path
+        
+        <INSTALL_ROOT>/flameassist_2016.2/bin/startApplication        --> (2016, 2, 0, "2016.2")
+        <INSTALL_ROOT>/flameassist_2016.3/bin/startApplication        --> (2016, 3, 0, "2016.3")
+        <INSTALL_ROOT>/flameassist_2016.0.3.322/bin/startApplication  --> (2016, 0, 3, "2016.0.3.322")
+        <INSTALL_ROOT>/flameassist_2016.2.pr99/bin/startApplication   --> (2016, 2, 0, "2016.2.pr99")
+        <INSTALL_ROOT>/flame_2016.pr50/bin/start_Flame                --> (2016, 0, 0, "2016.pr50")
+
+        If the patch, minor or major version cannot be extracted, it will be set to zero.
+
+        :param flame_path: path to executable
+        :returns: (major, minor, patch, full_str)
+        """
+
+        # do a quick check to ensure that we are running 2015.2 or later
+        re_match = re.search("/fla[mr]e[^_]*_([^/]+)/bin", flame_path)
+        if not re_match:
+            raise TankError("Cannot extract Flame version number from the path '%s'!" % flame_path)
+        version_str = re_match.group(1)
+
+        # Examples:
+        # 2016
+        # 2016.2
+        # 2016.pr99
+        # 2015.2.pr99
+
+        major_ver = 0
+        minor_ver = 0
+        patch_ver = 0
+
+        chunks = version_str.split(".")
+        if len(chunks) > 0:
+            if chunks[0].isdigit():
+                major_ver = int(chunks[0])
+
+        if len(chunks) > 1:
+            if chunks[1].isdigit():
+                minor_ver = int(chunks[1])
+
+        if len(chunks) > 2:
+            if chunks[2].isdigit():
+                patch_ver = int(chunks[2])
+
+        return (major_ver, minor_ver, patch_ver, version_str)
