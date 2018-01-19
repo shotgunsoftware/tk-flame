@@ -59,6 +59,43 @@ class FlameEngine(sgtk.platform.Engine):
     # define constants for the various modes the engine can execute in
     (ENGINE_MODE_DCC, ENGINE_MODE_PRELAUNCH, ENGINE_MODE_BACKBURNER) = range(3)
 
+    @property
+    def host_info(self):
+        """
+        :returns: A dictionary with information about the application hosting this engine.
+
+        The returned dictionary is of the following form on success:
+
+            {
+                "name": "Flame",
+                "version": "2018.3.pr84",
+            }
+
+        The returned dictionary is of following form on an error preventing
+        the version identification.
+
+            {
+                "name": "Flame",
+                "version": "unknown"
+            }
+        """
+        host_info = {"name": "Flame", "version": "unknown"}
+
+        try:
+            # The 'SHOTGUN_FLAME_VERSION' environment variable comes from Flame plugin
+            # The 'TOOLKIT_FLAME_VERSION' environment variable comes from Flame classic config
+            if "SHOTGUN_FLAME_VERSION" in os.environ:
+                host_info["version"] = os.environ.get("SHOTGUN_FLAME_VERSION", "unknown")
+
+            elif "TOOLKIT_FLAME_VERSION" in os.environ:
+                host_info["version"] = os.environ.get("TOOLKIT_FLAME_VERSION", "unknown")
+
+        except:
+            # Fallback to initialization value above
+            pass
+
+        return host_info
+    
     def __init__(self, *args, **kwargs):
         """
         Overridden constructor where we init some things which 
@@ -312,13 +349,6 @@ class FlameEngine(sgtk.platform.Engine):
         Do any initialization after apps have been loaded
         """
         self.log_debug("%s: Running post app init..." % self)
-
-        try:
-            full_version_str = os.environ.get("TOOLKIT_FLAME_VERSION")
-            self.log_user_attribute_metric("Flame version", full_version_str)
-        except:
-            # ignore all errors. ex: using a core that doesn't support metrics
-            pass
 
         # only run the startup commands when in DCC mode
         if self._engine_mode != self.ENGINE_MODE_DCC:
