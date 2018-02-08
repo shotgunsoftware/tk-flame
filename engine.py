@@ -331,10 +331,6 @@ class FlameEngine(sgtk.platform.Engine):
             instance_commands = commands_by_instance.get(instance_name)
 
             if instance_commands is None:
-                self.log_warning(
-                    "Error reading the '%s' configuration settings\n"
-                    "The requested command '%s' from app '%s' isn't loaded.\n"
-                    "Please make sure that you have the app installed" % (setting, command_name, instance_name))
                 continue
 
             for (name, callback) in instance_commands:
@@ -620,7 +616,83 @@ class FlameEngine(sgtk.platform.Engine):
             ~QtCore.Qt.WindowCloseButtonHint
         )
 
+        self.created_qt_dialogs.append(dialog)
+
         # show the dialog        
+        dialog.show()
+
+        # lastly, return the instantiated widget
+        return widget
+
+    def show_dialog(self, title, bundle, widget_class, *args, **kwargs):
+        """
+        Shows a non-modal dialog window in a way suitable for this engine.
+        The engine will attempt to parent the dialog nicely to the host application.
+        The dialog will be created with a standard Toolkit window title bar where
+        the title will be displayed.
+
+        .. note:: In some cases, it is necessary to hide the standard Toolkit title
+                  bar. You can do this by adding a property to the widget class you are
+                  displaying::
+
+                        @property
+                        def hide_tk_title_bar(self):
+                            "Tell the system to not show the standard toolkit toolbar"
+                            return True
+
+        **Notes for engine developers**
+
+        Qt dialog & widget management can be quite tricky in different engines/applications.
+        Because of this, Sgtk provides a few overridable methods with the idea being that when
+        developing a new engine, you only need to override the minimum amount necessary.
+
+        Making use of these methods in the correct way allows the base Engine class to manage the
+        lifetime of the dialogs and widgets efficiently and safely without you having to worry about it.
+
+        The methods available are listed here in the hierarchy in which they are called::
+
+            show_dialog()/show_modal()
+                _create_dialog_with_widget()
+                    _get_dialog_parent()
+                    _create_widget()
+                    _create_dialog()
+
+        For example, if you just need to make sure that all dialogs use a specific parent widget
+        then you only need to override _get_dialog_parent() (e.g. the tk-maya engine).
+        However, if you need to implement a two-stage creation then you may need to re-implement
+        show_dialog() and show_modal() to call _create_widget() and _create_dialog() directly rather
+        than using the helper method _create_dialog_with_widget() (e.g. the tk-3dsmax engine).
+        Finally, if the application you are writing an engine for is Qt based then you may not need
+        to override any of these methods (e.g. the tk-nuke engine).
+
+        :param title: The title of the window. This will appear in the Toolkit title bar.
+        :param bundle: The app, engine or framework object that is associated with this window
+        :param widget_class: The class of the UI to be constructed. This must derive from QWidget.
+        :type widget_class: :class:`PySide.QtGui.QWidget`
+
+        Additional parameters specified will be passed through to the widget_class constructor.
+
+        :returns: the created widget_class instance
+        """
+        if not self.has_ui:
+            self.log_error("Sorry, this environment does not support UI display! Cannot show "
+                           "the requested window '%s'." % title)
+            return None
+
+        from sgtk.platform.qt import QtGui, QtCore
+
+        # create the dialog:
+        dialog, widget = self._create_dialog_with_widget(title, bundle, widget_class, *args, **kwargs)
+
+        dialog.setWindowFlags(
+            dialog.windowFlags() |
+            QtCore.Qt.WindowStaysOnTopHint &
+            ~QtCore.Qt.WindowCloseButtonHint
+        )
+
+        self.created_qt_dialogs.append(dialog)
+
+        # show the dialog
         dialog.show()
 
         # lastly, return the instantiated widget
