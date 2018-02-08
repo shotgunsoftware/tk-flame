@@ -172,10 +172,11 @@ def postExport(info, userData):
         publisher = engine.apps.get("tk-multi-publish2")
         if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_EXPORT_PUBLISH"):
             if engine.export_info:
-                import gc; gc.disable()  # SMOK-46824 - PySide garbage collection issue
-                publisher.import_module("tk_multi_publish2").show_dialog(publisher)
-                gc.enable()
+                tk_multi_publish2 = publisher.import_module("tk_multi_publish2")
+                tk_multi_publish2.show_dialog(publisher)
 
+# tell Flame not to display the fish cursor while we process the hook
+postExport.func_dict["waitCursor"] = False
 
 def preExportSequence(info, userData):
     """
