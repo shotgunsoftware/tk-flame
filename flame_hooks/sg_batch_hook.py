@@ -139,20 +139,12 @@ def batchExportEnd(info, userData):
     engine.cache_batch_export_asset(info)
     engine.trigger_batch_callback("batchExportEnd", info)
 
-
-def renderEnded(module_name, sequence_name, elapsed):
-    import sgtk
-    engine = sgtk.platform.current_engine()
-
-    # We can't do anything without the Shotgun engine.
-    # The engine is None when the user decides to not use the plugin for the project.
-    if engine is None:
-        return
-
     publisher = engine.apps.get("tk-multi-publish2")
 
     if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_RENDER_PUBLISH"):
         if engine.export_info:
-            import gc; gc.disable()  # SMOK-46824 - PySide garbage collection issue
-            publisher.import_module("tk_multi_publish2").show_dialog(publisher)
-            gc.enable()
+            tk_multi_publish2 = publisher.import_module("tk_multi_publish2")
+            tk_multi_publish2.show_dialog(publisher)
+
+# tell Flame not to display the fish cursor while we process the hook
+batchExportEnd.func_dict["waitCursor"] = False
