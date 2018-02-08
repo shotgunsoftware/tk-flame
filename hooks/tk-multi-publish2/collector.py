@@ -90,13 +90,14 @@ class FlameItemCollector(HookBaseClass):
         self.engine = self.publisher.engine
         self.sg = self.engine.shotgun
 
-    def process_current_session(self, parent_item):
+    def process_current_session(self, settings, parent_item):
         """
         Create Items from the flame latest export action.
 
         This action could be an Export from the MediaLibrary or a Render from Batch.
 
-        :param parent_item: Invisible root item of the publisher app
+        :param dict settings: Configured settings for this collector
+        :param parent_item: Root item instance
         """
 
         # Current project
@@ -218,6 +219,9 @@ class FlameItemCollector(HookBaseClass):
                                     else:
                                         item.context = self.publisher.sgtk.context_from_entity_dictionary(project)
 
+                                    # This item cannot have another context than this one
+                                    item.context_change_allowed = False
+
         # When the action is a render, the export_info is a list of asset
         elif type(export_context) == list:
             # We have a list of asset
@@ -266,6 +270,9 @@ class FlameItemCollector(HookBaseClass):
                         item.context = self.publisher.sgtk.context_from_entity_dictionary(shot)
                     else:
                         item.context = self.publisher.sgtk.context_from_entity_dictionary(project)
+
+                    # This item cannot have another context than this one
+                    item.context_change_allowed = False
 
     def cache_entities(self, item, entities):
         """
@@ -397,7 +404,7 @@ class FlameItemCollector(HookBaseClass):
 
         if is_sequence:
             # generate the name from one of the actual files in the sequence
-            name_path = sequence[0]
+            name_path = self.publisher.util.get_frame_sequence_path(sequence[0])
         else:
             name_path = path
 
@@ -414,7 +421,7 @@ class FlameItemCollector(HookBaseClass):
             item.properties["is_sequence"] = True
             item.properties["sequence_files"] = sequence
 
-        item.properties["path"] = path
+        item.properties["path"] = name_path
 
         return [item]
 
