@@ -180,6 +180,9 @@ class UpdateCutPlugin(HookBaseClass):
         job_ids = item.properties.get("backgroundJobId")
         job_ids_str = ",".join(job_ids) if job_ids else None
 
+        # For file sequences, the hooks we want the path as provided by flame.
+        path = item.properties.get("file_path", path)
+
         # Create the Image thumbnail in background
         self.engine.create_local_backburner_job(
             "Upload Cut Item Image Preview",

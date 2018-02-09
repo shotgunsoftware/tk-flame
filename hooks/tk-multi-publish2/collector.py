@@ -422,6 +422,7 @@ class FlameItemCollector(HookBaseClass):
             item.properties["sequence_files"] = sequence
 
         item.properties["path"] = name_path
+        item.properties["file_path"] = path
 
         return [item]
 
