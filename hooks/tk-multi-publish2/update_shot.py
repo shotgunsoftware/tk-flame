@@ -228,6 +228,7 @@ class UpdateShotPlugin(HookBaseClass):
         shot_data["sg_tail_out"] = shot_data["sg_cut_out"] + asset_info["handleOut"]
 
         shot_data["sg_cut_duration"] = shot_data["sg_cut_out"] - shot_data["sg_cut_in"] + 1
+        shot_data["sg_working_duration"] = shot_data["sg_tail_out"] - shot_data["sg_head_in"] + 1
 
         return shot_data
 
