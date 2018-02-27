@@ -90,6 +90,35 @@ class FlameItemCollector(HookBaseClass):
         self.engine = self.publisher.engine
         self.sg = self.engine.shotgun
 
+    @property
+    def settings(self):
+        """
+        Dictionary defining the settings that this collector expects to receive
+        through the settings parameter in the process_current_session and
+        process_file methods.
+
+        A dictionary on the following form::
+
+            {
+                "Settings Name": {
+                    "type": "settings_type",
+                    "default": "default_value",
+                    "description": "One line description of the setting"
+            }
+
+        The type string should be one of the data types that toolkit accepts as
+        part of its environment configuration.
+        """
+        return {
+            "Task Templates": {
+                "type": "dict",
+                "default": {
+                    "Shot": "Basic shot template"
+                },
+                "description": "Task template to use on entity creation (Entity -> Task Template)"
+            }
+        }
+
     def process_current_session(self, settings, parent_item):
         """
         Create Items from the flame latest export action.
@@ -99,6 +128,23 @@ class FlameItemCollector(HookBaseClass):
         :param dict settings: Configured settings for this collector
         :param parent_item: Root item instance
         """
+
+        task_templates_setting = settings.get("Task Templates", None)
+        task_templates_names = task_templates_setting.value if task_templates_setting else {}
+
+        shot_task_template_code, shot_task_template = task_templates_names.get("Shot", ""), None
+        if shot_task_template_code:
+            shot_task_template = self.sg.find_one(
+                "TaskTemplate",
+                [["code", "is", shot_task_template_code]]
+            )
+
+        sequence_task_template_code, sequence_task_template = task_templates_names.get("Sequence", ""), None
+        if sequence_task_template_code:
+            sequence_task_template = self.sg.find_one(
+                "TaskTemplate",
+                [["code", "is", sequence_task_template_code]]
+            )
 
         # Current project
         project = self.publisher.context.project
@@ -129,7 +175,8 @@ class FlameItemCollector(HookBaseClass):
                         # There's no Sequence with the right code... Let's create one!
                         seq_data = {
                             "code": sequence_name,
-                            "project": project
+                            "project": project,
+                            "task_template": sequence_task_template
                         }
 
                         sequence = self.sg.create("Sequence", seq_data)
@@ -157,7 +204,8 @@ class FlameItemCollector(HookBaseClass):
                             # There's no Shot that match our needs... so let's create it !
                             shot_data = {
                                 "code": shot_name,
-                                "project": project
+                                "project": project,
+                                "task_template": shot_task_template
                             }
 
                             if sequence:
