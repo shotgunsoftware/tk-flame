@@ -383,7 +383,7 @@ class FlameEngine(sgtk.platform.Engine):
         from sgtk.platform.qt import QtCore, QtGui
 
         for w in QtGui.QApplication.topLevelWidgets():
-            if w.objectName() == "Flame Main Window":
+            if w.objectName() == "CF Main Window":
                 self.log_debug("Found Flame main window (%s)" % w.windowTitle())
                 return w
 
