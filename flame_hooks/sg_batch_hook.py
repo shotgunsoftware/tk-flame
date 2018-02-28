@@ -136,15 +136,17 @@ def batchExportEnd(info, userData):
     if engine is None:
         return
 
-    engine.cache_batch_export_asset(info)
     engine.trigger_batch_callback("batchExportEnd", info)
 
-    publisher = engine.apps.get("tk-multi-publish2")
+    if not info.get("aborted", False):
+        engine.cache_batch_export_asset(info)
 
-    if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_RENDER_PUBLISH"):
-        if engine.export_info:
-            tk_multi_publish2 = publisher.import_module("tk_multi_publish2")
-            tk_multi_publish2.show_dialog(publisher)
+        publisher = engine.apps.get("tk-multi-publish2")
+
+        if publisher and not os.environ.get("SHOTGUN_DISABLE_POST_RENDER_PUBLISH"):
+            if engine.export_info:
+                tk_multi_publish2 = publisher.import_module("tk_multi_publish2")
+                tk_multi_publish2.show_dialog(publisher)
 
 # tell Flame not to display the fish cursor while we process the hook
 batchExportEnd.func_dict["waitCursor"] = False

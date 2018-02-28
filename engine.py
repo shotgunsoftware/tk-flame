@@ -162,7 +162,7 @@ class FlameEngine(sgtk.platform.Engine):
             # tell QT to interpret C strings as utf-8
             # Note - Since Flame is a PySide only environment, we import it directly
             # rather than going through the sgtk wrappers.             
-            from PySide import QtGui, QtCore
+            from sgtk.platform.qt import QtCore, QtGui
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)
 
@@ -375,6 +375,19 @@ class FlameEngine(sgtk.platform.Engine):
         self.close_windows()
 
     @property
+    def flame_main_window(self):
+        """
+        Returns the Flame's main window
+        :return: Widget representing the flame's main window.
+        """
+        from sgtk.platform.qt import QtCore, QtGui
+
+        for w in QtGui.QApplication.topLevelWidgets():
+            if w.objectName() == "CF Main Window":
+                self.log_debug("Found Flame main window (%s)" % w.windowTitle())
+                return w
+
+    @property
     def python_executable(self):
         """
         Returns the python executable associated with this engine
@@ -583,9 +596,7 @@ class FlameEngine(sgtk.platform.Engine):
         # DCC UI environment, pyside support is available.
         has_ui = False
         try:
-            # Note - Since Flame is a PySide only environment, we import it directly
-            # rather than going through the sgtk wrappers.             
-            from PySide import QtGui, QtCore
+            from sgtk.platform.qt import QtCore, QtGui
             if QtCore.QCoreApplication.instance():
                 # there is an active application
                 has_ui = True
@@ -604,9 +615,7 @@ class FlameEngine(sgtk.platform.Engine):
                            "the requested panel '%s'." % title)
             return None
 
-        # Note - Since Flame is a PySide only environment, we import it directly
-        # rather than going through the sgtk wrappers.         
-        from PySide import QtGui, QtCore
+        from sgtk.platform.qt import QtCore, QtGui
 
         # create the dialog:
         dialog, widget = self._create_dialog_with_widget(title, bundle, widget_class, *args, **kwargs)
@@ -623,6 +632,21 @@ class FlameEngine(sgtk.platform.Engine):
 
         # lastly, return the instantiated widget
         return widget
+
+    def _get_dialog_parent(self):
+        """
+        Get the QWidget parent for all dialogs created through :meth:`show_dialog` :meth:`show_modal`.
+
+        Can be overriden in derived classes to return the QWidget to be used as the parent
+        for all TankQDialog's.
+
+        :return: QT Parent window (:class:`PySide.QtGui.QWidget`)
+        """
+        from sgtk.platform.qt import QtCore, QtGui
+
+        w = self.flame_main_window
+
+        return w if w else super(FlameEngine, self)._get_dialog_parent()
 
     def show_dialog(self, title, bundle, widget_class, *args, **kwargs):
         """
