@@ -47,8 +47,7 @@ class FlameLauncher(SoftwareLauncher):
     COMPONENT_REGEX_LOOKUP = {
         "darwin": {
             "version": "\d.*",  # starts with a number followed by anything
-            "product": "[ \w]+",  # spaces and word characters
-            "app": ".*",  # spaces and word characters
+            "executable": "[\w]+",  # word characters (a-z0-9)
         },
         "linux2": {
             "version": "\d.*",  # starts with a number followed by anything
@@ -62,10 +61,7 @@ class FlameLauncher(SoftwareLauncher):
     # with an appropriate glob or regex string.
     EXECUTABLE_TEMPLATES = {
         "darwin": [
-            # /Applications/Autodesk/Flame 2018/Flame 2018.app
-            # /Applications/Autodesk/Flame 2017.1.pr70/Flame 2017.1.pr70.app
-            # /Applications/Autodesk/Flame Assist 2017.1.pr70/Flame Assist 2017.1.pr70.app
-            "/Applications/Autodesk/{product} {version}/{app}.app",
+            "/opt/Autodesk/{executable}_{version}/bin/startApplication",
         ],
         "linux2": [
             # /usr/discreet/flame_2017.1/bin/startApplication
