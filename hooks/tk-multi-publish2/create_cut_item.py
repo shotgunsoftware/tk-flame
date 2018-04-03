@@ -324,11 +324,11 @@ class CreateCutPlugin(HookBaseClass):
                                                                               frame_rate=float(asset_info["fps"]))
 
         cutitem_data["timecode_edit_in_text"] = self._frames_to_timecode(cutitem_data["edit_in"],
-                                                                         drop=asset_info["drop"],
+                                                                         drop=asset_info["sequenceDrop"],
                                                                          frame_rate=float(asset_info["sequenceFps"]))
 
         cutitem_data["timecode_edit_out_text"] = self._frames_to_timecode(cutitem_data["edit_out"],
-                                                                          drop=asset_info["drop"],
+                                                                          drop=asset_info["sequenceDrop"],
                                                                           frame_rate=float(asset_info["sequenceFps"]))
 
         return cutitem_data
