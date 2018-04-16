@@ -10,6 +10,14 @@
 
 import os
 
+def appExit( info ):
+    engine = sgtk.platform.current_engine()
+
+    # Nothing to do if no Shotgun engine has been initialized.
+    if engine is not None:
+        engine.destroy()
+
+
 def getCustomUIActions():
 
     version = [os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION"), os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION")]
