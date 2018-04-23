@@ -11,6 +11,7 @@
 import os
 
 def appExit( info ):
+    import sgtk
     engine = sgtk.platform.current_engine()
 
     # Nothing to do if no Shotgun engine has been initialized.
