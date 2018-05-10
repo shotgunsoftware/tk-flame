@@ -114,6 +114,8 @@ class CreatePublishPlugin(HookBaseClass):
         :returns: dictionary with boolean keys accepted, required and enabled
         """
 
+        for i in item.properties:
+          print( "PATATE %s" % i)
         publishes = self.publisher.util.get_conflicting_publishes(
             item.context,
             item.properties["path"],

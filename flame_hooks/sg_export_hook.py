@@ -17,7 +17,7 @@ def getCustomExportProfiles(profiles):
     Hook returning the custom export profiles to display to the user in the
     contextual menu.
 
-    :param profiles: A dictionary of userData dictionaries where 
+    :param profiles: A dictionary of userData objects where 
                      the keys are the name of the profiles to show in contextual menus.
     """
     import sgtk
@@ -45,7 +45,7 @@ def preCustomExport(info, userData):
                  - abort: Pass True back to Flame if you want to abort
                  - abortMessage: Abort message to feed back to client
                  
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
@@ -59,6 +59,9 @@ def preCustomExport(info, userData):
     if engine is None:
         return
 
+    if userData is None:
+        return
+    
     # get the preset that the user selected from the menu
     current_preset = userData.get("sg_preset_title")
     # We can get here with a client defined hook. Ignore it if it is not shotgun related.
@@ -87,7 +90,7 @@ def postCustomExport(info, userData):
                  - destinationPath: Export path root.
                  - presetPath: Path to the preset used for the export.
     
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
@@ -102,9 +105,10 @@ def postCustomExport(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    session_id = userData.get("session_id")
-    if session_id:
-        engine.trigger_export_callback("postCustomExport", session_id, info)
+    if userData is not None:
+        session_id = userData.get("session_id")
+        if session_id:
+            engine.trigger_export_callback("postCustomExport", session_id, info)
 
 
 def preExport(info, userData):
@@ -118,7 +122,7 @@ def preExport(info, userData):
                  - abort: Pass True back to Flame if you want to abort
                  - abortMessage: Abort message to feed back to client
                  
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
@@ -135,9 +139,10 @@ def preExport(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    session_id = userData.get("session_id")
-    if session_id:
-        engine.trigger_export_callback("preExport", session_id, info)
+    if userData is not None:
+        session_id = userData.get("session_id")
+        if session_id:
+            engine.trigger_export_callback("preExport", session_id, info)
 
 
 
@@ -150,7 +155,7 @@ def postExport(info, userData):
                  - destinationHost: Host name where the exported files will be written to.
                  - destinationPath: Export path root.
     
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
@@ -165,7 +170,10 @@ def postExport(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    session_id = userData.get("session_id")
+    if userData is not None:
+        session_id = userData.get("session_id")
+    else:
+        session_id = None
     if session_id:
         engine.trigger_export_callback("postExport", session_id, info)
     else:
@@ -195,7 +203,7 @@ def preExportSequence(info, userData):
                  - abortMessage: Error message to be displayed to the user when the export sequence
                                  process has been aborted.
     
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.    
     """
@@ -210,9 +218,10 @@ def preExportSequence(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    session_id = userData.get("session_id")
-    if session_id:
-        engine.trigger_export_callback("preExportSequence", session_id, info)
+    if userData is not None:
+        session_id = userData.get("session_id")
+        if session_id:
+            engine.trigger_export_callback("preExportSequence", session_id, info)
 
 
 def postExportSequence(info, userData):
@@ -227,7 +236,7 @@ def postExportSequence(info, userData):
                  - shotNames: Tuple of all shot names in the exported sequence. 
                               Multiple segments could have the same shot name.
     
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.    
     """
@@ -242,9 +251,10 @@ def postExportSequence(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    session_id = userData.get("session_id")
-    if session_id:
-        engine.trigger_export_callback("postExportSequence", session_id, info)
+    if userData is not None:
+        session_id = userData.get("session_id")
+        if session_id:
+            engine.trigger_export_callback("postExportSequence", session_id, info)
 
 
 def preExportAsset(info, userData):
@@ -261,7 +271,7 @@ def preExportAsset(info, userData):
        name:            Name of the exported asset.
        sequenceName:    Name of the sequence the asset is part of.
        shotName:        Name of the shot the asset is part of.
-       assetType:       Type of exported asset. ( 'video', 'audio', 'batch', 'openClip', 'batchOpenClip' )
+       assetType:       Type of exported asset. ( 'video', 'movie', 'audio', 'batch', 'openClip', 'batchOpenClip' )
        width:           Frame width of the exported asset.
        height:          Frame height of the exported asset.
        aspectRatio:     Frame aspect ratio of the exported asset.
@@ -281,7 +291,7 @@ def preExportAsset(info, userData):
        versionName:     Current version name of export (Empty if unversioned).
        versionNumber:   Current version number of export (0 if unversioned).
     
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
@@ -296,9 +306,10 @@ def preExportAsset(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    session_id = userData.get("session_id")
-    if session_id:
-        engine.trigger_export_callback("preExportAsset", session_id, info)
+    if userData is not None:
+        session_id = userData.get("session_id")
+        if session_id:
+            engine.trigger_export_callback("preExportAsset", session_id, info)
 
 
 def postExportAsset(info, userData):
@@ -315,7 +326,7 @@ def postExportAsset(info, userData):
        name:            Name of the exported asset.
        sequenceName:    Name of the sequence the asset is part of.
        shotName:        Name of the shot the asset is part of.
-       assetType:       Type of exported asset. ( 'video', 'audio', 'batch', 'openClip', 'batchOpenClip' )
+       assetType:       Type of exported asset. ( 'video', 'movie', 'audio', 'batch', 'openClip', 'batchOpenClip' )
        isBackground:    True if the export of the asset happened in the background.
        backgroundJobId: Id of the background job given by the backburner manager upon submission. 
                         Empty if job is done in foreground.
@@ -338,7 +349,7 @@ def postExportAsset(info, userData):
        versionName:     Current version name of export (Empty if unversioned).
        versionNumber:   Current version number of export (0 if unversioned).
     
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
@@ -354,9 +365,10 @@ def postExportAsset(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    session_id = userData.get("session_id")
-    if session_id:
-        engine.trigger_export_callback("postExportAsset", session_id, info)
+    if userData is not None:
+        session_id = userData.get("session_id")
+        if session_id:
+            engine.trigger_export_callback("postExportAsset", session_id, info)
 
 
 

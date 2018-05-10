@@ -219,12 +219,12 @@ class FlameItemCollector(HookBaseClass):
 
                     # We use a shared job_id_list on a Shot level because there's no background job ID associated to a
                     # OpenClip file export. If we trigger a thumbnail generation when the real media is not available,
-                    # it fail. Making a long dependency list ensure that every video item is rendered before we try to
+                    # it fail. Making a long dependency list ensure that every video/movie item is rendered before we try to
                     # generate the thumbnails.
                     job_id_list = []
 
                     # Whe want to have the items in a sorted way
-                    key_order = ["batchOpenClip", "batch", "openClip", "video", "audio", "sequence"]
+                    key_order = ["batchOpenClip", "batch", "openClip", "video", "movie", "audio", "sequence"]
 
                     # The next level of dictionary have the asset type as key and a dictionary as value
                     for asset_type, asset_type_info in sorted(shot_info.items(), key=lambda i: key_order.index(i[0])):
@@ -355,7 +355,7 @@ class FlameItemCollector(HookBaseClass):
 
         video_info = asset_info.copy()
         video_info["path"] = video_info["resolvedPath"]
-        video = self.create_video_items(parent_item, asset_info, is_batch_render=True)
+        video = self.create_video_items(parent_item, asset_info)
 
         re.match(r"(.*)(\[\d+-\d+\])(.+)", asset_info["resolvedPath"])
 
@@ -370,7 +370,7 @@ class FlameItemCollector(HookBaseClass):
             openclip_info["path"] = openclip_info["openClipResolvedPath"]
             openclip = self.create_batchOpenClip_items(parent_item, openclip_info)
 
-        return [item for item in video + batch + openclip if item is not None]
+        return [item for item in video + movie + batch + openclip if item is not None]
 
     def create_batch_items(self, parent_item, asset_info):
         """
@@ -435,9 +435,9 @@ class FlameItemCollector(HookBaseClass):
 
         return [item]
 
-    def create_video_items(self, parent_item, asset_info, is_batch_render=False):
+    def create_video_items(self, parent_item, asset_info):
         """
-        Create items based on a video asset dictionary.
+        Create items based on a movie asset dictionary.
 
         :param parent_item: Parent of the items to create
         :param asset_info: Information dictionary related to a video asset
@@ -471,6 +471,29 @@ class FlameItemCollector(HookBaseClass):
 
         item.properties["path"] = name_path
         item.properties["file_path"] = path
+
+        return [item]
+
+    def create_movie_items(self, parent_item, asset_info):
+        """
+        Create items based on a video asset dictionary.
+
+        :param parent_item: Parent of the items to create
+        :param asset_info: Information dictionary related to a video asset
+        :return: List of Item
+        """
+        path = self._path_from_asset(asset_info)
+        icon = os.path.join(self.disk_location, "icons", "video.png")
+
+        # get the publish name for this file path. this will ensure we get a
+        # consistent name across version publishes of this file.
+        name = self.parent.util.get_publish_name(path)
+
+        item = parent_item.create_item("flame.movie", "Flame Render", name)
+        item.set_icon_from_path(icon)
+        item.thumbnail_enabled = False
+
+        item.properties["path"] = path
 
         return [item]
 
