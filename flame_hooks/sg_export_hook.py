@@ -59,7 +59,7 @@ def preCustomExport(info, userData):
     if engine is None:
         return
 
-    if userData is None:
+    if not isinstance(userData, dict):
         return
     
     # get the preset that the user selected from the menu
@@ -105,7 +105,7 @@ def postCustomExport(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    if userData is not None:
+    if isinstance(userData, dict):
         session_id = userData.get("session_id")
         if session_id:
             engine.trigger_export_callback("postCustomExport", session_id, info)
@@ -139,7 +139,7 @@ def preExport(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    if userData is not None:
+    if isinstance(userData, dict):
         session_id = userData.get("session_id")
         if session_id:
             engine.trigger_export_callback("preExport", session_id, info)
@@ -170,7 +170,7 @@ def postExport(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    if userData is not None:
+    if isinstance(userData, dict):
         session_id = userData.get("session_id")
     else:
         session_id = None
@@ -218,7 +218,7 @@ def preExportSequence(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    if userData is not None:
+    if isinstance(userData, dict):
         session_id = userData.get("session_id")
         if session_id:
             engine.trigger_export_callback("preExportSequence", session_id, info)
@@ -251,7 +251,7 @@ def postExportSequence(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    if userData is not None:
+    if isinstance(userData, dict):
         session_id = userData.get("session_id")
         if session_id:
             engine.trigger_export_callback("postExportSequence", session_id, info)
@@ -306,7 +306,7 @@ def preExportAsset(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    if userData is not None:
+    if isinstance(userData, dict):
         session_id = userData.get("session_id")
         if session_id:
             engine.trigger_export_callback("preExportAsset", session_id, info)
@@ -365,7 +365,7 @@ def postExportAsset(info, userData):
 
     # check if there is a toolkit export session currently 
     # progressing - in that case dispatch it to the appropriate app
-    if userData is not None:
+    if isinstance(userData, dict):
         session_id = userData.get("session_id")
         if session_id:
             engine.trigger_export_callback("postExportAsset", session_id, info)
