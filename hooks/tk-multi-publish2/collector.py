@@ -437,7 +437,7 @@ class FlameItemCollector(HookBaseClass):
 
     def create_video_items(self, parent_item, asset_info):
         """
-        Create items based on a movie asset dictionary.
+        Create items based on a video asset dictionary.
 
         :param parent_item: Parent of the items to create
         :param asset_info: Information dictionary related to a video asset
@@ -476,10 +476,10 @@ class FlameItemCollector(HookBaseClass):
 
     def create_movie_items(self, parent_item, asset_info):
         """
-        Create items based on a video asset dictionary.
+        Create items based on a movie asset dictionary.
 
         :param parent_item: Parent of the items to create
-        :param asset_info: Information dictionary related to a video asset
+        :param asset_info: Information dictionary related to a movie asset
         :return: List of Item
         """
         path = self._path_from_asset(asset_info)
