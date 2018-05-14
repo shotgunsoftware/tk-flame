@@ -370,7 +370,7 @@ class FlameItemCollector(HookBaseClass):
             openclip_info["path"] = openclip_info["openClipResolvedPath"]
             openclip = self.create_batchOpenClip_items(parent_item, openclip_info)
 
-        return [item for item in video + movie + batch + openclip if item is not None]
+        return [item for item in video + batch + openclip if item is not None]
 
     def create_batch_items(self, parent_item, asset_info):
         """
