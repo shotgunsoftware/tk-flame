@@ -73,10 +73,8 @@ def appInitialized(projectName):
             else:
                 project_is_changing = (new_sg_project != engine.context.project.get("name"))
 
-        # Note - Since Flame is a PySide only environment, we import it directly
-        # rather than going through the sgtk wrappers.
         if engine.get_setting("project_switching") is False and project_is_changing:
-            from PySide import QtGui
+            from sgtk.platform.qt import QtGui
             QtGui.QMessageBox.warning(
                 None,
                 "No project switching!",
