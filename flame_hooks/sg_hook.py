@@ -121,7 +121,7 @@ def customUIAction(info, userData):
                  - name: Name of the action being triggered
                  - selection: Tuple of wiretap ids
 
-    :param userData: The action dictionary that was passed to getCustomUIActions
+    :param userData: The action object that was passed to getCustomUIActions
     """
     # first, get the toolkit engine
     import sgtk

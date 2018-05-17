@@ -87,7 +87,7 @@ class CreateVersionPlugin(HookBaseClass):
         accept() method. Strings can contain glob patters such as *, for example
         ["maya.*", "file.maya"]
         """
-        return ["flame.video", "flame.openClip", "flame.batchOpenClip"]
+        return ["flame.video", "flame.movie", "flame.openClip", "flame.batchOpenClip"]
 
     def accept(self, settings, item):
         """

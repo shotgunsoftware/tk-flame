@@ -76,7 +76,7 @@ def batchExportBegin(info, userData):
                               This is only available if versioning is enabled.
     
     
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
@@ -124,7 +124,7 @@ def batchExportEnd(info, userData):
         aborted:              Indicate if the export has been aborted by the user.
     
     
-    :param userData: Dictionary that could have been populated by previous export hooks and that
+    :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
                      This can be used by the hook to pass black box data around.
     """
