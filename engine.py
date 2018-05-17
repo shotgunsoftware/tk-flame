@@ -159,9 +159,7 @@ class FlameEngine(sgtk.platform.Engine):
         self._export_info = None
 
         if self.has_ui:
-            # tell QT to interpret C strings as utf-8
-            # Note - Since Flame is a PySide only environment, we import it directly
-            # rather than going through the sgtk wrappers.             
+            # tell QT to interpret C strings as utf-8 
             from sgtk.platform.qt import QtCore, QtGui
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)
@@ -870,8 +868,12 @@ class FlameEngine(sgtk.platform.Engine):
             # a state akin to running apps inside the shell engine. 
             # We assume that in pre-launch mode, PySide is available since
             # we are running within the Flame python.
-            from PySide import QtCore, QtGui
-            import PySide
+            from sgtk.platform import qt
+            from sgtk.util.qt_importer import QtImporter
+
+            importer = QtImporter()
+            QtCore = importer.QtCore
+            QtGui = importer.QtGui
 
             # a simple dialog proxy that pushes the window forward
             class ProxyDialogPySide(QtGui.QDialog):
@@ -892,8 +894,6 @@ class FlameEngine(sgtk.platform.Engine):
             base["qt_core"] = QtCore
             base["qt_gui"] = QtGui
             base["dialog_base"] = ProxyDialogPySide
-            self.log_debug("Successfully initialized PySide '%s' located in %s."
-                           % (PySide.__version__, PySide.__file__))
 
             return base
 
@@ -1418,9 +1418,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
 
     # now try to output it
     try:
-        # Note - Since Flame is a PySide only environment, we import it directly
-        # rather than going through the sgtk wrappers.         
-        from PySide import QtGui, QtCore
+        from sgtk.platform.qt import QtGui, QtCore
         if QtCore.QCoreApplication.instance():
             # there is an application running - so pop up a message!
             QtGui.QMessageBox.critical(None, "Shotgun General Error", error_message)
