@@ -114,7 +114,7 @@ class UpdateShotPlugin(HookBaseClass):
         """
 
         # Only available on a Shot Context and from a batch render
-        is_accepted = item.context.entity["type"] == "Shot" and not item.properties["fromBatch"]
+        is_accepted = item.context.entity and item.context.entity.get("type", "") == "Shot" and not item.properties.get("fromBatch", False)
 
         return {"accepted": is_accepted}
 
