@@ -117,7 +117,7 @@ class UpdateCutPlugin(HookBaseClass):
         cut_supported = self.sg.server_caps.version >= (7, 0, 0)
 
         # Only available on Shot context
-        shot_context = item.context.entity and item.context.entity.get("type", "") == "Shot"
+        shot_context = item.context.entity and item.context.entity.get("type") == "Shot"
 
         accepted = cut_supported and shot_context and item.properties.get("fromBatch", False)
 
