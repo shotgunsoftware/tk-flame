@@ -116,7 +116,7 @@ class CreateCutPlugin(HookBaseClass):
         cut_supported = self.sg.server_caps.version >= (7, 0, 0)
 
         # Only available on Shot entity
-        shot_context = item.context.entity and item.context.entity.get("type", "") == "Shot"
+        shot_context = item.context.entity and item.context.entity.get("type") == "Shot"
 
         # Not available from batch render
         accepted = cut_supported and shot_context and not item.properties.get("fromBatch", False)
