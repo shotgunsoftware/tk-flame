@@ -117,5 +117,5 @@ description: "Shotgun Integration in Flame"
 
 # Required minimum versions for this item to run
 requires_shotgun_version:
-requires_core_version: "v0.18.148"
+requires_core_version: "v0.18.45"
 
