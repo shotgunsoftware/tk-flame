@@ -18,6 +18,7 @@ import re
 
 import sgtk
 from sgtk import TankError
+from sgtk.platform.qt import QtGui
 
 # First flame version with the Python API is 2018.2
 if sgtk.platform.current_engine().is_version_less_than("2018.2"):
@@ -110,10 +111,12 @@ class FlameLoaderActions(HookBaseClass):
                                      "description": "Create a Batch setup inside a new Batch Group."})
 
         if SHOT_LOAD_ACTION in actions and hasattr(flame.batch, "load_setup"):
-            action_instances.append({"name": SHOT_LOAD_ACTION,
-                                     "params": None,
-                                     "caption": "Load in new Batch Group",
-                                     "description": "Load a Batch setup file inside a new Batch Group."})
+            batch_paths = self._get_batch_path_from_sg_publish_data(sg_publish_data)
+            if batch_paths is not None:
+                action_instances.append({"name": SHOT_LOAD_ACTION,
+                                         "params": None,
+                                         "caption": "Load in new Batch Group",
+                                         "description": "Load a Batch setup file inside a new Batch Group."})
 
         return action_instances
 
@@ -177,9 +180,14 @@ class FlameLoaderActions(HookBaseClass):
                 self._add_batch_group_from_shot(sg_publish_data, False)
 
             else:
-                raise FlameLoaderActionError("Unknown action name: '%s'".format(name))
+                raise FlameLoaderActionError("Unknown action name: '{}'".format(name))
         except FlameLoaderActionError, error:
             # A FlameActionError reaching here means that something major have stopped the current action
+            QtGui.QMessageBox.critical(
+                None,
+                "Error",
+                str(error),
+            )
             app.log_error(error)
 
     ##############################################################################################################
@@ -258,22 +266,9 @@ class FlameLoaderActions(HookBaseClass):
         app = self.parent
         app.log_debug("Adding a batch group using '%s'" % sg_publish_data)
 
-        # Query the Shotgun database about what we need
-        sg_filters = [["id", "is", sg_publish_data["id"]]]
-        sg_fields = ["sg_published_files",  # List of linked PublishedFile
-                     "code",  # Name of the Shot
-                     "sg_versions",  # List of linked Version
-                     "sg_sequence"  # Linked Sequence
-                     ]
-        sg_type = "Shot"
-
-        sg_info = self.parent.shotgun.find_one(
-            sg_type, filters=sg_filters, fields=sg_fields
-        )
-
-        # Checks that we have the necessary info to proceed.
-        if not all(f in sg_info for f in sg_fields):
-            raise FlameLoaderActionError("Cannot load a Batch Group from Shotgun using this {}".format(sg_type))
+        sg_info = self._get_batch_info_from_sg_publish_data(sg_publish_data)
+        if sg_info is None:
+            raise FlameLoaderActionError("Cannot load a Batch Group from Shotgun using this Shot")
 
         # Create a new batch_group using this Shot
         if build_new:
@@ -528,8 +523,6 @@ class FlameLoaderActions(HookBaseClass):
         :rtype: dict
 
         """
-        app = self.parent
-
         fields = {
             "Sequence": clip["Sequence Name"],
             "Shot": "<shot name>",
@@ -590,7 +583,7 @@ class FlameLoaderActions(HookBaseClass):
 
         # Create a .clip file
         if self.use_template and self.clip_path_template:
-            clip_root, clip_path, clip_ext = self._build_path_from_template(self.clip_path_template, fields)
+            _, clip_path, _ = self._build_path_from_template(self.clip_path_template, fields)
             write_file_info["create_clip_path"] = clip_path
 
             clip_path_set = True
@@ -600,7 +593,7 @@ class FlameLoaderActions(HookBaseClass):
 
         # Create a .batch file
         if self.use_template and self.setup_path_template:
-            setup_root, setup_path, setup_ext = self._build_path_from_template(self.setup_path_template, fields)
+            _, setup_path, _ = self._build_path_from_template(self.setup_path_template, fields)
             write_file_info["include_setup_path"] = setup_path
 
             setup_path_set = True
@@ -673,24 +666,29 @@ class FlameLoaderActions(HookBaseClass):
                 continue
 
             # Eliminates PublishedFiles with an invalid local path
-            if path and self._exists(path):
-                published_files.append({"path": path, "info": file_info})
-            elif '%' in path:
-                path_info = self._handle_frame_range(path)
+            try:
+                if path and self._exists(path):
+                    published_files.append({"path": path, "info": file_info})
+                elif '%' in path:
+                    path_info = self._handle_frame_range(path)
 
-                published_files.append(
-                    {
-                        "path": path_info["path"],
-                        "frame_range":
-                            {
-                                "start_frame": int(path_info["start_frame"]),
-                                "end_frame": int(path_info["end_frame"])
-                            },
-                        "info": file_info
-                    }
-                )
-            else:
-                self.parent.log_warning("File not found on disk - '%s'" % path)
+                    published_files.append(
+                        {
+                            "path": path_info["path"],
+                            "frame_range":
+                                {
+                                    "start_frame": int(path_info["start_frame"]),
+                                    "end_frame": int(path_info["end_frame"])
+                                },
+                            "info": file_info
+                        }
+                    )
+                else:
+                    self.parent.log_warning("File not found on disk - '%s'" % path)
+            except FlameLoaderActionError as error:
+                # Path not found so log it and ignore this published file
+                self.parent.log_warning(str(error))
+                continue
 
         app.log_debug("PublishedFile info found: %s" % published_files)
 
@@ -723,6 +721,45 @@ class FlameLoaderActions(HookBaseClass):
 
         # We want to get the one with the latest iteration
         return self._latest_version_filter(batchs)[0]["path"] if batchs else None
+
+
+    def _get_batch_info_from_sg_publish_data(self, sg_publish_data):
+        """
+        Gets the publish Batch file dictionnary from shotgun data dictionnary
+
+        :param sg_publish_data: Shotgun data dictionary with all the standard publish fields.
+        :returns: A list of Shotgun data dictionary containing the published batch files.
+        """
+
+        sg_filters = [["id", "is", sg_publish_data["id"]]]
+        sg_fields = ["sg_published_files",  # List of linked PublishedFile
+                     "code",  # Name of the Shot
+                     "sg_versions",  # List of linked Version
+                     "sg_sequence"  # Linked Sequence
+                    ]
+        sg_type = "Shot"
+
+        sg_info = self.parent.shotgun.find_one(
+            sg_type, filters=sg_filters, fields=sg_fields
+        )
+
+        # Checks that we have the necessary info to proceed.
+        if not all(f in sg_info for f in sg_fields):
+            return None
+        return sg_info
+
+    def _get_batch_path_from_sg_publish_data(self, sg_publish_data):
+        """
+        Gets the current shot batch filefrom shotgun data dictionnary
+
+        :param sg_publish_data: Shotgun data dictionary with all the standard publish fields.
+        :returns: The path to the batch file for the curent shot.
+        """
+        import pdb
+        pdb.set_trace()
+        sg_info = self._get_batch_info_from_sg_publish_data(sg_publish_data)
+        batch_path = self._get_batch_path_from_published_files(sg_info)
+        return batch_path if batch_path and self._exists(batch_path) else None
 
     def _get_clips_from_published_files(self, sg_info):
         """
@@ -887,7 +924,7 @@ class FlameLoaderActions(HookBaseClass):
         # Lets retrieve all the files that's in the folder of the file to match
         try:
             files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
-        except OSError, e:
+        except OSError:
             raise FlameLoaderActionError("Unable to guess the frame range for '%s'" % path)
 
         for f in files:
