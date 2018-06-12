@@ -803,10 +803,8 @@ class FlameItemCollector(HookBaseClass):
         frame_range = match.group(2).replace("[", "").replace("]", "").split("-")
         if len(frame_range) == 1:
             last = first = frame_range[0]
-        elif len(frame_range) == 2:
-            first, last = frame_range
         else:
-            return [] # The path is not a sequence
+            first, last = frame_range
 
         # Get the frame value padding length
         frame_size = len(first)
