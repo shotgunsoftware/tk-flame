@@ -755,8 +755,6 @@ class FlameLoaderActions(HookBaseClass):
         :param sg_publish_data: Shotgun data dictionary with all the standard publish fields.
         :returns: The path to the batch file for the curent shot.
         """
-        import pdb
-        pdb.set_trace()
         sg_info = self._get_batch_info_from_sg_publish_data(sg_publish_data)
         batch_path = self._get_batch_path_from_published_files(sg_info)
         return batch_path if batch_path and self._exists(batch_path) else None
