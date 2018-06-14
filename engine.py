@@ -443,6 +443,17 @@ class FlameEngine(sgtk.platform.Engine):
                 "presets"
             )
         else:
+            # Newer flame version have shotgun specific presets
+            path = os.path.join(
+                self.install_root,
+                "presets",
+                self.flame_version,
+                "export",
+                "presets",
+                "shotgun"
+            )
+            if os.path.exists(path): return path
+
             # flame 2017+ presets structure (note the extra flame folder)
             return os.path.join(
                 self.install_root,
