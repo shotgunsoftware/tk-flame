@@ -539,7 +539,8 @@ class FlameItemCollector(HookBaseClass):
 
         return [item]
 
-    def _path_from_asset(self, asset_info):
+    @staticmethod
+    def _path_from_asset(asset_info):
         """
         Extract the path from the given asset information dictionary
 
@@ -552,7 +553,8 @@ class FlameItemCollector(HookBaseClass):
         else:
             # Avoiding the os.path.join because resolvedPath might start with /
             path = os.path.normpath(
-                os.path.sep.join([asset_info.get("destinationPath", ""), asset_info["resolvedPath"]]))
+                os.path.sep.join([asset_info.get("destinationPath", ""),
+                                  asset_info["resolvedPath"]]))
 
         return path
 
@@ -783,7 +785,8 @@ class FlameItemCollector(HookBaseClass):
             path=path
         )
 
-    def _get_file_sequence(self, path):
+    @staticmethod
+    def _get_file_sequence(path):
         """
         Return a list of path from a file sequence path.
 
@@ -792,20 +795,21 @@ class FlameItemCollector(HookBaseClass):
         :param path: Path of the file sequence
         :return: List of path
         """
-        file_sequence = []
-
         match = re.match(r"(.*\.)((?:\[\d+-\d+\])|(?:\d+))(\..*)", path)
         if not match:
-            # The path is not a sequence
-            return file_sequence
+            return [] # The path is not a sequence
 
         # Get the first and last frame of the sequence
-        first, last = match.group(2).replace("[", "").replace("]", "").split("-")
+        frame_range = match.group(2).replace("[", "").replace("]", "").split("-")
+        if len(frame_range) == 1:
+            last = first = frame_range[0]
+        else:
+            first, last = frame_range
 
         # Get the frame value padding length
         frame_size = len(first)
 
-        # Check if every frame in the sequence exists
+        file_sequence = []
         for frame in range(int(first), int(last)):
             # Apply frame padding
             frame = "0" * (frame_size - len(str(frame))) + str(frame)
