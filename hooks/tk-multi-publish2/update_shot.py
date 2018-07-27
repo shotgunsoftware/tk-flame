@@ -53,7 +53,7 @@ class UpdateShotPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return ""
+        return "Update shot in Shotgun for the given object"
 
     @property
     def settings(self):
@@ -175,24 +175,13 @@ class UpdateShotPlugin(HookBaseClass):
         # Update the Shot on shotgun
         self.sg.update("Shot", item.context.entity['id'], shot_data)
 
-        # Extract the Backburner dependencies
-        job_ids = item.properties.get("backgroundJobId")
-        job_ids_str = ",".join(job_ids) if job_ids else None
-
         # Create the Image thumbnail in background
-        self.engine.create_local_backburner_job(
-            "Upload Shot Image Preview",
-            item.name,
-            job_ids_str,
-            "backburner_hooks",
-            "attach_jpg_preview",
-            {
-                "targets": target,
-                "width": asset_info["width"],
-                "height": asset_info["height"],
-                "path": path,
-                "name": item.name
-            }
+        self.engine.thumbnail_generator.generate(
+            display_name=item.name,
+            path=path,
+            dependencies=item.properties.get("backgroundJobId"),
+            target_entities=target,
+            asset_info=asset_info
         )
 
     def finalize(self, settings, item):
@@ -206,7 +195,7 @@ class UpdateShotPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
-        pass
+        self.engine.thumbnail_generator.finalize(path=item.properties["path"])
 
     def _shot_data(self, item):
         """

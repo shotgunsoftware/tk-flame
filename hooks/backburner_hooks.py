@@ -36,7 +36,58 @@ class BackburnerHooks(HookBaseClass):
                     "+parti8x8+parti4x4+partp8x8+partp4x4+partb8x8 -bidir_refine 1 -cmp 1 -flags2 fastpskip -flags2 " \
                     "dct8x8 -flags2 mixed_refs -flags2 wpred -refs 2 -deblockalpha 0 -deblockbeta 0 -bf 3 -crf 18 "
 
-    def attach_jpg_preview(self, path, width, height, targets, name):
+
+    def upload_to_shotgun(self, path, targets, field_name, display_name, files_to_delete):
+        """
+        Upload a file to Shotgun, link it to the targets and delete the file.
+
+        :param path: Media file to upload.
+        :param targets: Shotgun entities to be linked to the file.
+        :param field_name: The internal Shotgun field name on the entity to
+            store the file in. This field must be "thumb_image" (if image) or
+            "sg_uploaded_movie" (if movie).
+        :param display_name: The display name to use for the file.
+        :param files_to_delete: List of files to be deleted upon successful
+            upload to Shotgun.
+        """
+        for target in targets:
+            self.parent.shotgun.upload(
+                entity_type=target["type"],
+                entity_id=target["id"],
+                path=path,
+                field_name=field_name,
+                display_name=display_name
+            )
+        if files_to_delete is not None:
+            for file_to_delete in files_to_delete:
+                sgtk.util.filesystem.safe_delete_file(file_to_delete)
+
+    def update_path_to_movie(self, path, targets, files_to_delete):
+        """
+        Update the path to the local movie in Shotgun
+
+        :param path: Local movie file
+        :param targets: Shotgun entities to be linked to the file.
+        :param files_to_delete: List of files to be deleted upon successful
+            update to Shotgun.
+        """
+        batch_data = []
+        for target in targets:
+            data = {
+                "request_type": "update",
+                "entity_type": target["type"],
+                "entity_id": target["id"],
+                "data": {
+                    "sg_path_to_movie": path
+                }
+            }
+            batch_data.append(data)
+        self.parent.shotgun.batch(batch_data)
+        if files_to_delete is not None:
+            for file_to_delete in files_to_delete:
+                sgtk.util.filesystem.safe_delete_file(file_to_delete)
+
+    def attach_jpg_preview(self, path, width, height, targets, display_name):
         # first figure out a good scale-down res
         scaled_down_width, scaled_down_height = self._calculate_aspect_ratio(
             self.SHOTGUN_THUMBNAIL_TARGET_HEIGHT,
@@ -52,12 +103,12 @@ class BackburnerHooks(HookBaseClass):
             scaled_down_height
         )
 
-        jpg_fd, jpg_path = mkstemp(suffix=".jpg", prefix=name + ".", dir=self.parent.get_backburner_tmp())
+        jpg_fd, jpg_path = mkstemp(suffix=".jpg", prefix=display_name + ".", dir=self.parent.get_backburner_tmp())
         try:
             full_cmd = "%s > %s" % (input_cmd, jpg_path)
 
             jpg_job = subprocess.Popen([full_cmd], stdout=subprocess.PIPE, shell=True)
-            stdout, stderr = jpg_job.communicate()
+            _, stderr = jpg_job.communicate()
             return_code = jpg_job.returncode
 
             if return_code:
@@ -66,13 +117,19 @@ class BackburnerHooks(HookBaseClass):
                 return return_code
 
             for target in targets:
-                self.parent.shotgun.upload(target["type"], target["id"], jpg_path, "thumb_image", name)
+                self.parent.shotgun.upload(
+                    entity_type=target["type"],
+                    entity_id=target["id"],
+                    path=jpg_path,
+                    field_name="thumb_image",
+                    display_name=display_name
+                )
 
         finally:
             os.close(jpg_fd)
-            os.remove(jpg_path)
+            sgtk.util.filesystem.safe_delete_file(jpg_path)
 
-    def attach_mov_preview(self, path, width, height, targets, name, fps):
+    def attach_mov_preview(self, path, width, height, targets, display_name, fps):
         # first figure out a good scale-down res
         scaled_down_width, scaled_down_height = self._calculate_aspect_ratio(
             self.SHOTGUN_QUICKTIME_TARGET_HEIGHT,
@@ -95,24 +152,37 @@ class BackburnerHooks(HookBaseClass):
             scaled_down_height
         )
 
-        mov_fd, mov_path = mkstemp(suffix=".mov", prefix=name + ".", dir=self.parent.get_backburner_tmp())
+        mov_fd, mov_path = mkstemp(suffix=".mov", prefix=display_name + ".", dir=self.parent.get_backburner_tmp())
 
         try:
             full_cmd = "%s | %s %s %s" % (input_cmd, ffmpeg_cmd, self.FFMPEG_PRESET, mov_path)
 
             mov_job = subprocess.Popen([full_cmd], stdout=subprocess.PIPE, shell=True)
-            stdout, stderr = mov_job.communicate()
+            _, stderr = mov_job.communicate()
             return_code = mov_job.returncode
 
             if return_code:
                 self.parent.log_warning("Movie process failed!\nError code: %s\nOutput:\n%s" % (return_code, stderr))
                 return return_code
 
+            if self.engine.get_setting("bypass_server_transcoding"):
+                self.engine.log_debug("Bypass Shotgun transcoding setting enabled.")
+                field_name = "sg_uploaded_movie_mp4"
+            else:
+                field_name = "sg_uploaded_movie"
+
             for target in targets:
-                self.parent.shotgun.upload(target["type"], target["id"], mov_path, "sg_uploaded_movie", name)
+                self.parent.shotgun.upload(
+                    entity_type=target["type"],
+                    entity_id=target["id"],
+                    path=mov_path,
+                    field_name=field_name,
+                    display_name=display_name
+                )
+
         finally:
             os.close(mov_fd)
-            os.remove(mov_path)
+            sgtk.util.filesystem.safe_delete_file(mov_path)
 
     def _calculate_aspect_ratio(self, target_height, width, height):
         """

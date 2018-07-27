@@ -55,7 +55,7 @@ class CreateVersionPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "TBD"
+        return "Creates version in Shotgun for the given object"
 
     @property
     def settings(self):
@@ -142,7 +142,7 @@ class CreateVersionPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
-        path = item.properties["path"]
+        path = item.properties.get("path", None)
 
         # Build the Version metadata dictionary
         ver_data = dict(
@@ -167,7 +167,12 @@ class CreateVersionPlugin(HookBaseClass):
             ver_data["sg_frames_aspect_ratio"] = float(aspect_ratio)
             ver_data["sg_movie_aspect_ratio"] = float(aspect_ratio)
 
-        re_match = re.search("(\[[0-9]+-[0-9]+\])\.", path)
+        # For file sequences, we want the path as provided by flame.
+        # The property 'path' will be encoded the shotgun way file.%d.ext
+        # while 'file_path' will be encoded the flame way file.[##-##].ext.
+        file_path = item.properties.get("file_path", path)
+
+        re_match = re.search("(\[[0-9]+-[0-9]+\])\.", file_path)
         if re_match:
             ver_data["frame_range"] = re_match.group(1)[1:-1]
 
@@ -182,45 +187,16 @@ class CreateVersionPlugin(HookBaseClass):
         # Keep the version reference for the other plugins
         item.properties["Version"] = version
 
-        # Extract the Backburner dependencies
-        job_ids = item.properties.get("backgroundJobId")
-        job_ids_str = ",".join(job_ids) if job_ids else None
+        dependencies = item.properties.get("backgroundJobId")
 
-        # For file sequences, the hooks we want the path as provided by flame.
-        path = item.properties.get("file_path", path)
-
-        # Create the Image thumbnail in background
-        self.engine.create_local_backburner_job(
-            "Upload Version Image Preview",
-            item.name,
-            job_ids_str,
-            "backburner_hooks",
-            "attach_jpg_preview",
-            {
-                "targets": [version],
-                "width": asset_info["width"],
-                "height": asset_info["height"],
-                "path": path,
-                "name": item.name
-            }
-        )
-
-        # Create the Video thumbnail in background
-        self.engine.create_local_backburner_job(
-            "Upload Version Movie Preview",
-            item.name,
-            job_ids_str,
-            "backburner_hooks",
-            "attach_mov_preview",
-            {
-                "targets": [version],
-                "width": asset_info["width"],
-                "height": asset_info["height"],
-                "path": path,
-                "name": item.name,
-                "fps": asset_info["fps"]
-            }
-        )
+        # Create the Movie preview in background
+        # (Thumbnail will be generated server-side from movie)
+        self.engine.thumbnail_generator.generate(
+            display_name=item.name,
+            path=file_path,
+            dependencies=dependencies,
+            target_entities=[version],
+            asset_info=asset_info)
 
     def finalize(self, settings, item):
         """
@@ -234,4 +210,7 @@ class CreateVersionPlugin(HookBaseClass):
         :param item: Item to process
         """
 
-        pass
+        path = item.properties.get("path", None)
+        file_path = item.properties.get("file_path", path)
+
+        self.engine.thumbnail_generator.finalize(path=file_path)

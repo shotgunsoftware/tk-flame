@@ -1,11 +1,11 @@
 # Copyright (c) 2014 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
@@ -35,12 +35,12 @@ class FlameEngine(sgtk.platform.Engine):
     """
     The engine class. This wraps around a series of callbacks in Flame (so called hooks).
     The Flame engine is a bit different than other engines.
-    
-    Because Flame doesn't have an API, we cannot call Flame, but Flame will call out 
-    to the toolkit code. This means that the normal register_command approach won't 
+
+    Because Flame doesn't have an API, we cannot call Flame, but Flame will call out
+    to the toolkit code. This means that the normal register_command approach won't
     work inside of Flame - instead, the engine introduces a different scheme of callbacks
     that apps can register to ensure that they cen do stuff.
-    
+
     For apps, the main entry points are register_export_hook and register_batch_hook.
     For more information, see below.
     """
@@ -95,10 +95,10 @@ class FlameEngine(sgtk.platform.Engine):
             pass
 
         return host_info
-    
+
     def __init__(self, *args, **kwargs):
         """
-        Overridden constructor where we init some things which 
+        Overridden constructor where we init some things which
         need to be defined very early on in the engine startup.
         """
 
@@ -119,8 +119,8 @@ class FlameEngine(sgtk.platform.Engine):
         self._install_root = None
 
         # set the current engine mode. The mode contains information about
-        # how the engine was started - it can be executed either before the 
-        # actual DCC starts up (pre-launch), in the DCC itself or on the 
+        # how the engine was started - it can be executed either before the
+        # actual DCC starts up (pre-launch), in the DCC itself or on the
         # backburner farm. This means that there are three distinct bootstrap
         # scripts which can launch the engine (all contained within the engine itself).
         # these bootstrap scripts all set an environment variable called
@@ -135,6 +135,16 @@ class FlameEngine(sgtk.platform.Engine):
         else:
             raise TankError("Unknown launch mode '%s' defined in "
                             "environment variable TOOLKIT_FLAME_ENGINE_MODE!" % engine_mode_str)
+
+        # Transcoder, thumbnail generator and local movie generator will be
+        # initialized on first request for them since, in order to know which
+        # type we will need, we need to wait for the Flame API to be loaded
+        # completely.
+        #
+        self._flame_exporter_supported_check = None
+        self._transcoder = None
+        self._thumbnail_generator = None
+        self._local_movie_generator = None
 
         super(FlameEngine, self).__init__(*args, **kwargs)
 
@@ -159,7 +169,7 @@ class FlameEngine(sgtk.platform.Engine):
         self._export_info = None
 
         if self.has_ui:
-            # tell QT to interpret C strings as utf-8 
+            # tell QT to interpret C strings as utf-8
             from sgtk.platform.qt import QtCore, QtGui
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)
@@ -255,8 +265,8 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Specifies the path to the associated python process.
         This is typically populated as part of the engine startup.
-        
-        :param python_path: path to python, as string 
+
+        :param python_path: path to python, as string
         """
         self._python_executable_path = python_path
         self.log_debug("This engine is running python interpreter '%s'" % self._python_executable_path)
@@ -265,8 +275,8 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Specifies which version of Flame this engine is running.
         This is typically populated as part of the engine startup.
-        
-        :param major_version_str: Major version number as string 
+
+        :param major_version_str: Major version number as string
         :param minor_version_str: Minor version number as string
         :param patch_version_str: Patch version number as string
         :param full_version_str: Full version number as string
@@ -389,7 +399,7 @@ class FlameEngine(sgtk.platform.Engine):
     def python_executable(self):
         """
         Returns the python executable associated with this engine
-        
+
         :returns: path to python, e.g. '/usr/discreet/python/2016.0.0.322/bin/python'
         """
         if self._python_executable_path is None:
@@ -400,11 +410,11 @@ class FlameEngine(sgtk.platform.Engine):
     @property
     def preset_version(self):
         """
-        Returns the preset version required for the currently executing 
-        version of Flame. Preset xml files in Flame all have a version number 
+        Returns the preset version required for the currently executing
+        version of Flame. Preset xml files in Flame all have a version number
         to denote which generation of the file format they implement. If you are using
-        an old preset with a new version of Flame, a warning message appears. 
-        
+        an old preset with a new version of Flame, a warning message appears.
+
         :returns: Preset version, as string, e.g. '5'
         """
         if self._flame_version is None:
@@ -433,6 +443,16 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: Path as string
         """
+
+        # If possible use the Flame python API to get the presets location
+        try:
+            import flame
+            if 'PyExporter' in dir(flame):
+                return flame.PyExporter.get_presets_base_dir(
+                    flame.PyExporter.PresetVisibility.Shotgun)
+        except:
+            pass
+
         if self.is_version_less_than("2017"):
             # flame 2016 presets structure
             return os.path.join(
@@ -443,17 +463,6 @@ class FlameEngine(sgtk.platform.Engine):
                 "presets"
             )
         else:
-            # Newer flame version have shotgun specific presets
-            path = os.path.join(
-                self.install_root,
-                "presets",
-                self.flame_version,
-                "export",
-                "presets",
-                "shotgun"
-            )
-            if os.path.exists(path): return path
-
             # flame 2017+ presets structure (note the extra flame folder)
             return os.path.join(
                 self.install_root,
@@ -463,6 +472,70 @@ class FlameEngine(sgtk.platform.Engine):
                 "presets",
                 "flame"
             )
+
+    @staticmethod
+    def _get_full_preset_path(preset_path, preset_type):
+        """
+        Convert a path to a preset that can be incomplete to an absolute path.
+
+        :param preset_path: Path to a preset to find.
+        :param preset_type: Type of preset to look for.
+
+        :returns: Absolute path to the preset.
+        """
+        if not os.path.isabs(preset_path):
+            import flame
+            presets_dir = flame.PyExporter.get_presets_dir(
+                flame.PyExporter.PresetVisibility.Shotgun,
+                preset_type
+            )
+            preset_path = os.path.join(
+                presets_dir,
+                preset_path
+            )
+        return preset_path
+
+    @property
+    def thumbnails_preset_path(self):
+        """
+        The location of the flame export preset to use to generate thumbnails.
+
+        :returns: Path as string
+        """
+        import flame
+        return self._get_full_preset_path(
+            self.get_setting("thumbnails_preset_path"),
+            flame.PyExporter.PresetType.Image_Sequence
+        )
+
+    @property
+    def previews_preset_path(self):
+        """
+        The location of the flame export preset to use to generate previews.
+
+        :returns: Path as string
+        """
+        import flame
+        return self._get_full_preset_path(
+            self.get_setting("previews_preset_path"),
+            flame.PyExporter.PresetType.Movie
+        )
+
+    @property
+    def local_movies_preset_path(self):
+        """
+        The location of the flame export preset to use to generate local movies.
+
+        Local movies are linked to assets in Shotgun thru the "Path to Movie"
+        field but are not uploaded on the server.
+
+        :returns: Path as string
+        """
+        import flame
+        return self._get_full_preset_path(
+            self.get_setting("local_movies_preset_path"),
+            flame.PyExporter.PresetType.Movie
+        )
 
     @property
     def wiretap_tools_root(self):
@@ -480,8 +553,8 @@ class FlameEngine(sgtk.platform.Engine):
 
     def _is_version_less_than(self, major, minor, patch):
         """
-        Compares the given version numbers with the current 
-        flame version and returns False if the given version is 
+        Compares the given version numbers with the current
+        flame version and returns False if the given version is
         greater than the current version.
 
         Example:
@@ -505,15 +578,15 @@ class FlameEngine(sgtk.platform.Engine):
 
     def is_version_less_than(self, version_str):
         """
-        Compares the given version string with the current 
-        flame version and returns False if the given version is 
+        Compares the given version string with the current
+        flame version and returns False if the given version is
         greater than the current version.
-        
-        Example: 
-        
+
+        Example:
+
         - Flame: '2016.1.0.278', version str: '2016.1' => False
         - Flame: '2016',  version str: '2016.1' => True
-        
+
         :param version_str: Version to run comparison against
         """
 
@@ -540,7 +613,7 @@ class FlameEngine(sgtk.platform.Engine):
     def flame_major_version(self):
         """
         Returns Flame's major version number as a string.
-        
+
         :returns: String (e.g. '2016')
         """
         if self._flame_version is None:
@@ -552,7 +625,7 @@ class FlameEngine(sgtk.platform.Engine):
     def flame_minor_version(self):
         """
         Returns Flame's minor version number as a string.
-        
+
         :returns: String (e.g. '2')
         """
         if self._flame_version is None:
@@ -576,7 +649,7 @@ class FlameEngine(sgtk.platform.Engine):
     def flame_version(self):
         """
         Returns Flame's full version number as a string.
-        
+
         :returns: String (e.g. '2016.1.0.278')
         """
         if self._flame_version is None:
@@ -636,7 +709,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         self.created_qt_dialogs.append(dialog)
 
-        # show the dialog        
+        # show the dialog
         dialog.show()
 
         # lastly, return the instantiated widget
@@ -753,7 +826,7 @@ class FlameEngine(sgtk.platform.Engine):
     def log_debug(self, msg):
         """
         Log a debug message
-        
+
         :param msg: The debug message to log
         """
         logging.getLogger(LOG_CHANNEL).debug(msg)
@@ -761,7 +834,7 @@ class FlameEngine(sgtk.platform.Engine):
     def log_info(self, msg):
         """
         Log some info
-        
+
         :param msg: The info message to log
         """
         logging.getLogger(LOG_CHANNEL).info(msg)
@@ -769,7 +842,7 @@ class FlameEngine(sgtk.platform.Engine):
     def log_warning(self, msg):
         """
         Log a warning
-        
+
         :param msg: The warning message to log
         """
         logging.getLogger(LOG_CHANNEL).warning(msg)
@@ -777,7 +850,7 @@ class FlameEngine(sgtk.platform.Engine):
     def log_error(self, msg):
         """
         Log an error
-        
+
         :param msg: The error message to log
         """
         logging.getLogger(LOG_CHANNEL).error(msg)
@@ -789,27 +862,27 @@ class FlameEngine(sgtk.platform.Engine):
     def pre_dcc_launch_phase(self):
         """
         Special bootstrap method used to set up the Flame environment.
-        This is designed to execute before Flame has launched, as part of the 
+        This is designed to execute before Flame has launched, as part of the
         bootstrapping process.
 
         This method assumes that it is being executed inside a Flame python
         and is called from the app_launcher script which ensures such an environment.
-        
+
         The bootstrapper will first import the wiretap API and setup other settings.
-        
+
         It then attempts to execute the pre-DCC project creation process, utilizing
         both wiretap and QT (setup project UI) for this.
-        
+
         Finally, it will return the command line args to pass to Flame as it is being
         launched.
-        
+
         :returns: arguments to pass to the app launch process
         """
         if self.get_setting("debug_logging"):
             # enable Flame hooks debug
             os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
 
-        # see if we can launch into batch mode. We only do this when in a 
+        # see if we can launch into batch mode. We only do this when in a
         # shot context and if there is a published batch file in Shotgun
         #
         # For now, hard code the logic of how to detect which batch file to load up.
@@ -847,7 +920,7 @@ class FlameEngine(sgtk.platform.Engine):
         sgtk.util.append_path_to_env_var("DL_PYTHON_HOOK_PATH", flame_hooks_folder)
         self.log_debug("Added to hook path: %s" % flame_hooks_folder)
 
-        # now that we have a wiretap library, call out and initialize the project 
+        # now that we have a wiretap library, call out and initialize the project
         # automatically
         tk_flame = self.import_module("tk_flame")
         wiretap_handler = tk_flame.WiretapHandler()
@@ -867,8 +940,8 @@ class FlameEngine(sgtk.platform.Engine):
             # We are running the engine inside of the Flame Application.
             # alternatively, we are running the engine in backburner
             #
-            # in both these states, no special QT init is necessary. 
-            # Defer to default implementation which looks for pyside and 
+            # in both these states, no special QT init is necessary.
+            # Defer to default implementation which looks for pyside and
             # gracefully fails in case that isn't found.
             self.log_debug("Initializing default PySide for in-DCC / backburner use")
             return super(FlameEngine, self)._define_qt_base()
@@ -876,7 +949,7 @@ class FlameEngine(sgtk.platform.Engine):
         else:
             # we are running the engine outside of Flame.
             # This is special - no QApplication is running at this point -
-            # a state akin to running apps inside the shell engine. 
+            # a state akin to running apps inside the shell engine.
             # We assume that in pre-launch mode, PySide is available since
             # we are running within the Flame python.
             from sgtk.platform import qt
@@ -912,7 +985,8 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Cache the export asset into the engine cache.
 
-        :param asset_info: Information dictionary of the asset
+        :param asset_info: Information dictionary of the asset.
+        See sg_export_hook.postExportAsset for details on the dictionary content.
         """
 
         # extract asset information
@@ -922,33 +996,34 @@ class FlameEngine(sgtk.platform.Engine):
         asset_name = asset_info.get("assetName")
 
         # reinitialize the export cache if the format doesn't fit the current asset
-        if type(self.export_info) is not dict:
+        if not isinstance(self._export_info, dict):
             self._export_info = {}
 
-        if sequence_name not in self.export_info:
-            self.export_info[sequence_name] = {shot_name: {asset_type: {asset_name: [asset_info]}}}
+        if sequence_name not in self._export_info:
+            self._export_info[sequence_name] = {shot_name: {asset_type: {asset_name: [asset_info]}}}
 
-        elif shot_name not in self.export_info[sequence_name]:
-            self.export_info[sequence_name][shot_name] = {asset_type: {asset_name: [asset_info]}}
+        elif shot_name not in self._export_info[sequence_name]:
+            self._export_info[sequence_name][shot_name] = {asset_type: {asset_name: [asset_info]}}
 
-        elif asset_type not in self.export_info[sequence_name][shot_name]:
-            self.export_info[sequence_name][shot_name][asset_type] = {asset_name: [asset_info]}
+        elif asset_type not in self._export_info[sequence_name][shot_name]:
+            self._export_info[sequence_name][shot_name][asset_type] = {asset_name: [asset_info]}
 
-        elif asset_name not in self.export_info[sequence_name][shot_name][asset_type]:
-            self.export_info[sequence_name][shot_name][asset_type][asset_name] = [asset_info]
+        elif asset_name not in self._export_info[sequence_name][shot_name][asset_type]:
+            self._export_info[sequence_name][shot_name][asset_type][asset_name] = [asset_info]
         else:
-            self.export_info[sequence_name][shot_name][asset_type][asset_name].append(asset_info)
+            self._export_info[sequence_name][shot_name][asset_type][asset_name].append(asset_info)
 
     def cache_batch_export_asset(self, info):
         """
         Cache the batch export asset into the engine cache.
 
         :param info: Information dictionary of the asset
+                See sg_batch_hook.batchExportEnd for details on the dictionary content.
         """
-        if type(self.export_info) is not list:
+        if not isinstance(self._export_info, list):
             self._export_info = []
 
-        self.export_info.append(info)
+        self._export_info.append(info)
 
     ################################################################################################################
     # export callbacks handling
@@ -962,34 +1037,34 @@ class FlameEngine(sgtk.platform.Engine):
     def register_export_hook(self, menu_caption, callbacks):
         """
         Allows an app to register an interest in one of the Flame export hooks.
-        
+
         This is one of the interaction entry points in the system and this is how apps
         typically have their business logic executed. At app init, an app typically
         calls this method with a syntax like this:
-        
+
             # set up callback map
             callbacks = {}
             callbacks["preCustomExport"] = self.pre_custom_export
             callbacks["preExportAsset"] = self.adjust_path
             callbacks["postExportAsset"] = self.register_post_asset_job
-            
+
             # register with the engine
             self.engine.register_export_hook("Menu Caption", callbacks)
- 
+
         The engine will keep track of things automatically, and whenever the user
         clicks the "Menu Caption" entry on the menu, the corresponding chain of callbacks
         will be called.
-        
+
         All methods should have the following method signature:
-        
+
             def export_callback(self, session_id, info)
-            
+
         Where session_id is a unique session identifier (typically only used in advanced scenarios)
         and info reflects the info parameter passed from Flame (varies for different callbacks).
-        
+
         For information which export can currently be registered against, see the
         flame_hooks/exportHook.py file.
-        
+
         :param menu_caption: Text to appear on the Flame export menu
         :param callbacks: Dictionary of callbacks, see above for details.
         """
@@ -1004,7 +1079,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Internal engine method. Do not use outside of the engine.
         Returns all export presets registered by apps.
-        
+
         :returns: List of preset titles
         """
         return self._registered_export_instances.keys()
@@ -1014,7 +1089,7 @@ class FlameEngine(sgtk.platform.Engine):
         Internal engine method. Do not use outside of the engine.
         Start a new export session.
         Creates a session object which represents a single export session in Flame.
-        
+
         :param preset_name: The name of the preset which should be executed.
         :returns: session id string which is later passed into various methods
         """
@@ -1032,11 +1107,11 @@ class FlameEngine(sgtk.platform.Engine):
     def trigger_export_callback(self, callback_name, session_id, info):
         """
         Internal engine method. Do not use outside of the engine.
-        
-        Dispatch method called from the various Flame hooks. 
-        This method will ensure that the Flame callbacks will be 
+
+        Dispatch method called from the various Flame hooks.
+        This method will ensure that the Flame callbacks will be
         dispatched to the appropriate registered app callbacks.
-        
+
         :param callback_name: Name of the Flame callback method
         :param session_id: Unique session identifier
         :param info: Metadata dictionary from Flame
@@ -1077,36 +1152,36 @@ class FlameEngine(sgtk.platform.Engine):
     #
     # Any apps which are interested in register custom batch exporters with Flame should use the methods
     # below. The register_batch_hook() is called by apps in order to register an interest in pre and post
-    # export callbacks when in batch mode. The Flame engine will ensure that the app's callbacks will get 
+    # export callbacks when in batch mode. The Flame engine will ensure that the app's callbacks will get
     # called at the right time.
     #
 
     def register_batch_hook(self, callbacks):
         """
         Allows an app to register an interest in one of the Flame batch hooks.
-        
+
         This one of the interaction entry points in the system and this is how apps
         typically have their business logic executed. At app init, an app typically
         calls this method with a syntax like this:
-        
+
             # set up callback map
             callbacks = {}
             callbacks["batchExportBegin"] = self.before_export
             callbacks["batchExportEnd"] = self.after_export
-            
+
             # register with the engine
             self.engine.register_batch_hook(callbacks)
- 
-        The engine will keep track of things automatically, and whenever a batch render executes, 
+
+        The engine will keep track of things automatically, and whenever a batch render executes,
         the corresponding chain of callbacks will be called.
-        
+
         All methods should have the following method signature:
-        
+
             def export_callback(self, info)
-            
+
         For information which export can currently be registered against, see the
         flame_hooks/batchHook.py file.
-        
+
         :param callbacks: Dictionary of callbacks, see above for details.
         """
         self.log_debug("Registered batch callbacks with engine: %s" % callbacks)
@@ -1115,11 +1190,11 @@ class FlameEngine(sgtk.platform.Engine):
     def trigger_batch_callback(self, callback_name, info):
         """
         Internal engine method. Do not use outside of the engine.
-        
-        Dispatch method called from the various Flame hooks. 
-        This method will ensure that the Flame callbacks will be 
+
+        Dispatch method called from the various Flame hooks.
+        This method will ensure that the Flame callbacks will be
         dispatched to the appropriate registered app callbacks.
-        
+
         :param callback_name: Name of the Flame callback method
         :param session_id: Unique session identifier
         :param info: Metadata dictionary from Flame
@@ -1144,8 +1219,8 @@ class FlameEngine(sgtk.platform.Engine):
         Return the hostname for the server which hosts this Flame setup.
         This is an accessor into the engine hook settings, allowing apps
         to query which host the closest Flame server is running on.
-        
-        :returns: hostname string 
+
+        :returns: hostname string
         """
         return self.execute_hook_method("project_startup_hook", "get_server_hostname")
 
@@ -1153,25 +1228,110 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Return a location on disk, guaranteed to exist
         where temporary data can be put in such a way that
-        it will be accessible for all backburner jobs, regardless of 
+        it will be accessible for all backburner jobs, regardless of
         which host they execute on.
-        
+
         :returns: path
         """
         return self.get_setting("backburner_shared_tmp")
+
+    @property
+    def _flame_exporter_supported(self):
+        """
+        :return True if Flame exporter API is supported.
+        """
+
+        if self._flame_exporter_supported_check is not None:
+            return self._flame_exporter_supported_check
+
+        try:
+            import flame
+            if "import_clips" in dir(flame) and "PyExporter" in dir(flame):
+                self._flame_exporter_supported_check = True
+            else:
+                self._flame_exporter_supported_check = False
+        except ImportError:
+            self._flame_exporter_supported_check = False
+        return self._flame_exporter_supported_check
+
+    @property
+    def transcoder(self):
+        """
+        :return transcoder: Transcoder to use to trancode a clip from
+            one format to another.
+        """
+
+        if self._transcoder is not None:
+            return self._transcoder
+
+        tk_flame = self.import_module("tk_flame")
+
+        if self._flame_exporter_supported:
+            self._transcoder = tk_flame.Transcoder(
+                engine=self
+            )
+        else:
+            raise Exception("Transcoder not supported")
+
+        return self._transcoder
+
+
+    @property
+    def thumbnail_generator(self):
+        """
+        :return thumbnail_generator: Thumbnail generator to use to generate
+            thumbnail from Flame's asset published or rendered.
+        """
+
+        if self._thumbnail_generator is not None:
+            return self._thumbnail_generator
+
+        tk_flame = self.import_module("tk_flame")
+
+        if self._flame_exporter_supported:
+            self._thumbnail_generator = tk_flame.ThumbnailGeneratorFlame(
+                engine=self
+            )
+        else:
+            self._thumbnail_generator = tk_flame.ThumbnailGeneratorFFmpeg(
+                engine=self
+            )
+        return self._thumbnail_generator
+
+    @property
+    def local_movie_generator(self):
+        """
+        :return local_movie_generator: Local movie generator to use to generate
+            local movie file from Flame's asset published or rendered.
+        """
+
+        if self._local_movie_generator is not None:
+            return self._local_movie_generator
+
+        tk_flame = self.import_module("tk_flame")
+
+        if self._flame_exporter_supported:
+            self._thumbnail_generator = tk_flame.LocalMovieGeneratorFlame(
+                engine=self
+            )
+        else:
+            self._thumbnail_generator = tk_flame.LocalMovieGeneratorFFmpeg(
+                engine=self
+            )
+        return self._thumbnail_generator
 
     def create_local_backburner_job(self, job_name, description, run_after_job_id,
                                     instance, method_name, args, backburner_server_host=None):
         """
         Run a method in the local backburner queue.
-        
+
         :param job_name: Name of the backburner job
         :param description: Description of the backburner job
-        :param run_after_job_id: None if the backburner job should execute arbitrarily. If you 
+        :param run_after_job_id: None if the backburner job should execute arbitrarily. If you
                                  want to set the job up so that it executes after another known task, pass
                                  the backburner id here. This is typically used in conjunction with a postExportAsset
                                  hook where the export task runs on backburner. In this case, the hook will return
-                                 the backburner id. By passing that id into this method, you can create a job which 
+                                 the backburner id. By passing that id into this method, you can create a job which
                                  only executes after the main export task has completed.
         :param instance: App or hook to remotely call up
         :param method_name: Name of method to remotely execute
@@ -1202,8 +1362,8 @@ class FlameEngine(sgtk.platform.Engine):
         # info doesn't contain any strange characters etc
 
         # remove any non-trivial characters
-        sanitized_job_name = re.sub('[^0-9a-zA-Z_\-,\. ]+', '_', job_name)
-        sanitized_job_desc = re.sub('[^0-9a-zA-Z_\-,\. ]+', '_', description)
+        sanitized_job_name = re.sub("[^0-9a-zA-Z_\-,\. ]+", "_", job_name)
+        sanitized_job_desc = re.sub("[^0-9a-zA-Z_\-,\. ]+", "_", description)
 
         # if the job name contains too many characters, backburner submission fails
         if len(sanitized_job_name) > 70:
@@ -1316,7 +1476,7 @@ class FlameEngine(sgtk.platform.Engine):
                 raise TankError("\n".join(error))
 
     ################################################################################################################
-    # accessors to various core settings and functions                
+    # accessors to various core settings and functions
 
     def __get_wiretap_central_binary(self, binary_name):
         """
@@ -1376,7 +1536,7 @@ class FlameEngine(sgtk.platform.Engine):
     def get_ffmpeg_path(self):
         """
         Returns the path to the ffmpeg executable that ships with Flame.
-        
+
         :returns: Absolute path as a string
         """
         return self.__get_wiretap_central_binary("ffmpeg")
@@ -1384,7 +1544,7 @@ class FlameEngine(sgtk.platform.Engine):
     def get_read_frame_path(self):
         """
         Returns the path to the read_frame utility that ships with Flame.
-        
+
         :returns: Absolute path as a string
         """
         return self.__get_wiretap_central_binary("read_frame")
@@ -1393,26 +1553,26 @@ class FlameEngine(sgtk.platform.Engine):
 def sgtk_exception_trap(ex_cls, ex, tb):
     """
     UI Popup and logging exception trap override.
-    
+
     This method is used to override the default exception reporting behaviour
-    inside the embedded Flame python interpreter to make errors more visible 
+    inside the embedded Flame python interpreter to make errors more visible
     to the user.
-    
+
     It attempts to create a QT messagebox with a formatted error message to
     alert the user that something has gong wrong. In addition to this, the
     default exception handling is also carried out and the exception is also
     written to the log.
-    
+
     Note that this is a global object and not an engine-relative thing, so that
     the exception handler will operate correctly even if the engine instance no
     longer exists.
     """
     # careful about infinite loops here - we mustn't raise exceptions.
 
-    # like in other environments and scripts, for TankErrors, we assume that the 
+    # like in other environments and scripts, for TankErrors, we assume that the
     # error message is already a nice descriptive, crafted message and try to present
     # this in a user friendly fashion
-    # 
+    #
     # for other exception types, we give a full call stack.
 
     error_message = "Critical: Could not format error message."
