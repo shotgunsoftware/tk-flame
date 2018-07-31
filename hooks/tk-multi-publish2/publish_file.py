@@ -1,11 +1,11 @@
 # Copyright (c) 2017 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
@@ -54,7 +54,7 @@ class CreatePublishPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "TBD"
+        return "Creates publish file in Shotgun for the given object"
 
     @property
     def settings(self):
@@ -184,19 +184,12 @@ class CreatePublishPlugin(HookBaseClass):
             path = item.properties.get("file_path", path)
 
             # Create the Image thumbnail in background
-            self.engine.create_local_backburner_job(
-                "Upload PublishedFile Image Preview",
-                item.name,
-                job_ids_str,
-                "backburner_hooks",
-                "attach_jpg_preview",
-                {
-                    "targets": [published_file],
-                    "width": asset_info["width"],
-                    "height": asset_info["height"],
-                    "path": path,
-                    "name": item.name
-                }
+            self.engine.thumbnail_generator.generate(
+                display_name=item.name,
+                path=path,
+                dependencies=item.properties.get("backgroundJobId"),
+                target_entities=[published_file],
+                asset_info=asset_info
             )
 
         # Save the PublishedFile for the others plugins
@@ -214,4 +207,4 @@ class CreatePublishPlugin(HookBaseClass):
         :param item: Item to process
         """
 
-        pass
+        self.engine.thumbnail_generator.finalize(path=item.properties["path"])

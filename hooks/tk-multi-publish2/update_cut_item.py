@@ -54,7 +54,7 @@ class UpdateCutPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return ""
+        return "Update cut items in Shotgun for the given object"
 
     @property
     def settings(self):
@@ -176,27 +176,16 @@ class UpdateCutPlugin(HookBaseClass):
             cut = cut_item["cut"]
             targets.append(cut)
 
-        # Extract the Backburner dependencies
-        job_ids = item.properties.get("backgroundJobId")
-        job_ids_str = ",".join(job_ids) if job_ids else None
-
         # For file sequences, the hooks we want the path as provided by flame.
         path = item.properties.get("file_path", path)
 
         # Create the Image thumbnail in background
-        self.engine.create_local_backburner_job(
-            "Upload Cut Item Image Preview",
-            item.name,
-            job_ids_str,
-            "backburner_hooks",
-            "attach_jpg_preview",
-            {
-                "targets": targets,
-                "width": asset_info["width"],
-                "height": asset_info["height"],
-                "path": path,
-                "name": item.name
-            }
+        self.engine.thumbnail_generator.generate(
+            display_name=item.name,
+            path=path,
+            dependencies=item.properties.get("backgroundJobId"),
+            target_entities=targets,
+            asset_info=asset_info
         )
 
     def finalize(self, settings, item):
@@ -211,4 +200,4 @@ class UpdateCutPlugin(HookBaseClass):
         :param item: Item to process
         """
 
-        pass
+        self.engine.thumbnail_generator.finalize(path=item.properties["path"])
