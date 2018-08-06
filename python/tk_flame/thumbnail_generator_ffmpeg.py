@@ -20,6 +20,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
 
     def __init__(self, engine):
         super(ThumbnailGeneratorFFmpeg, self).__init__(engine)
+        self._job_ids = []
 
     """
     Thumbnail generator based on ffmpeg and read_frame.
@@ -44,9 +45,12 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
             the media is created in foreground.
         """
         self.engine.log_debug("Create and Upload Preview using ffmpeg")
-        self.engine.create_local_backburner_job(
-            "%s - Create and Upload Thumbnail" % display_name,
-            "Create and Upload Shotgun Thumbnail for %s - %s" % (display_name, path),
+        job_context = "Create and Upload Shotgun Preview"
+        job_name = "%s - %s" % (display_name, job_context)
+        job_description = "%s for %s" % (job_context, path)
+        job_id = self.engine.create_local_backburner_job(
+            job_name,
+            job_description,
             ",".join(dependencies) if dependencies else None,
             "backburner_hooks",
             "attach_mov_preview",
@@ -59,6 +63,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
                 "fps": asset_info["fps"]
             }
         )
+        self._job_ids.append(job_id)
 
     def _generate_thumbnail(self, path, display_name, target_entities, asset_info, dependencies):
         """
@@ -79,10 +84,13 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
             generation job need to wait in order to be started. Can be None if
             the media is created in foreground.
         """
-        self.engine.log_debug("Create and Upload thumnail using read_frame")
-        self.engine.create_local_backburner_job(
-            "%s - Create and Upload Thumbnail" % display_name,
-            "Create and Upload Shotgun Thumbnail for %s - %s" % (display_name, path),
+        self.engine.log_debug("Create and Upload Thumbnail using ffmpeg")
+        job_context = "Create and Upload Shotgun Thumbnail"
+        job_name = "%s - %s" % (display_name, job_context)
+        job_description = "%s for %s" % (job_context, path)
+        job_id = self.engine.create_local_backburner_job(
+            job_name,
+            job_description,
             ",".join(dependencies) if dependencies else None,
             "backburner_hooks",
             "attach_jpg_preview",
@@ -94,6 +102,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
                 "display_name": display_name
             }
         )
+        self._job_ids.append(job_id)
 
     def finalize(self, path=None):
         """
@@ -103,5 +112,8 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
         :param path: Path to the media for which thumbnail or/and preview need
             to be uploaded to Shotgun. If None is pass, all jobs will be
             finalized.
+        :return: Backburner job IDs created.
         """
-        pass
+        job_ids = self._job_ids
+        self._job_ids = []
+        return job_ids

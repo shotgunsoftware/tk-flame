@@ -63,7 +63,7 @@ class LocalMovieGenerator(object):
         self.engine.create_local_backburner_job(
             job_name="%s - Updating Shotgun Path to movie" % display_name,
             description="Uploading Shotgun Path to movie to %s" % dst_path,
-            run_after_job_id=job_id,
+            dependencies=job_id,
             instance="backburner_hooks",
             method_name="update_path_to_movie",
             args={

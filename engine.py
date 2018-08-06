@@ -1320,19 +1320,19 @@ class FlameEngine(sgtk.platform.Engine):
             )
         return self._thumbnail_generator
 
-    def create_local_backburner_job(self, job_name, description, run_after_job_id,
+    def create_local_backburner_job(self, job_name, description, dependencies,
                                     instance, method_name, args, backburner_server_host=None):
         """
         Run a method in the local backburner queue.
 
         :param job_name: Name of the backburner job
         :param description: Description of the backburner job
-        :param run_after_job_id: None if the backburner job should execute arbitrarily. If you
-                                 want to set the job up so that it executes after another known task, pass
-                                 the backburner id here. This is typically used in conjunction with a postExportAsset
-                                 hook where the export task runs on backburner. In this case, the hook will return
-                                 the backburner id. By passing that id into this method, you can create a job which
-                                 only executes after the main export task has completed.
+        :param dependencies: None if the backburner job should execute arbitrarily. If you
+                             want to set the job up so that it executes after another known task, pass
+                             the backburner id or a list of ids here. This is typically used in conjunction with a postExportAsset
+                             hook where the export task runs on backburner. In this case, the hook will return
+                             the backburner id. By passing that id into this method, you can create a job which
+                             only executes after the main export task has completed.
         :param instance: App or hook to remotely call up
         :param method_name: Name of method to remotely execute
         :param args: dictionary or args (**argv style) to pass to method at remote execution
@@ -1362,8 +1362,8 @@ class FlameEngine(sgtk.platform.Engine):
         # info doesn't contain any strange characters etc
 
         # remove any non-trivial characters
-        sanitized_job_name = re.sub("[^0-9a-zA-Z_\-,\. ]+", "_", job_name)
-        sanitized_job_desc = re.sub("[^0-9a-zA-Z_\-,\. ]+", "_", description)
+        sanitized_job_name = re.sub(r"[^0-9a-zA-Z_\-,\. ]+", "_", job_name)
+        sanitized_job_desc = re.sub(r"[^0-9a-zA-Z_\-,\. ]+", "_", description)
 
         # if the job name contains too many characters, backburner submission fails
         if len(sanitized_job_name) > 70:
@@ -1407,8 +1407,16 @@ class FlameEngine(sgtk.platform.Engine):
                 backburner_args.append("-servers:\"%s\"" % bb_servers)
 
         # Set the backburner job dependencies
-        if run_after_job_id:
-            backburner_args.append("-dependencies:%s" % run_after_job_id)
+        if dependencies:
+            if isinstance(dependencies, list):
+                if len(dependencies) > 1:
+                    if self.is_version_less_than("2019.1"):
+                        raise TankError("Multiple job dependencies not supported before 2019.1")
+                    backburner_args.append("-dependencies:%s" % ",".join(dependencies))
+                else:
+                    backburner_args.append("-dependencies:%s" % dependencies[0])
+            else:
+                backburner_args.append("-dependencies:%s" % dependencies)
 
         # call the bootstrap script
         backburner_bootstrap = os.path.join(self.disk_location, "python", "startup", "backburner.py")
@@ -1464,7 +1472,7 @@ class FlameEngine(sgtk.platform.Engine):
 
             if match:
                 backburner_job_id = match.group(0)
-                self.log_debug("Backburner job created (%s)" % backburner_job_id )
+                self.log_debug("Backburner job created (%s)" % backburner_job_id)
                 return backburner_job_id
 
             else:

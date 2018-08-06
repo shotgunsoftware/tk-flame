@@ -165,8 +165,8 @@ class BackburnerHooks(HookBaseClass):
                 self.parent.log_warning("Movie process failed!\nError code: %s\nOutput:\n%s" % (return_code, stderr))
                 return return_code
 
-            if self.engine.get_setting("bypass_server_transcoding"):
-                self.engine.log_debug("Bypass Shotgun transcoding setting enabled.")
+            if self.parent.get_setting("bypass_server_transcoding"):
+                self.parent.log_debug("Bypass Shotgun transcoding setting enabled.")
                 field_name = "sg_uploaded_movie_mp4"
             else:
                 field_name = "sg_uploaded_movie"

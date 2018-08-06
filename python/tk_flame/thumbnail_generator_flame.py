@@ -121,10 +121,19 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
             thumbnail_job["target_entities"] = thumbnail_job["target_entities"] + target_entities
 
     def _upload_thumbnail_job(self, thumbnail_job):
-        self.engine.create_local_backburner_job(
-            job_name="%s - Uploading Shotgun Thumbnail" % thumbnail_job.get("display_name"),
-            description="Uploading Shotgun Thumbnail for %s" % thumbnail_job.get("path"),
-            run_after_job_id=thumbnail_job.get("dependencies"),
+        """
+        Create a Backburner job to upload a thumbnail and link it to entities.
+
+        :param thumbnail_job: Thumbnail generation job information.
+        :return: Backburner job ID created.
+        """
+        job_context = "Upload Shotgun Thumbnail"
+        job_name = "%s - %s" % (thumbnail_job.get("display_name"), job_context)
+        job_description = "%s for %s" % (job_context, thumbnail_job.get("path"))
+        return self.engine.create_local_backburner_job(
+            job_name=job_name,
+            description=job_description,
+            dependencies=thumbnail_job.get("dependencies"),
             instance="backburner_hooks",
             method_name="upload_to_shotgun",
             args={
@@ -137,16 +146,25 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         )
 
     def _upload_preview_job(self, preview_job):
+        """
+        Create a Backburner job to upload a preview and link it to entities.
+
+        :param preview_job: Preview generation job information.
+        :return: Backburner job ID created.
+        """
         if self.engine.get_setting("bypass_server_transcoding"):
             self.engine.log_debug("Bypass Shotgun transcoding setting ENABLED.")
             field_name = "sg_uploaded_movie_mp4"
         else:
             field_name = "sg_uploaded_movie"
 
-        self.engine.create_local_backburner_job(
-            job_name="%s - Uploading Shotgun Preview" % preview_job.get("display_name"),
-            description="Uploading Shotgun Preview for %s" % preview_job.get("path"),
-            run_after_job_id=preview_job.get("dependencies"),
+        job_context = "Upload Shotgun Preview"
+        job_name = "%s - %s" % (preview_job.get("display_name"), job_context)
+        job_description = "%s for %s" % (job_context, preview_job.get("path"))
+        return self.engine.create_local_backburner_job(
+            job_name=job_name,
+            description=job_description,
+            dependencies=preview_job.get("dependencies"),
             instance="backburner_hooks",
             method_name="upload_to_shotgun",
             args={
@@ -166,24 +184,28 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         :param path: Path to the media for which thumbnail or/and preview need
             to be uploaded to Shotgun. If None is pass, all jobs will be
             finalized.
+        :return: Backburner job IDs created.
         """
 
         # A Given path can have both a thumbnail or a preview to upload since
         # not all entity type support a preview upload
 
+        job_ids = []
         if path is not None:
             thumbnail_job = self._thumbnail_jobs.pop(path, None)
             if thumbnail_job is not None:
-                self._upload_thumbnail_job(thumbnail_job)
+                job_ids.append(self._upload_thumbnail_job(thumbnail_job))
 
             preview_job = self._preview_jobs.pop(path, None)
             if preview_job is not None:
-                self._upload_preview_job(preview_job)
+                job_ids.append(self._upload_preview_job(preview_job))
         else:
             for thumbnail_job in self._thumbnail_jobs.values():
-                self._upload_thumbnail_job(thumbnail_job)
+                job_ids.append(self._upload_thumbnail_job(thumbnail_job))
             self._thumbnail_jobs = {}
 
             for preview_job in self._preview_jobs.values():
-                self._upload_preview_job(preview_job)
-            self.preview_jobs = {}
+                job_ids.append(self._upload_preview_job(preview_job))
+            self._preview_jobs = {}
+
+        return job_ids
