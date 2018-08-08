@@ -41,7 +41,14 @@ class WiretapError(TankError):
 # note: this is one of those C style library wrappers
 # where each method internally is prefixed with
 # WireTap, hence the dropping of the namespace.
-from libwiretapPythonClientAPI import *
+try:
+  from adsk.libwiretapPythonClientAPI import *
+except ImportError:
+  # Older version of Flame distributed that in the
+  #/opt/Autodesk/<app>_<version>/python directory which required the current
+  # working directory to be that directory in order to work.
+  #
+  from libwiretapPythonClientAPI import *
 
 from .project_create_dialog import ProjectCreateDialog
 from .qt_task import start_qt_app_and_show_modal
