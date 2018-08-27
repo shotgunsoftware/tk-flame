@@ -151,5 +151,6 @@ class ThumbnailGenerator(object):
         :param path: Path to the media for which thumbnail or/and preview need
             to be uploaded to Shotgun. If None is pass, all jobs will be
             finalized.
+        :return: Backburner job IDs created.
         """
         raise NotImplementedError

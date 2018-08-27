@@ -100,9 +100,10 @@ configuration:
     generate_local_movies:
         type: bool
         default_value: True
-        description: Generate an higher quality movies file that will not be uploaded to shotgun but
-                     can be used by client applications that do not want or cannot read original exported
-                     media from Flame.
+        description: Global switch to allow or not the generation an higher quality movies
+                     file that will not be uploaded to shotgun but can be used by client applications
+                     that do not want or cannot read original exported media from Flame.
+                     This is currently only used by tk-flame-export.
 
     local_movies_preset_path:
         type: str
