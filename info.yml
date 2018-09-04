@@ -124,6 +124,14 @@ configuration:
         default_value: False
 
 
+    media_path_root:
+        description: Default root directory of media for versions created by batch setup created
+                     by the loader. Can be overriden by the environment variable SHOTGUN_FLAME_MEDIA_PATH_ROOT.
+                     If no value is defined, rendering write file nodes will fails.
+        type: str
+        default_value: ""
+
+
     use_builtin_plugin:
         type: bool
         description: Whether to prepare the launch of Flame to make use of its builtin Toolkit

@@ -359,7 +359,10 @@ class FlameLoaderActions(HookBaseClass):
         :return: Media path root
         :type: str
         """
-        return os.environ.get("SHOTGUN_FLAME_MEDIA_PATH_ROOT", "/var/tmp")
+        return os.environ.get(
+            "SHOTGUN_FLAME_MEDIA_PATH_ROOT",
+            self.parent.engine.get_setting("media_path_root", "")
+        )
 
     @property
     def media_path_pattern(self):
@@ -528,13 +531,28 @@ class FlameLoaderActions(HookBaseClass):
             "Shot": "<shot name>",
             "segment_name": clip["Sequence Name"],
             "version": "<version>",
-            "SEQ": "<frame>"
+            "SEQ": "<frame>",
+            "flame.frame" : "<frame>"
         }
 
         file_format = {
+            "als": "Alias",
+            "cin": "Cineon",
+            "dpx": "Dpx",
+            "jpg": "Jpeg",
+            "jpeg": "Jpeg",
+            "iff": "Maya",
             "exr": "OpenEXR",
-            "dpx": "Dpx"
+            "pict": "Pict",
+            "picio": "Pixar",
+            "sgi": "Sgi",
+            "pic": "Softimage",
+            "tga": "Targa",
+            "tif": "Tiff",
+            "tiff": "Tiff",
+            "rla": "Wavefront"
         }
+
         # The order is important when setting the attributes
         write_file_info = collections.OrderedDict()
 
@@ -560,11 +578,14 @@ class FlameLoaderActions(HookBaseClass):
             media_root, media_path, media_ext = self._build_path_from_template(self.media_path_template, fields)
             write_file_info["media_path"] = media_root
             write_file_info["media_path_pattern"] = media_path
+            while media_ext[0] == '.':
+                media_ext = media_ext[1:]
             write_file_info["file_type"] = file_format.get(media_ext)
 
             keys = self.media_path_template.keys
             write_file_info["version_padding"] = int(keys['version'].format_spec)
-            write_file_info["frame_padding"] = int(keys['SEQ'].format_spec)
+            padding = keys.get("flame.frame", keys.get('SEQ', None))
+            write_file_info["frame_padding"] = int(padding.format_spec) if padding is not None else 8
 
             media_path_set = True
 
@@ -1007,7 +1028,7 @@ class FlameLoaderActions(HookBaseClass):
         """
 
         # Build the path from the template
-        path = template._apply_fields(fields, ignore_types=["version", "SEQ", "Shot", "segment_name"]) \
+        path = template._apply_fields(fields, ignore_types=["version", "SEQ", "flame.frame", "Shot", "segment_name"]) \
                    .replace(template.root_path, "", 1)[1:]  # remove the root path from the path and the first "/"
 
         path, ext = os.path.splitext(path)
