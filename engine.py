@@ -1242,7 +1242,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # Note. Flame exporter can be used in 2019.1 but there are issues
         #       with transcoding of Movie files that prevent wide use of it
-        #       before 2016.2.
+        #       with 2019.1.
         #
         return not self.is_version_less_than("2016.2")
 
