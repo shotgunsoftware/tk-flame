@@ -1244,7 +1244,7 @@ class FlameEngine(sgtk.platform.Engine):
         #       with transcoding of Movie files that prevent wide use of it
         #       with 2019.1.
         #
-        return not self.is_version_less_than("2016.2")
+        return not self.is_version_less_than("2019.2")
 
     @property
     def transcoder(self):
