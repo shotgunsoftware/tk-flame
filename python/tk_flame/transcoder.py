@@ -155,6 +155,16 @@ class Transcoder(object):
             metadata["fieldDominance"] = 2
         metadata["colourSpace"] = asset_info.get("colourSpace", "Unknown")
 
+        extension = os.path.splitext(src_path)[1].lower()
+        handlers = {
+            ".mov": "Quicktime"
+        }
+        handler = handlers.get(extension, None)
+        if handler is not None:
+            metadata["handler"] = "<handler><name>%s</name></handler>" % handler
+        else:
+            metadata["handler"] = ""
+
         os.write(
             tmp_fd,
             """
@@ -164,6 +174,7 @@ class Transcoder(object):
                <trackType>video</trackType>
                <feeds currentVersion=\"v0\">
                 <feed type=\"feed\" vuid=\"v0\" uid=\"v0\">
+                 {handler}
                  <storageFormat type=\"format\">
                   <type>video</type>
                   <nbChannels type=\"uint\">{nbChannels}</nbChannels>

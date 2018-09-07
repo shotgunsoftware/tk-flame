@@ -42,6 +42,7 @@ def preCustomExport(info, userData):
                  - destinationHost: Host name where the exported files will be written to.
                  - destinationPath: Export path root.
                  - presetPath: Path to the preset used for the export.
+                 - isBackground: Perform the export in background. (True if not defined)
                  - abort: Pass True back to Flame if you want to abort
                  - abortMessage: Abort message to feed back to client
                  

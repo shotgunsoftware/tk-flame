@@ -141,7 +141,6 @@ class FlameEngine(sgtk.platform.Engine):
         # type we will need, we need to wait for the Flame API to be loaded
         # completely.
         #
-        self._flame_exporter_supported_check = None
         self._transcoder = None
         self._thumbnail_generator = None
         self._local_movie_generator = None
@@ -1241,18 +1240,11 @@ class FlameEngine(sgtk.platform.Engine):
         :return True if Flame exporter API is supported.
         """
 
-        if self._flame_exporter_supported_check is not None:
-            return self._flame_exporter_supported_check
-
-        try:
-            import flame
-            if "import_clips" in dir(flame) and "PyExporter" in dir(flame):
-                self._flame_exporter_supported_check = True
-            else:
-                self._flame_exporter_supported_check = False
-        except ImportError:
-            self._flame_exporter_supported_check = False
-        return self._flame_exporter_supported_check
+        # Note. Flame exporter can be used in 2019.1 but there are issues
+        #       with transcoding of Movie files that prevent wide use of it
+        #       with 2019.1.
+        #
+        return not self.is_version_less_than("2019.2")
 
     @property
     def transcoder(self):
