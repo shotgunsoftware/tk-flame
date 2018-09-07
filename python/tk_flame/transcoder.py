@@ -163,7 +163,7 @@ class Transcoder(object):
         except:
             metadata["duration"] = ""
 
-        metadata["sampleRate"] = asset.info.get("fps")
+        metadata["sampleRate"] = asset_info.info.get("fps")
 
         extension = os.path.splitext(src_path)[1].lower()
         handlers = {
