@@ -155,6 +155,16 @@ class Transcoder(object):
             metadata["fieldDominance"] = 2
         metadata["colourSpace"] = asset_info.get("colourSpace", "Unknown")
 
+        try:
+            sourceIn = int(asset_info.get("sourceIn", 0))
+            sourceOut = int(asset_info.get("sourceOut", sourceIn + 1))
+            nbFrames = sourceOut - sourceIn
+            metadata["duration"] = "<duration>%d</duration>" % (nbFrames)
+        except:
+            metadata["duration"] = ""
+
+        metadata["sampleRate"] = asset.info.get("fps")
+
         extension = os.path.splitext(src_path)[1].lower()
         handlers = {
             ".mov": "Quicktime"
@@ -187,8 +197,10 @@ class Transcoder(object):
                   <fieldDominance type=\"int\">{fieldDominance}</fieldDominance>
                   <colourSpace type=\"string\">{colourSpace}</colourSpace>
                  </storageFormat>
+                 <sampleRate>{sampleRate}</sampleRate>
                  <spans type=\"spans\">
                   <span type=\"span\">
+                   {duration}
                    <path encoding=\"pattern\">{path}</path>
                   </span>
                  </spans>
