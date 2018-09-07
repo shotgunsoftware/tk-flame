@@ -156,10 +156,10 @@ class Transcoder(object):
         metadata["colourSpace"] = asset_info.get("colourSpace", "Unknown")
 
         try:
-            sourceIn = int(asset_info.get("sourceIn", 0))
-            sourceOut = int(asset_info.get("sourceOut", sourceIn + 1))
-            nbFrames = sourceOut - sourceIn
-            metadata["duration"] = "<duration>%d</duration>" % (nbFrames)
+            source_in = int(asset_info.get("sourceIn", 0))
+            source_out = int(asset_info.get("sourceOut", source_in + 1))
+            nb_frames = source_out - source_in
+            metadata["duration"] = "<duration>%d</duration>" % (nb_frames)
         except:
             metadata["duration"] = ""
 
