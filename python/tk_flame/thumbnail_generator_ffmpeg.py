@@ -51,7 +51,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
         job_id = self.engine.create_local_backburner_job(
             job_name,
             job_description,
-            ",".join(dependencies) if dependencies else None,
+            dependencies,
             "backburner_hooks",
             "attach_mov_preview",
             {
@@ -91,7 +91,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
         job_id = self.engine.create_local_backburner_job(
             job_name,
             job_description,
-            ",".join(dependencies) if dependencies else None,
+            dependencies,
             "backburner_hooks",
             "attach_jpg_preview",
             {

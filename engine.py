@@ -1401,12 +1401,7 @@ class FlameEngine(sgtk.platform.Engine):
         # Set the backburner job dependencies
         if dependencies:
             if isinstance(dependencies, list):
-                if len(dependencies) > 1:
-                    if self.is_version_less_than("2019.1"):
-                        raise TankError("Multiple job dependencies not supported before 2019.1")
-                    backburner_args.append("-dependencies:%s" % ",".join(dependencies))
-                else:
-                    backburner_args.append("-dependencies:%s" % dependencies[0])
+                backburner_args.append("-dependencies:%s" % ",".join(dependencies)) 
             else:
                 backburner_args.append("-dependencies:%s" % dependencies)
 

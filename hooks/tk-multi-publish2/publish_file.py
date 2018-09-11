@@ -176,10 +176,6 @@ class CreatePublishPlugin(HookBaseClass):
 
         # Create a Thumbnail in Background for compatible Flame related PublishedFile
         if item.display_type in ["Flame OpenClip", "Flame Render", "Flame Batch OpenClip"]:
-            # Extract the Backburner dependencies
-            job_ids = item.properties.get("backgroundJobId")
-            job_ids_str = ",".join(job_ids) if job_ids else None
-
             # For file sequences, the hooks we want the path as provided by flame.
             path = item.properties.get("file_path", path)
 
