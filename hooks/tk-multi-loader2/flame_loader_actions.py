@@ -28,7 +28,7 @@ else:
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
-##############################################################################################################
+####################################################################################################
 # Constants to be used with Flame
 
 SETUP_ACTION = "load_setup"
@@ -42,7 +42,7 @@ class FlameLoaderActionError(Exception):
 
 
 class FlameLoaderActions(HookBaseClass):
-    ##############################################################################################################
+    ################################################################################################
     # public interface - to be overridden by deriving classes
     def generate_actions(self, sg_publish_data, actions, ui_area):
         """
@@ -93,30 +93,38 @@ class FlameLoaderActions(HookBaseClass):
             return action_instances
 
         if SETUP_ACTION in actions and hasattr(flame.batch, "append_setup"):
-            action_instances.append({"name": SETUP_ACTION,
-                                     "params": None,
-                                     "caption": "Load and Append Batch Setup",
-                                     "description": "Load and append a batch setup file to the current Batch Group."})
+            action_instances.append({
+                "name": SETUP_ACTION,
+                "params": None,
+                "caption": "Load and Append Batch Setup",
+                "description": "Load and append a batch setup file to the current Batch Group."
+            })
 
         if CLIP_ACTION in actions and hasattr(flame.batch, "import_clip"):
-            action_instances.append({"name": CLIP_ACTION,
-                                     "params": None,
-                                     "caption": "Import Clip",
-                                     "description": "Import a clip to the current Batch Group."})
+            action_instances.append({
+                "name": CLIP_ACTION,
+                "params": None,
+                "caption": "Import Clip",
+                "description": "Import a clip to the current Batch Group."
+            })
 
         if SHOT_CREATE_ACTION in actions and hasattr(flame.batch, "create_batch_group"):
-            action_instances.append({"name": SHOT_CREATE_ACTION,
-                                     "params": None,
-                                     "caption": "Create Batch Group",
-                                     "description": "Create a Batch setup inside a new Batch Group."})
+            action_instances.append({
+                "name": SHOT_CREATE_ACTION,
+                "params": None,
+                "caption": "Create Batch Group",
+                "description": "Create a Batch setup inside a new Batch Group."
+            })
 
         if SHOT_LOAD_ACTION in actions and hasattr(flame.batch, "load_setup"):
             batch_paths = self._get_batch_path_from_sg_publish_data(sg_publish_data)
             if batch_paths is not None:
-                action_instances.append({"name": SHOT_LOAD_ACTION,
-                                         "params": None,
-                                         "caption": "Load in new Batch Group",
-                                         "description": "Load a Batch setup file inside a new Batch Group."})
+                action_instances.append({
+                    "name": SHOT_LOAD_ACTION,
+                    "params": None,
+                    "caption": "Load in new Batch Group",
+                    "description": "Load a Batch setup file inside a new Batch Group."
+                })
 
         return action_instances
 
@@ -182,7 +190,8 @@ class FlameLoaderActions(HookBaseClass):
             else:
                 raise FlameLoaderActionError("Unknown action name: '{}'".format(name))
         except FlameLoaderActionError, error:
-            # A FlameActionError reaching here means that something major have stopped the current action
+            # A FlameActionError reaching here means that something major have
+            # stopped the current action
             QtGui.QMessageBox.critical(
                 None,
                 "Error",
@@ -190,7 +199,7 @@ class FlameLoaderActions(HookBaseClass):
             )
             app.log_error(error)
 
-    ##############################################################################################################
+    ################################################################################################
     # methods called by the menu options in the loader
 
     def _import_batch_file(self, sg_publish_data):
@@ -219,7 +228,8 @@ class FlameLoaderActions(HookBaseClass):
         """
         Imports a clip into Flame.
 
-        This function import the clip into self.import_location (Default: Schematic Reel 1) in the current Batch Group.
+        This function import the clip into self.import_location (Default: Schematic Reel 1)
+        in the current Batch Group.
 
         :param dict sg_publish_data: Shotgun data dictionary with all the standard publish fields.
         """
@@ -235,7 +245,8 @@ class FlameLoaderActions(HookBaseClass):
             if not flame.batch.import_clip(clip_path, self.import_location):
                 raise FlameLoaderActionError("Unable to import '%s'" % clip_path)
 
-        # The clip name doesn't directly exists, but it might contain a pattern that we need to resolve.
+        # The clip name doesn't directly exists, but it might
+        # contain a pattern that we need to resolve.
         elif clip_path and '%' in clip_path:
             new_path = self._handle_frame_range(clip_path)["path"]
 
@@ -256,11 +267,13 @@ class FlameLoaderActions(HookBaseClass):
         """
         Add a batch group into Flame.
 
-        If build_new is True, it loads last version of every clip present in the Shot, otherwise it create the batch
-        group using the latest version of the batch file present in the Shot ( Do nothing if no batch file is present).
+        If build_new is True, it loads last version of every clip present in the Shot, otherwise it
+        create the batch group using the latest version of the batch file present in the Shot
+        (Do nothing if no batch file is present).
 
         :param dict sg_publish_data: Shotgun data dictionary with all the standard publish fields.
-        :param bool build_new: Hint about if we should build a new batch group from the clip or use the latest batch file
+        :param bool build_new: Hint about if we should build a new batch group from the clip or
+                               use the latest batch file
         """
 
         app = self.parent
@@ -281,7 +294,10 @@ class FlameLoaderActions(HookBaseClass):
             app.log_debug("Found Batch setup path: %s" % batch_path)
             # We found a batch file so let's import it
             if batch_path and self._exists(batch_path):
-                app.log_debug("Creating the '%s' batch group using '%s'" % (sg_publish_data['code'], batch_path))
+                app.log_debug(
+                    "Creating the '%s' batch group using '%s'" % (
+                        sg_publish_data['code'], batch_path
+                    ))
                 flame.batch.create_batch_group(sg_publish_data["code"])
                 if not flame.batch.load_setup(batch_path):
                     raise FlameLoaderActionError("Unable to load the Batch Setup")
@@ -290,7 +306,7 @@ class FlameLoaderActions(HookBaseClass):
             else:
                 raise FlameLoaderActionError("No setup to load")
 
-    ##############################################################################################################
+    ################################################################################################
     # interface to the action hook configuration
 
     @property
@@ -307,7 +323,8 @@ class FlameLoaderActions(HookBaseClass):
     @property
     def supported_batch_types(self):
         """
-        Query the action_mappings entry to get every Published Type that's considered as a Batch file
+        Query the action_mappings entry to get every Published Type that's considered as
+        a Batch file
 
         :return: List of Published Type
         :rtype: [str]
@@ -359,7 +376,10 @@ class FlameLoaderActions(HookBaseClass):
         :return: Media path root
         :type: str
         """
-        return os.environ.get("SHOTGUN_FLAME_MEDIA_PATH_ROOT", "/var/tmp")
+        return os.environ.get(
+            "SHOTGUN_FLAME_MEDIA_PATH_ROOT",
+            self.parent.engine.get_setting("media_path_root", "")
+        )
 
     @property
     def media_path_pattern(self):
@@ -528,13 +548,28 @@ class FlameLoaderActions(HookBaseClass):
             "Shot": "<shot name>",
             "segment_name": clip["Sequence Name"],
             "version": "<version>",
-            "SEQ": "<frame>"
+            "SEQ": "<frame>",
+            "flame.frame" : "<frame>"
         }
 
         file_format = {
+            "als": "Alias",
+            "cin": "Cineon",
+            "dpx": "Dpx",
+            "jpg": "Jpeg",
+            "jpeg": "Jpeg",
+            "iff": "Maya",
             "exr": "OpenEXR",
-            "dpx": "Dpx"
+            "pict": "Pict",
+            "picio": "Pixar",
+            "sgi": "Sgi",
+            "pic": "Softimage",
+            "tga": "Targa",
+            "tif": "Tiff",
+            "tiff": "Tiff",
+            "rla": "Wavefront"
         }
+
         # The order is important when setting the attributes
         write_file_info = collections.OrderedDict()
 
@@ -560,11 +595,14 @@ class FlameLoaderActions(HookBaseClass):
             media_root, media_path, media_ext = self._build_path_from_template(self.media_path_template, fields)
             write_file_info["media_path"] = media_root
             write_file_info["media_path_pattern"] = media_path
+            while media_ext[0] == ".":
+                media_ext = media_ext[1:]
             write_file_info["file_type"] = file_format.get(media_ext)
 
             keys = self.media_path_template.keys
             write_file_info["version_padding"] = int(keys['version'].format_spec)
-            write_file_info["frame_padding"] = int(keys['SEQ'].format_spec)
+            padding = keys.get("flame.frame", keys.get('SEQ', None))
+            write_file_info["frame_padding"] = int(padding.format_spec) if padding is not None else 8
 
             media_path_set = True
 
@@ -669,7 +707,7 @@ class FlameLoaderActions(HookBaseClass):
             try:
                 if path and self._exists(path):
                     published_files.append({"path": path, "info": file_info})
-                elif '%' in path:
+                elif "%" in path:
                     path_info = self._handle_frame_range(path)
 
                     published_files.append(
@@ -1007,7 +1045,7 @@ class FlameLoaderActions(HookBaseClass):
         """
 
         # Build the path from the template
-        path = template._apply_fields(fields, ignore_types=["version", "SEQ", "Shot", "segment_name"]) \
+        path = template._apply_fields(fields, ignore_types=["version", "SEQ", "flame.frame", "Shot", "segment_name"]) \
                    .replace(template.root_path, "", 1)[1:]  # remove the root path from the path and the first "/"
 
         path, ext = os.path.splitext(path)
