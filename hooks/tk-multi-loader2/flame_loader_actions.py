@@ -664,8 +664,9 @@ class FlameLoaderActions(HookBaseClass):
                         clip_path = clip_path[1:]
                     write_file_info["create_clip_path"] = clip_path
                 else:
-                    self.parent.log_warning("Absolute Open Clip Path not supported")
-                    write_file_info["create_clip"] = False
+                    if sgtk.platform.current_engine().is_version_less_than("2019.2"):
+                        self.parent.log_warning("Absolute Open Clip Path not supported")
+                        write_file_info["create_clip"] = False
 
         # Create a .batch file
         if self.use_template and self.setup_path_template:
