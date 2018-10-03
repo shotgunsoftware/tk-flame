@@ -131,6 +131,10 @@ configuration:
         type: str
         default_value: ""
 
+    go_to_batch_on_load:
+        type: bool
+        description: Go to batch upon actions form the loader that create or modify batch group.
+        default_value: True
 
     use_builtin_plugin:
         type: bool
