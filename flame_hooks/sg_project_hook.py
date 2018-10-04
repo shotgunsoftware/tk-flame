@@ -9,18 +9,18 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # Note! This file implements the projectHook interface from Flame 2015.2
-        
+
 def appInitialized(projectName):
     """
     Hook called when application is fully initialized.
     
     :param projectName: String containing the name of the project that was loaded
     """
-    
+
     # attempt to start the Flame engine if it hasn't already been started.
-    
+
     import sgtk
-    import os    
+    import os
 
     engine = sgtk.platform.current_engine()
 
@@ -82,7 +82,7 @@ def appInitialized(projectName):
                 "Even if you switch projects, any Shotgun-specific configuration will\n"
                 "remain connected to the initially loaded project."
             )
-    
+
     else:
         # no engine running - so start one!
         engine_name = os.environ.get("TOOLKIT_ENGINE_NAME")
@@ -92,9 +92,9 @@ def appInitialized(projectName):
             logger = sgtk.LogManager.get_logger(__name__)
             logger.debug("No toolkit context, can't initialize the engine")
             return
-        
+
         context = sgtk.context.deserialize(toolkit_context)
-        
+
         # set a special environment variable to help hint to the engine
         # that we are running a backburner job
         os.environ["TOOLKIT_FLAME_ENGINE_MODE"] = "DCC"
@@ -119,7 +119,7 @@ def appInitialized(projectName):
         minor_version_str = os.environ.get("TOOLKIT_FLAME_MINOR_VERSION")
         patch_version_str = os.environ.get("TOOLKIT_FLAME_PATCH_VERSION")
         full_version_str = os.environ.get("TOOLKIT_FLAME_VERSION")
-        
+
         if None in (major_version_str, minor_version_str, patch_version_str, full_version_str):
             e.log_error("Cannot find environment variable TOOLKIT_FLAME_x_VERSION")
         else:
@@ -129,5 +129,3 @@ def appInitialized(projectName):
                 patch_version_str=patch_version_str,
                 full_version_str=full_version_str
             )
-        
-        
