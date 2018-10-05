@@ -199,6 +199,13 @@ class FlameLoaderActions(HookBaseClass):
             )
             app.log_error(error)
 
+    def _go_to_batch_on_action(self):
+        if self.parent.engine.get_setting("go_to_batch_on_load", True):
+            if hasattr(flame, "go_to"):
+                flame.go_to("Batch")
+            else:
+                flame.batch.go_to()
+
     ################################################################################################
     # methods called by the menu options in the loader
 
@@ -213,6 +220,8 @@ class FlameLoaderActions(HookBaseClass):
 
         app = self.parent
         app.log_debug("Importing batch file using '%s'" % sg_publish_data)
+
+        self._go_to_batch_on_action()
 
         setup_path = self.get_publish_path(sg_publish_data)
 
@@ -238,6 +247,8 @@ class FlameLoaderActions(HookBaseClass):
         app.log_debug("Importing clip using '%s'" % sg_publish_data)
 
         clip_path = self.get_publish_path(sg_publish_data)
+
+        self._go_to_batch_on_action()
 
         # Load directly if the clip exists
         if clip_path and self._exists(clip_path):
@@ -282,6 +293,8 @@ class FlameLoaderActions(HookBaseClass):
         sg_info = self._get_batch_info_from_sg_publish_data(sg_publish_data)
         if sg_info is None:
             raise FlameLoaderActionError("Cannot load a Batch Group from Shotgun using this Shot")
+
+        self._go_to_batch_on_action()
 
         # Create a new batch_group using this Shot
         if build_new:
