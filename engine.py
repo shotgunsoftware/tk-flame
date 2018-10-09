@@ -113,10 +113,19 @@ class FlameEngine(sgtk.platform.Engine):
         self._python_executable_path = None
 
         # version of Flame we are running
-        self._flame_version = None
-
-        # root folder where flame is installed
-        self._install_root = None
+        try:
+            import flame
+            self.set_version_info(
+                major_version_str=flame.get_version_major(),
+                minor_version_str=flame.get_version_minor(),
+                full_version_str=flame.get_version(),
+                patch_version_str=flame.get_version_patch()
+            )
+            # If we get to here, the install root can only be /opt/Autodesk
+            self._install_root = "/opt/Autodesk"
+        except:
+            self._flame_version = None
+            self._install_root = None
 
         # set the current engine mode. The mode contains information about
         # how the engine was started - it can be executed either before the
@@ -125,7 +134,7 @@ class FlameEngine(sgtk.platform.Engine):
         # scripts which can launch the engine (all contained within the engine itself).
         # these bootstrap scripts all set an environment variable called
         # TOOLKIT_FLAME_ENGINE_MODE which defines the desired engine mode.
-        engine_mode_str = os.environ.get("TOOLKIT_FLAME_ENGINE_MODE")
+        engine_mode_str = os.environ.get("TOOLKIT_FLAME_ENGINE_MODE", "DCC")
         if engine_mode_str == "PRE_LAUNCH":
             self._engine_mode = self.ENGINE_MODE_PRELAUNCH
         elif engine_mode_str == "BACKBURNER":
@@ -292,7 +301,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         :param install_root: root path to flame installation
         """
-        if self._install_root:
+        if self._install_root and self._install_root != install_root:
             # cannot call this multiple times
             raise TankError("Cannot call set_install_root multiple times!")
 
