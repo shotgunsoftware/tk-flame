@@ -1241,9 +1241,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: path
         """
-        path = self.get_setting(
-            "backburner_shared_tmp",
-            tempfile.gettempdir())
+        path = self.get_setting("backburner_shared_tmp")
         if not path:
             path = tempfile.gettempdir()
         return path
@@ -1410,7 +1408,12 @@ class FlameEngine(sgtk.platform.Engine):
         # to detect bad situation or to limit the job server
         #
         temp_dir = self.get_backburner_tmp()
-        temp_dir_is_local = not temp_dir or temp_dir == tempfile.gettempdir()
+        temp_dir_is_local = temp_dir in [
+            tempfile.gettempdir(),
+            "/tmp",
+            "/var/tmp",
+            "/usr/tmp"
+        ]
         localhost = os.uname()[1]
         if not bb_server_group and not bb_servers:
             # No servers/groups sepecified and local path.
@@ -1441,7 +1444,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # now we need to capture all of the environment and everything in a file
         # (thanks backburner!) so that we can replay it later when the task wakes up
-        session_file = os.path.join(self.get_backburner_tmp(), "tk_backburner_%s.pickle" % uuid.uuid4().hex)
+        session_file = os.path.join(temp_dir, "tk_backburner_%s.pickle" % uuid.uuid4().hex)
 
         data = {}
         data["engine_instance"] = self.instance_name
