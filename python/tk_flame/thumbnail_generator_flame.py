@@ -129,7 +129,11 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         """
         job_context = "Upload Shotgun Thumbnail"
         job_name = "%s - %s" % (thumbnail_job.get("display_name"), job_context)
-        job_description = "%s for %s" % (job_context, thumbnail_job.get("path"))
+        job_description = "%s for %s\nTemporary file %s" % (
+            job_context,
+            thumbnail_job.get("display_name"),
+            thumbnail_job.get("path")
+        )
         return self.engine.create_local_backburner_job(
             job_name=job_name,
             description=job_description,
@@ -160,7 +164,11 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
 
         job_context = "Upload Shotgun Preview"
         job_name = "%s - %s" % (preview_job.get("display_name"), job_context)
-        job_description = "%s for %s" % (job_context, preview_job.get("path"))
+        job_description = "%s for %s\nTemporary file %s" % (
+            job_context,
+            preview_job.get("display_name"),
+            preview_job.get("path")
+        )
         return self.engine.create_local_backburner_job(
             job_name=job_name,
             description=job_description,

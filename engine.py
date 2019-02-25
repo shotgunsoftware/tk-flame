@@ -15,7 +15,6 @@ A Toolkit engine for Flame
 import os
 import pwd
 import re
-import shlex
 import sys
 import uuid
 import sgtk
@@ -24,8 +23,8 @@ import logging
 import pprint
 import logging.handlers
 import traceback
-import datetime
 import subprocess
+import tempfile
 from sgtk import TankError
 
 LOG_CHANNEL = "sgtk.tk-flame"
@@ -178,7 +177,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         if self.has_ui:
             # tell QT to interpret C strings as utf-8
-            from sgtk.platform.qt import QtCore, QtGui
+            from sgtk.platform.qt import QtCore
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)
 
@@ -396,7 +395,7 @@ class FlameEngine(sgtk.platform.Engine):
         Returns the Flame's main window
         :return: Widget representing the flame's main window.
         """
-        from sgtk.platform.qt import QtCore, QtGui
+        from sgtk.platform.qt import QtGui
 
         for w in QtGui.QApplication.topLevelWidgets():
             if w.objectName() == "CF Main Window":
@@ -431,18 +430,18 @@ class FlameEngine(sgtk.platform.Engine):
         if self.is_version_less_than("2016.1"):
             # for version 2016 before ext 1, export preset is v5
             return "5"
-        elif self.is_version_less_than("2017"):
+        if self.is_version_less_than("2017"):
             # flame 2016 extension 1 and above.
             return "6"
-        else:
-            # flame 2017 and above
-            #
-            # Note: Flame 2017 uses preset 7, however further adjustments to the actual
-            #       preset format used is required in individual apps - for the time being,
-            #       the preset version is held at v6, ensuring that app apps operate correctly,
-            #       but generating a warning message at startup.
-            #
-            return "7"
+
+        # flame 2017 and above
+        #
+        # Note: Flame 2017 uses preset 7, however further adjustments to the actual
+        #       preset format used is required in individual apps - for the time being,
+        #       the preset version is held at v6, ensuring that app apps operate correctly,
+        #       but generating a warning message at startup.
+        #
+        return "7"
 
     @property
     def export_presets_root(self):
@@ -686,7 +685,7 @@ class FlameEngine(sgtk.platform.Engine):
         # DCC UI environment, pyside support is available.
         has_ui = False
         try:
-            from sgtk.platform.qt import QtCore, QtGui
+            from sgtk.platform.qt import QtCore
             if QtCore.QCoreApplication.instance():
                 # there is an active application
                 has_ui = True
@@ -705,7 +704,7 @@ class FlameEngine(sgtk.platform.Engine):
                            "the requested panel '%s'." % title)
             return None
 
-        from sgtk.platform.qt import QtCore, QtGui
+        from sgtk.platform.qt import QtCore
 
         # create the dialog:
         dialog, widget = self._create_dialog_with_widget(title, bundle, widget_class, *args, **kwargs)
@@ -732,10 +731,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         :return: QT Parent window (:class:`PySide.QtGui.QWidget`)
         """
-        from sgtk.platform.qt import QtCore, QtGui
-
         w = self.flame_main_window
-
         return w if w else super(FlameEngine, self)._get_dialog_parent()
 
     def show_dialog(self, title, bundle, widget_class, *args, **kwargs):
@@ -793,7 +789,7 @@ class FlameEngine(sgtk.platform.Engine):
                            "the requested window '%s'." % title)
             return None
 
-        from sgtk.platform.qt import QtGui, QtCore
+        from sgtk.platform.qt import QtCore
 
         # create the dialog:
         dialog, widget = self._create_dialog_with_widget(title, bundle, widget_class, *args, **kwargs)
@@ -831,7 +827,8 @@ class FlameEngine(sgtk.platform.Engine):
             except Exception, exception:
                 self.log_error("Cannot close dialog %s: %s" % (dialog_window_title, exception))
 
-    def log_debug(self, msg):
+    @staticmethod
+    def log_debug(msg):
         """
         Log a debug message
 
@@ -839,7 +836,8 @@ class FlameEngine(sgtk.platform.Engine):
         """
         logging.getLogger(LOG_CHANNEL).debug(msg)
 
-    def log_info(self, msg):
+    @staticmethod
+    def log_info(msg):
         """
         Log some info
 
@@ -847,7 +845,8 @@ class FlameEngine(sgtk.platform.Engine):
         """
         logging.getLogger(LOG_CHANNEL).info(msg)
 
-    def log_warning(self, msg):
+    @staticmethod
+    def log_warning(msg):
         """
         Log a warning
 
@@ -855,7 +854,8 @@ class FlameEngine(sgtk.platform.Engine):
         """
         logging.getLogger(LOG_CHANNEL).warning(msg)
 
-    def log_error(self, msg):
+    @staticmethod
+    def log_error(msg):
         """
         Log an error
 
@@ -954,40 +954,38 @@ class FlameEngine(sgtk.platform.Engine):
             self.log_debug("Initializing default PySide for in-DCC / backburner use")
             return super(FlameEngine, self)._define_qt_base()
 
-        else:
-            # we are running the engine outside of Flame.
-            # This is special - no QApplication is running at this point -
-            # a state akin to running apps inside the shell engine.
-            # We assume that in pre-launch mode, PySide is available since
-            # we are running within the Flame python.
-            from sgtk.platform import qt
-            from sgtk.util.qt_importer import QtImporter
+        # we are running the engine outside of Flame.
+        # This is special - no QApplication is running at this point -
+        # a state akin to running apps inside the shell engine.
+        # We assume that in pre-launch mode, PySide is available since
+        # we are running within the Flame python.
+        from sgtk.util.qt_importer import QtImporter
 
-            importer = QtImporter()
-            QtCore = importer.QtCore
-            QtGui = importer.QtGui
+        importer = QtImporter()
+        QtCore = importer.QtCore
+        QtGui = importer.QtGui
 
-            # a simple dialog proxy that pushes the window forward
-            class ProxyDialogPySide(QtGui.QDialog):
-                def show(self):
-                    QtGui.QDialog.show(self)
-                    self.activateWindow()
-                    self.raise_()
+        # a simple dialog proxy that pushes the window forward
+        class ProxyDialogPySide(QtGui.QDialog):
+            def show(self):
+                QtGui.QDialog.show(self)
+                self.activateWindow()
+                self.raise_()
 
-                def exec_(self):
-                    self.activateWindow()
-                    self.raise_()
-                    # the trick of activating + raising does not seem to be enough for
-                    # modal dialogs. So force put them on top as well.
-                    self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | self.windowFlags())
-                    return QtGui.QDialog.exec_(self)
+            def exec_(self):
+                self.activateWindow()
+                self.raise_()
+                # the trick of activating + raising does not seem to be enough for
+                # modal dialogs. So force put them on top as well.
+                self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | self.windowFlags())
+                return QtGui.QDialog.exec_(self)
 
-            base = {}
-            base["qt_core"] = QtCore
-            base["qt_gui"] = QtGui
-            base["dialog_base"] = ProxyDialogPySide
+        base = {}
+        base["qt_core"] = QtCore
+        base["qt_gui"] = QtGui
+        base["dialog_base"] = ProxyDialogPySide
 
-            return base
+        return base
 
     def cache_export_asset(self, asset_info):
         """
@@ -1230,18 +1228,24 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: hostname string
         """
-        return self.execute_hook_method("project_startup_hook", "get_server_hostname")
+        return self.execute_hook_method(
+            "project_startup_hook",
+            "get_server_hostname")
 
     def get_backburner_tmp(self):
         """
-        Return a location on disk, guaranteed to exist
-        where temporary data can be put in such a way that
-        it will be accessible for all backburner jobs, regardless of
-        which host they execute on.
+        Return a location on disk, guaranteed to exist where temporary data can
+        be put. If not defined in the settings, the default temporary directory
+        for the system will be used and jobs should be limited to the local
+        system except if servers or server groups for jobs have been defined.
 
         :returns: path
         """
-        return self.get_setting("backburner_shared_tmp")
+        path = self.get_setting("backburner_shared_tmp")
+        if not path:
+            path = tempfile.gettempdir()
+        return path
+
 
     @property
     def _flame_exporter_supported(self):
@@ -1363,21 +1367,14 @@ class FlameEngine(sgtk.platform.Engine):
         # info doesn't contain any strange characters etc
 
         # remove any non-trivial characters
-        sanitized_job_name = re.sub(r"[^0-9a-zA-Z_\-,\. ]+", "_", job_name)
-        sanitized_job_desc = re.sub(r"[^0-9a-zA-Z_\-,\. ]+", "_", description)
+        sanitized_job_name = re.sub(r"[^0-9a-zA-Z_\-,\. %]+", "_", job_name)
 
         # if the job name contains too many characters, backburner submission fails
         if len(sanitized_job_name) > 70:
             sanitized_job_name = "%s..." % sanitized_job_name[:67]
-        if len(sanitized_job_desc) > 70:
-            sanitized_job_desc = "%s..." % sanitized_job_desc[:67]
-
-        # there is a convention in flame to append a time stamp to jobs
-        # e.g. 'Export - XXX_YYY_ZZZ (10.02.04)
-        sanitized_job_name += datetime.datetime.now().strftime(" (%H.%M.%S)")
 
         backburner_args.append("-jobName:\"%s\"" % sanitized_job_name)
-        backburner_args.append("-description:\"%s\"" % sanitized_job_desc)
+        backburner_args.append("-description:\"%s\"" % description)
 
         # Specifying a remote backburner manager is only supported on 2016.1 and above
         if not self.is_version_less_than("2016.1"):
@@ -1399,18 +1396,46 @@ class FlameEngine(sgtk.platform.Engine):
             backburner_args.append("-group:\"%s\"" % bb_server_group)
 
         # Specify the backburner server if provided
-        if backburner_server_host:
-            backburner_args.append("-servers:\"%s\"" % backburner_server_host)
-        # Otherwise, fallback to the global backburner servers setting
-        else:
+        bb_servers = backburner_server_host
+        if not bb_servers:
+            # Otherwise, fallback to the global backburner servers setting
             bb_servers = self.get_setting("backburner_servers")
-            if bb_servers:
-                backburner_args.append("-servers:\"%s\"" % bb_servers)
+        if bb_servers:
+            backburner_args.append("-servers:\"%s\"" % bb_servers)
+
+        # Check where the temporary data has/will be written. If the job is
+        # allow on remote host, it must be on a shared location. Do our best
+        # to detect bad situation or to limit the job server
+        #
+        temp_dir = self.get_backburner_tmp()
+        temp_dir_is_local = temp_dir in [
+            tempfile.gettempdir(),
+            "/tmp",
+            "/var/tmp",
+            "/usr/tmp"
+        ]
+        localhost = os.uname()[1]
+        if not bb_server_group and not bb_servers:
+            # No servers/groups sepecified and local path.
+            # Force the job to run on local server.
+            if temp_dir_is_local:
+                backburner_args.append("-servers:\"%s\"" % localhost)
+        else:
+            # Possible remote server but local only path.
+            # Fail the job creation with an explicit message.
+            if temp_dir_is_local and (bb_server_group or bb_servers != localhost):
+                raise TankError(
+                    "backburner_shared_tmp points to a local path (%s) and jobs can be ran "
+                    "on multiple BackBurner servers. Change backburner_shared_tmp, "
+                    "backburner_server_group and/or backburner_servers settings in "
+                    "the configuration files." % temp_dir
+                )
+
 
         # Set the backburner job dependencies
         if dependencies:
             if isinstance(dependencies, list):
-                backburner_args.append("-dependencies:%s" % ",".join(dependencies)) 
+                backburner_args.append("-dependencies:%s" % ",".join(dependencies))
             else:
                 backburner_args.append("-dependencies:%s" % dependencies)
 
@@ -1419,7 +1444,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # now we need to capture all of the environment and everything in a file
         # (thanks backburner!) so that we can replay it later when the task wakes up
-        session_file = os.path.join(self.get_backburner_tmp(), "tk_backburner_%s.pickle" % uuid.uuid4().hex)
+        session_file = os.path.join(temp_dir, "tk_backburner_%s.pickle" % uuid.uuid4().hex)
 
         data = {}
         data["engine_instance"] = self.instance_name
@@ -1515,7 +1540,8 @@ class FlameEngine(sgtk.platform.Engine):
         # We don't have any Wiretap Central installed on this workstation
         raise TankError("Cannot find binary '%s'!" % binary_name)
 
-    def _get_wiretap_central_bin_path(self):
+    @staticmethod
+    def _get_wiretap_central_bin_path():
         """
         Get the path to the Wiretap Central binaries folder based on the current operating system.
 
@@ -1525,8 +1551,10 @@ class FlameEngine(sgtk.platform.Engine):
             return "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
         elif sys.platform == "linux2":
             return "/var/www/html/WiretapCentral/cgi-bin"
+        return None
 
-    def _get_wiretap_central_legacy_bin_path(self):
+    @staticmethod
+    def _get_wiretap_central_legacy_bin_path():
         """
         Get the path to the legacy Wiretap Central binaries folder based on the current operating system.
 
@@ -1536,6 +1564,7 @@ class FlameEngine(sgtk.platform.Engine):
             return "/Library/WebServer/CGI-Executables/WiretapCentral"
         elif sys.platform == "linux2":
             return "/var/www/cgi-bin/WiretapCentral"
+        return None
 
     def get_ffmpeg_path(self):
         """
