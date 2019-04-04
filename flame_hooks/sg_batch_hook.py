@@ -119,6 +119,7 @@ def batchRenderEnd(info, userData, *args, **kwargs):
     if isinstance(engine.export_info, list) and engine.export_info:
         _show_publisher()
 
+
 def batch_burn_begin(info, userData, *args, **kwargs):
     """
     Hook called before a background job to Burn or Background reactor begins.
