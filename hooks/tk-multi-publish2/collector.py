@@ -220,12 +220,6 @@ class FlameItemCollector(HookBaseClass):
                             # Let's cache this Shot information
                             self.cache_entities(parent_item, [shot])
 
-                        # We use a shared job_id_list on a Shot level because there's no background job ID associated to a
-                        # OpenClip file export. If we trigger a thumbnail generation when the real media is not available,
-                        # it fail. Making a long dependency list ensure that every video/movie item is rendered before we try to
-                        # generate the thumbnails.
-                        job_id_list = []
-
                         # Whe want to have the items in a sorted way
                         key_order = ["batchOpenClip", "batch", "openClip", "video", "movie", "audio", "sequence"]
 
@@ -254,13 +248,10 @@ class FlameItemCollector(HookBaseClass):
                                         # Let's keep a reference to the asset info dict
                                         item.properties["assetInfo"] = asset_info
 
-                                        # Let's keep a reference to the shared job id list
-                                        item.properties["backgroundJobId"] = job_id_list
-
                                         # Add the current asset job id if there's one
                                         job_id = asset_info.get("backgroundJobId")
                                         if job_id:
-                                            item.properties["backgroundJobId"].append(job_id)
+                                            item.properties["backgroundJobId"] = job_id
 
                                         # Set the context based on the most precise entity available
                                         if shot:
@@ -309,6 +300,14 @@ class FlameItemCollector(HookBaseClass):
 
                         # Let's keep a reference to the asset info dict
                         item.properties["assetInfo"] = asset_info
+
+                        # Batch hook do not set the assetType field
+                        item.properties["assetInfo"]["assetType"] = "video"
+
+                        # Add the current asset job id if there's one
+                        job_id = asset_info.get("backgroundJobId")
+                        if job_id:
+                            item.properties["backgroundJobId"] = job_id
 
                         # TODO: Rendering with Background Reactor trigger the postRender hook and start the publish
                         # process. This implies that the media might not be ready at the thumbnail generation and return
@@ -606,8 +605,7 @@ class FlameItemCollector(HookBaseClass):
         if os.path.isdir(path):
             self._collect_folder(parent_item, path)
             return None
-        else:
-            return self._collect_file(parent_item, path)
+        return self._collect_file(parent_item, path)
 
     def _collect_file(self, parent_item, path, frame_sequence=False):
         """

@@ -172,7 +172,7 @@ class CreateVersionPlugin(HookBaseClass):
         # while 'file_path' will be encoded the flame way file.[##-##].ext.
         file_path = item.properties.get("file_path", path)
 
-        re_match = re.search("(\[[0-9]+-[0-9]+\])\.", file_path)
+        re_match = re.search(r"(\[[0-9]+-[0-9]+\])\.", file_path)
         if re_match:
             ver_data["frame_range"] = re_match.group(1)[1:-1]
 

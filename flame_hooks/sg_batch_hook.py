@@ -116,7 +116,64 @@ def batchRenderEnd(info, userData, *args, **kwargs):
     if info.get("aborted", False):
         return
 
-    if isinstance(engine.export_info, list) and len(engine.export_info) > 0:
+    if isinstance(engine.export_info, list) and engine.export_info:
+        _show_publisher()
+
+
+def batch_burn_begin(info, userData, *args, **kwargs):
+    """
+    Hook called before a background job to Burn or Background reactor begins.
+    The submission will be blocked until this function returns.
+
+
+    :param info: Empty dictionary for now. Might have parameters in the future.
+
+    :param userData: Object that will be carried over into the render end hooks.
+                     This can be used by the hook to pass black box data around.
+
+    :note: This hook is available in Flame 2020 and up only.
+    """
+    import sgtk
+    engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine.
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
+    engine.clear_export_info()
+
+    engine.trigger_batch_callback("batchBurnBegin", info)
+
+
+def batch_burn_end(info, userData, *args, **kwargs):
+    """
+    Hook called after a background job has been sent to Burn or Background Reactor.
+
+
+    :param info: Dictionary with a number of parameters:
+
+        aborted:              Indicate if the render has been aborted by the user.
+
+    :param userData: Object that could have been populated by the render begin hook.
+                     This can be used by the hook to pass black box data around.
+
+    :note: This hook is available in Flame 2020 and up only.
+    """
+    import sgtk
+    engine = sgtk.platform.current_engine()
+
+    # We can't do anything without the Shotgun engine.
+    # The engine is None when the user decides to not use the plugin for the project.
+    if engine is None:
+        return
+
+    engine.trigger_batch_callback("batchBurnEnd", info)
+
+    if info.get("aborted", False):
+        return
+
+    if isinstance(engine.export_info, list) and engine.export_info:
         _show_publisher()
 
 # tell Flame not to display the fish cursor while we process the hook
