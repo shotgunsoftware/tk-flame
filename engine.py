@@ -1325,6 +1325,33 @@ class FlameEngine(sgtk.platform.Engine):
             )
         return self._thumbnail_generator
 
+    def get_backburner_job_completion(self):
+        """
+        Return the completion handling of BackBurner jobs.
+        :return None or (completion_handling,completion_handling_delay): Where None means manager
+            or application defaults, completion_handling can be leave, delete or archive and
+            completion_handling_delay is the number of days before executing the action.
+        """
+        completion = self.get_setting("backburner_job_completion")
+        if not completion:
+            return (None, None)
+
+        completion_groups = re.match(
+            r"((?:default)|(?:leaveInQueue)|(?:delete)|(?:archive))(?:\:([0-9]+))*$",
+            completion
+        )
+        if not completion_groups:
+            raise TankError("Invalid backburner completion setting: %s", completion)
+
+        completion_handling, completion_handling_delay = completion_groups.groups()
+        if completion_handling == "default":
+            return (None, None)
+        if completion_handling == "leaveInQueue":
+            completion_handling_delay = None
+        elif not completion_handling_delay:
+            completion_handling_delay = 0
+        return (completion_handling, completion_handling_delay)
+
     def create_local_backburner_job(self, job_name, description, dependencies,
                                     instance, method_name, args, backburner_server_host=None):
         """
@@ -1333,10 +1360,11 @@ class FlameEngine(sgtk.platform.Engine):
         :param job_name: Name of the backburner job
         :param description: Description of the backburner job
         :param dependencies: None if the backburner job should execute arbitrarily. If you
-                             want to set the job up so that it executes after another known task, pass
-                             the backburner id or a list of ids here. This is typically used in conjunction with a postExportAsset
-                             hook where the export task runs on backburner. In this case, the hook will return
-                             the backburner id. By passing that id into this method, you can create a job which
+                             want to set the job up so that it executes after another known task,
+                             pass the backburner id or a list of ids here. This is typically used
+                             in conjunction with a postExportAsset hook where the export task runs
+                             on backburner. In this case, the hook will return the backburner id.
+                             By passing that id into this method, you can create a job which
                              only executes after the main export task has completed.
         :param instance: App or hook to remotely call up
         :param method_name: Name of method to remotely execute
@@ -1346,7 +1374,6 @@ class FlameEngine(sgtk.platform.Engine):
         """
 
         # the backburner executable
-
         backburner_job_cmd = os.path.join(self._install_root, "backburner", "cmdjob")
 
         # pass some args - most importantly tell it to run on the local host
@@ -1361,6 +1388,13 @@ class FlameEngine(sgtk.platform.Engine):
 
         # increase the max task length to 600 minutes
         backburner_args.append("-timeout:600")
+
+        completion_handling, completion_handling_delay = self.get_backburner_job_completion()
+        if completion_handling:
+            completion_arg = "-" + completion_handling
+            if completion_handling_delay is not None:
+                completion_arg += ":" + str(completion_handling_delay)
+            backburner_args.append(completion_arg)
 
         # add basic job info
         # backburner does not do any kind of sanitaion itself, so ensure that job
