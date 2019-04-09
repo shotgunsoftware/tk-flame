@@ -70,6 +70,14 @@ configuration:
         default_value: ""
         description: The group name of the servers to use when submitting a backburner job.
 
+    backburner_job_completion:
+        type: str
+        default_value: "delete"
+        description: Action to be done on Backburner job completion.
+                     Possible values are default, leaveInQueue, delete[:days], archive[:days].
+                     Default will use the manager or application default for the action.
+
+
 
     generate_thumbnails:
         type: bool

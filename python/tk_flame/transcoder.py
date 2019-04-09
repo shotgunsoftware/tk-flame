@@ -212,7 +212,16 @@ class Transcoder(object):
         os.close(tmp_fd)
         return path
 
-    def transcode(self, src_path, dst_path, extension, display_name, job_context, preset_path, asset_info, dependencies, poster_frame=None):
+    def transcode(self,
+                  src_path,
+                  dst_path,
+                  extension,
+                  display_name,
+                  job_context,
+                  preset_path,
+                  asset_info,
+                  dependencies,
+                  poster_frame=None):
         """
         Generate a preview for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with
@@ -293,6 +302,12 @@ class Transcoder(object):
             dst_path
         )
         background_job_settings.dependencies = dependencies
+
+        completion_handling, completion_handling_delay = self.engine.get_backburner_job_completion()
+        if completion_handling:
+            background_job_settings.completion_handling = completion_handling
+            if completion_handling_delay is not None:
+                background_job_settings.completion_handling_delay = completion_handling_delay
 
         hooks_user_data = {}
         transcoder_job_key = "transcoder_job"
