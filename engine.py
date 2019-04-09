@@ -1341,7 +1341,7 @@ class FlameEngine(sgtk.platform.Engine):
             completion
         )
         if not completion_groups:
-            raise TankError("Invalid backburner completion setting: %s", completion)
+            raise TankError("Invalid backburner completion setting: %s" % completion)
 
         completion_handling, completion_handling_delay = completion_groups.groups()
         if completion_handling == "default":
@@ -1350,6 +1350,13 @@ class FlameEngine(sgtk.platform.Engine):
             completion_handling_delay = None
         elif not completion_handling_delay:
             completion_handling_delay = 0
+        else:
+            try:
+                completion_handling_delay = int(completion_handling_delay)
+            except ValueError, error:
+                raise TankError(
+                    "Invalid backburner completion delay setting: %s: %s" % (completion, error)
+                )
         return (completion_handling, completion_handling_delay)
 
     def create_local_backburner_job(self, job_name, description, dependencies,
