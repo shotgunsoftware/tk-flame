@@ -86,7 +86,7 @@ class UpdateCutPlugin(HookBaseClass):
         accept() method. Strings can contain glob patters such as *, for example
         ["maya.*", "file.maya"]
         """
-        return ["flame.batchOpenClip"]
+        return ["flame.*"]
 
     def accept(self, settings, item):
         """
@@ -123,10 +123,15 @@ class UpdateCutPlugin(HookBaseClass):
 
         # If the context is correct, try to find the CutItem to Update
         if accepted:
-            item.properties["CutItem"] = self.sg.find_one("CutItem", [["shot", "is", item.context.entity]],
-                                                          ["cut_order", "cut"], [
-                                                              {"field_name": "cut.Cut.revision_number",
-                                                               "direction": "desc"}])
+            item.properties["CutItem"] = self.sg.find_one(
+                "CutItem",
+                [["shot", "is", item.context.entity]],
+                ["cut_order", "cut"],
+                [{
+                    "field_name": "cut.Cut.revision_number",
+                    "direction": "desc"
+                }]
+            )
 
             # Accept only if we know what CutItem to update
             accepted = item.properties["CutItem"] is not None
@@ -159,7 +164,6 @@ class UpdateCutPlugin(HookBaseClass):
         :param item: Item to process
         """
         asset_info = item.properties["assetInfo"]
-        path = item.properties["path"]
 
         cut_item = item.properties["CutItem"]
         version = item.properties.get("Version")
@@ -176,17 +180,17 @@ class UpdateCutPlugin(HookBaseClass):
             cut = cut_item["cut"]
             targets.append(cut)
 
-        # For file sequences, the hooks we want the path as provided by flame.
-        path = item.properties.get("file_path", path)
-
         # Create the Image thumbnail in background
-        self.engine.thumbnail_generator.generate(
-            display_name=item.name,
-            path=path,
-            dependencies=item.properties.get("backgroundJobId"),
-            target_entities=targets,
-            asset_info=asset_info
-        )
+        if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
+            # For file sequences, the hooks we want the path as provided by flame.
+            path = item.properties.get("file_path", item.properties["path"])
+            self.engine.thumbnail_generator.generate(
+                display_name=item.name,
+                path=path,
+                dependencies=item.properties.get("backgroundJobId"),
+                target_entities=targets,
+                asset_info=asset_info
+            )
 
     def finalize(self, settings, item):
         """
@@ -200,4 +204,8 @@ class UpdateCutPlugin(HookBaseClass):
         :param item: Item to process
         """
 
-        self.engine.thumbnail_generator.finalize(path=item.properties["path"])
+        asset_info = item.properties["assetInfo"]
+        if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
+            # For file sequences, the hooks we want the path as provided by flame.
+            path = item.properties.get("file_path", item.properties["path"])
+            self.engine.thumbnail_generator.finalize(path=path)

@@ -84,7 +84,7 @@ class CreateCutPlugin(HookBaseClass):
         accept() method. Strings can contain glob patters such as *, for example
         ["maya.*", "file.maya"]
         """
-        return ["flame.batchOpenClip"]
+        return ["flame.*"]
 
     def accept(self, settings, item):
         """
@@ -167,7 +167,6 @@ class CreateCutPlugin(HookBaseClass):
         :param item: Item to process
         """
         asset_info = item.properties["assetInfo"]
-        path = item.properties["path"]
 
         # Check if a previous run had already created the Cut
         if "Cut" in item.properties["context"]["Sequence"]:
@@ -237,13 +236,16 @@ class CreateCutPlugin(HookBaseClass):
         targets.append(cut_item)
 
         # Create the Image thumbnail in background
-        self.engine.thumbnail_generator.generate(
-            display_name=item.name,
-            path=path,
-            dependencies=item.properties.get("backgroundJobId"),
-            target_entities=targets,
-            asset_info=asset_info
-        )
+        if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
+            # For file sequences, the hooks we want the path as provided by flame.
+            path = item.properties.get("file_path", item.properties["path"])
+            self.engine.thumbnail_generator.generate(
+                display_name=item.name,
+                path=path,
+                dependencies=item.properties.get("backgroundJobId"),
+                target_entities=targets,
+                asset_info=asset_info
+            )
 
     def finalize(self, settings, item):
         """
@@ -279,7 +281,11 @@ class CreateCutPlugin(HookBaseClass):
             # Delete the Cut in the context to ensure that the finalization step is not repeated
             del item.properties["context"]["Sequence"]["Cut"]
 
-        self.engine.thumbnail_generator.finalize(path=item.properties["path"])
+        asset_info = item.properties["assetInfo"]
+        if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
+            # For file sequences, the hooks we want the path as provided by flame.
+            path = item.properties.get("file_path", item.properties["path"])
+            self.engine.thumbnail_generator.finalize(path=path)
 
     def _cutitem_data(self, item):
         """
