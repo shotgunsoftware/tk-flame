@@ -176,7 +176,9 @@ class UpdateShotPlugin(HookBaseClass):
 
         # Create the Image thumbnail in background
         if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
-            # For file sequences, the hooks we want the path as provided by flame.
+            # Favor the file_path attribute if present since it will use the same
+            # syntax as Flame for files sequences (ie file.[#-#].ext) instead of
+            # Shotgun syntax (ie file.%d.ext).
             path = item.properties.get("file_path", item.properties["path"])
             self.engine.thumbnail_generator.generate(
                 display_name=item.name,
@@ -199,7 +201,9 @@ class UpdateShotPlugin(HookBaseClass):
         """
         asset_info = item.properties["assetInfo"]
         if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
-            # For file sequences, the hooks we want the path as provided by flame.
+            # Favor the file_path attribute if present since it will use the same
+            # syntax as Flame for files sequences (ie file.[#-#].ext) instead of
+            # Shotgun syntax (ie file.%d.ext).
             path = item.properties.get("file_path", item.properties["path"])
             self.engine.thumbnail_generator.finalize(path=path)
 
