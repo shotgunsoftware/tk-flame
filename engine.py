@@ -602,15 +602,16 @@ class FlameEngine(sgtk.platform.Engine):
         patch_ver = 0
 
         chunks = version_str.split(".")
-        if len(chunks) > 0:
+        nb_chunks = len(chunks)
+        if nb_chunks > 0:
             if chunks[0].isdigit():
                 major_ver = int(chunks[0])
 
-        if len(chunks) > 1:
+        if nb_chunks > 1:
             if chunks[1].isdigit():
                 minor_ver = int(chunks[1])
 
-        if len(chunks) > 2:
+        if nb_chunks > 2:
             if chunks[2].isdigit():
                 patch_ver = int(chunks[2])
 
@@ -757,7 +758,8 @@ class FlameEngine(sgtk.platform.Engine):
         developing a new engine, you only need to override the minimum amount necessary.
 
         Making use of these methods in the correct way allows the base Engine class to manage the
-        lifetime of the dialogs and widgets efficiently and safely without you having to worry about it.
+        lifetime of the dialogs and widgets efficiently and safely without you having to worry
+        about it.
 
         The methods available are listed here in the hierarchy in which they are called::
 
@@ -863,7 +865,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         logging.getLogger(LOG_CHANNEL).error(msg)
 
-    ################################################################################################################
+    ################################################################################################
     # Engine Bootstrap
     #
 
@@ -1031,7 +1033,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         self._export_info.append(info)
 
-    ################################################################################################################
+    ################################################################################################
     # export callbacks handling
     #
     # Any apps which are interested in registering custom exporters with Flame should use the methods
@@ -1153,13 +1155,13 @@ class FlameEngine(sgtk.platform.Engine):
 
         self._export_info = None
 
-    ################################################################################################################
+    ################################################################################################
     # batch callbacks handling
     #
-    # Any apps which are interested in register custom batch exporters with Flame should use the methods
-    # below. The register_batch_hook() is called by apps in order to register an interest in pre and post
-    # export callbacks when in batch mode. The Flame engine will ensure that the app's callbacks will get
-    # called at the right time.
+    # Any apps which are interested in register custom batch exporters with Flame should use the
+    # methods below. The register_batch_hook() is called by apps in order to register an interest
+    # in pre and post export callbacks when in batch mode. The Flame engine will ensure that the
+    # app's callbacks will get called at the right time.
     #
 
     def register_batch_hook(self, callbacks):
@@ -1216,7 +1218,7 @@ class FlameEngine(sgtk.platform.Engine):
                 self.log_debug("Executing callback %s" % registered_batch_instance[callback_name])
                 registered_batch_instance[callback_name](info)
 
-    ################################################################################################################
+    ################################################################################################
     # backburner integration
     #
 
@@ -1324,6 +1326,14 @@ class FlameEngine(sgtk.platform.Engine):
                 engine=self
             )
         return self._thumbnail_generator
+
+    @staticmethod
+    def is_thumbnail_supported_for_asset_type(asset_type):
+        """
+        Return True if the asset type support thumbnail generation
+        :return True or False:
+        """
+        return asset_type in ["video", "movie", "openClip", "batchOpenClip"]
 
     def get_backburner_job_completion(self):
         """
@@ -1502,8 +1512,9 @@ class FlameEngine(sgtk.platform.Engine):
 
         full_cmd = "%s %s %s %s" % (backburner_job_cmd, " ".join(backburner_args), backburner_bootstrap, session_file)
 
-        # On old Flame version, python hooks are running root. We need to run the command as the effective user to
-        # ensure that backburner is running the job as the user who's using the Software to avoir permissions issues.
+        # On old Flame version, python hooks are running root. We need to run the command as the
+        # effective user to ensure that backburner is running the job as the user who's using the
+        # Software to avoir permissions issues.
         if os.getuid() == 0:  # root
             # Getting the user name of the user who started Flame (the effective user)
             e_user = pwd.getpwuid(os.geteuid()).pw_name
@@ -1545,7 +1556,7 @@ class FlameEngine(sgtk.platform.Engine):
 
                 raise TankError("\n".join(error))
 
-    ################################################################################################################
+    ################################################################################################
     # accessors to various core settings and functions
 
     def __get_wiretap_central_binary(self, binary_name):
@@ -1597,7 +1608,8 @@ class FlameEngine(sgtk.platform.Engine):
     @staticmethod
     def _get_wiretap_central_legacy_bin_path():
         """
-        Get the path to the legacy Wiretap Central binaries folder based on the current operating system.
+        Get the path to the legacy Wiretap Central binaries folder based on the current
+        operating system.
 
         :return: Path to the legacy Wiretap Central binaries folder
         """
