@@ -145,7 +145,11 @@ class CreateCutPlugin(HookBaseClass):
         # Make sure that we have the Sequence in our context dict
         if "Sequence" not in item.properties["context"]:
             sequence_fields = ["cuts", "shots", "code"]
-            sequence = self.sg.find_one("Sequence", [["shots", "is", item.context.entity]], sequence_fields)
+            sequence = self.sg.find_one(
+                "Sequence",
+                [["shots", "is", item.context.entity]],
+                sequence_fields
+            )
             self.cache_entities(item.parent, [sequence])
 
             if sequence \
@@ -310,7 +314,7 @@ class CreateCutPlugin(HookBaseClass):
             "shot": item.properties.get("Shot"),
             "code": asset_info["assetName"],
             "version": item.properties.get("Version"),
-            "cut_order": asset_info["segmentIndex"]
+            "cut_order": asset_info.get("segmentIndex", 0)
         }
 
         cutitem_data["cut_item_duration"] = cutitem_data["cut_item_out"] - cutitem_data["cut_item_in"] + 1
@@ -334,7 +338,8 @@ class CreateCutPlugin(HookBaseClass):
 
         return cutitem_data
 
-    def _frames_to_timecode(self, total_frames, frame_rate, drop):
+    @staticmethod
+    def _frames_to_timecode(total_frames, frame_rate, drop):
         """
         Helper method that converts frames to SMPTE timecode.
 
@@ -431,7 +436,8 @@ class CreateCutPlugin(HookBaseClass):
         frames = int(total_frames % fps_int)
         return "%02d:%02d:%02d%s%02d" % (hours, minutes, seconds, smpte_token, frames)
 
-    def cache_entities(self, parent_item, entities):
+    @staticmethod
+    def cache_entities(parent_item, entities):
         """
         Cache the entity list on the item properties to avoid redundant database query.
 
