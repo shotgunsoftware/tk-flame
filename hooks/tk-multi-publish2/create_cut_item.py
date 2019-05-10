@@ -224,7 +224,7 @@ class CreateCutPlugin(HookBaseClass):
         targets = []
 
         # If this CutItem is the first element of the cut, update the thumbnail of the Cut
-        if asset_info["segmentIndex"] == 1:
+        if asset_info.get("segmentIndex", 1) == 1:
             targets.append(cut)
 
         # Create the CutItem
@@ -314,7 +314,7 @@ class CreateCutPlugin(HookBaseClass):
             "shot": item.properties.get("Shot"),
             "code": asset_info["assetName"],
             "version": item.properties.get("Version"),
-            "cut_order": asset_info.get("segmentIndex", 0)
+            "cut_order": asset_info.get("segmentIndex", 1)
         }
 
         cutitem_data["cut_item_duration"] = cutitem_data["cut_item_out"] - cutitem_data["cut_item_in"] + 1
