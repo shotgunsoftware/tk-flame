@@ -167,7 +167,7 @@ class UpdateShotPlugin(HookBaseClass):
         target = [item.context.entity]
 
         # If this is the first Shot of the Sequence, we update the Sequence thumbnail
-        if asset_info["segmentIndex"] == 1:
+        if asset_info.get("segmentIndex", 1) == 1:
             sequence = item.properties["context"]["Sequence"]
             target.append(sequence)
 
@@ -220,7 +220,7 @@ class UpdateShotPlugin(HookBaseClass):
             "description": item.description,
             "sg_cut_in": asset_info["recordIn"],
             "sg_cut_out": asset_info["recordOut"] - 1,
-            "sg_cut_order": asset_info["segmentIndex"],
+            "sg_cut_order": asset_info.get("segmentIndex", 1)
         }
 
         shot_data["sg_head_in"] = shot_data["sg_cut_in"] - asset_info["handleIn"]
