@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Shotgun Software Inc.
+# Copyright (c) 2019 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -1436,7 +1436,7 @@ class FlameEngine(sgtk.platform.Engine):
         if (len(job_name) + len(job_prefix) + len(job_suffix)) > max_length:
             sanitized_job_name = "%s%s...%s" % (
                 job_prefix,
-                job_name[:max(10, max_length - 3 - len(job_prefix)- len(job_suffix))],
+                job_name[:max(10, max_length - 3 - len(job_prefix) - len(job_suffix))],
                 job_suffix
             )
         else:
