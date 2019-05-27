@@ -40,7 +40,7 @@ class Transcoder(object):
         import flame
         clips = flame.import_clips(path)
         self.engine.log_debug("Imported '%s' -> [%s]" % (path, clips))
-        if len(clips) == 0:
+        if not clips:
             self.engine.log_warning("%s does not points to a clip" % path)
             return None
         elif len(clips) > 1:
@@ -83,9 +83,11 @@ class Transcoder(object):
                 pass
 
             def postExportAsset(self, info, userData, *args, **kwargs):
+                del args, kwargs # Unused necessary parameters
                 userData[self._user_data_job_key] = info["backgroundJobId"]
 
             def exportOverwriteFile(self, path, *args, **kwargs):
+                del path, args, kwargs # Unused necessary parameters
                 return "overwrite"
         return PythonHookOverride(user_data_job_key)
 
@@ -291,9 +293,9 @@ class Transcoder(object):
                               (preset_path, actual_dst_path, dependencies))
 
         background_job_settings = flame.PyExporter.BackgroundJobSettings()
-        background_job_settings.name = "%s - %s" % (
-            display_name,
-            job_context
+        background_job_settings.name = self.engine.sanitize_backburner_job_name(
+            job_name=display_name,
+            job_suffix=" - %s" % job_context
         )
         background_job_settings.description = "%s for %s - %s -> %s" % (
             job_context,

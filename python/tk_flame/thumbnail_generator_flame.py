@@ -128,7 +128,10 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         :return: Backburner job ID created.
         """
         job_context = "Upload Shotgun Thumbnail"
-        job_name = "%s - %s" % (thumbnail_job.get("display_name"), job_context)
+        job_name = self.engine.sanitize_backburner_job_name(
+            job_name=thumbnail_job.get("display_name"),
+            job_suffix=" - %s" % job_context
+        )
         job_description = "%s for %s\nTemporary file %s" % (
             job_context,
             thumbnail_job.get("display_name"),
@@ -163,7 +166,10 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
             field_name = "sg_uploaded_movie"
 
         job_context = "Upload Shotgun Preview"
-        job_name = "%s - %s" % (preview_job.get("display_name"), job_context)
+        job_name = self.engine.sanitize_backburner_job_name(
+            job_name=preview_job.get("display_name"),
+            job_suffix=" - %s" % job_context
+        )
         job_description = "%s for %s\nTemporary file %s" % (
             job_context,
             preview_job.get("display_name"),
