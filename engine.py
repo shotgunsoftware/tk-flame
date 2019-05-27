@@ -1420,8 +1420,8 @@ class FlameEngine(sgtk.platform.Engine):
     @staticmethod
     def sanitize_backburner_job_name(job_name, job_prefix="", job_suffix=""):
         """
-        Sanitize a job name so backburner will accept it. Will replace undesired character with '_'
-        and will ellips the string if too long.
+        Sanitize a job name so backburner will accept it. Will replace undesired characters with '_'
+        and will ellipse the string if too long.
         :return: sanitized job name string.
         """
 
