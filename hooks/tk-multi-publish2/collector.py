@@ -160,22 +160,34 @@ class FlameItemCollector(HookBaseClass):
             sequence_fields = ["cuts", "shots", "code"]
             sort_by_fields = [{"field_name": "created_at", "direction": "desc"}]
 
-            # When the action is an Export, the export_info is an embedded dictionary structure
+            # When the action is an Export, the export_info is an embedded
+            # dictionary structure.
             if isinstance(export_context, dict):
 
-                # The first level of dictionary have the Sequence name as key and another dictionary as value
+                # The first level of dictionary have the Sequence name as key
+                # and another dictionary as value.
                 for sequence_name, sequence_info in sorted(export_context.items()):
                     sequence = None
 
-                    # If the sequence_name is not ""
+                    # If the sequence_name is not "".
                     if sequence_name:
 
-                        # We try to find a Sequence with the right code. The latest if there's more thant one Sequence.
-                        sg_filter = [["code", "is", sequence_name], ["project", "is", project]]
-                        sequence = self.sg.find_one("Sequence", sg_filter, sequence_fields, sort_by_fields)
+                        # We try to find a Sequence with the right code.
+                        # The latest if there's more than one Sequence.
+                        sg_filter = [
+                            ["code", "is", sequence_name],
+                            ["project", "is", project]
+                        ]
+                        sequence = self.sg.find_one(
+                            "Sequence",
+                            sg_filter,
+                            sequence_fields,
+                            sort_by_fields
+                        )
 
                         if not sequence:
-                            # There's no Sequence with the right code... Let's create one!
+                            # There's no Sequence with the right code...
+                            # Let's create one!
                             seq_data = {
                                 "code": sequence_name,
                                 "project": project,
@@ -187,7 +199,8 @@ class FlameItemCollector(HookBaseClass):
                         # Let's cache this Sequence information
                         self.cache_entities(parent_item, [sequence])
 
-                    # The second level of dictionary have the Shot name as key and another dictionary as value
+                    # The second level of dictionary have the Shot name as key
+                    # and another dictionary as value.
                     for shot_name, shot_info in sorted(sequence_info.items()):
                         shot = None
 
@@ -200,11 +213,18 @@ class FlameItemCollector(HookBaseClass):
                                 # The shot should be linked to the right Sequence
                                 sg_filter.append(["sg_sequence", "is", sequence])
 
-                                # We try to find the right Shot. The latest if there's more thant one Shot.
-                                shot = self.sg.find_one("Shot", sg_filter, shot_fields, sort_by_fields)
+                                # We try to find the right Shot.
+                                # The latest if there's more than one Shot.
+                                shot = self.sg.find_one(
+                                    "Shot",
+                                    sg_filter,
+                                    shot_fields,
+                                    sort_by_fields
+                                )
 
                             if not shot:
-                                # There's no Shot that match our needs... so let's create it !
+                                # There's no Shot that match our needs...
+                                # so let's create it !
                                 shot_data = {
                                     "code": shot_name,
                                     "project": project,
@@ -212,7 +232,8 @@ class FlameItemCollector(HookBaseClass):
                                 }
 
                                 if sequence:
-                                    # It should be linked to the sequence that we fount previously
+                                    # It should be linked to the sequence that
+                                    # we found previously.
                                     shot_data["sg_sequence"] = sequence
 
                                 shot = self.sg.create("Shot", shot_data)
@@ -220,19 +241,31 @@ class FlameItemCollector(HookBaseClass):
                             # Let's cache this Shot information
                             self.cache_entities(parent_item, [shot])
 
-                        # Whe want to have the items in a sorted way
-                        key_order = ["batchOpenClip", "batch", "openClip", "video", "movie", "audio", "sequence"]
+                        # We want to have the items in a sorted way.
+                        key_order = [
+                            "batchOpenClip",
+                            "batch",
+                            "openClip",
+                            "video",
+                            "movie",
+                            "audio",
+                            "sequence"
+                        ]
 
-                        # The next level of dictionary have the asset type as key and a dictionary as value
+                        # The next level of dictionary have the asset type as
+                        # key and a dictionary as value.
                         for asset_type, asset_type_info in sorted(shot_info.items(), key=lambda i: key_order.index(i[0])):
 
-                            # The next level of dictionary have the asset name as key and a list as value
+                            # The next level of dictionary have the asset name
+                            # as key and a list as value.
                             for _, asset_info_list in asset_type_info.items():
 
-                                # Finally, this is a list of asset with the same name, type, shot and sequence.
+                                # Finally, this is a list of asset with the same
+                                # name, type, shot and sequence.
                                 for asset_info in asset_info_list:
 
-                                    # Dynamically get the right function based on the type
+                                    # Dynamically get the right function based
+                                    # on the type.
                                     if hasattr(self, "create_{}_items".format(asset_type)):
                                         create_items = getattr(self, "create_{}_items".format(asset_type))
                                     else:
@@ -271,12 +304,14 @@ class FlameItemCollector(HookBaseClass):
                     shot = None
                     shot_name = asset_info.get("shotName", "")
 
-                    # We try to find the right Shot. The latest if there's more thant one Shot.
+                    # We try to find the right Shot.
+                    # The latest if there's more than one Shot.
                     if shot_name:
                         sg_filter = [["code", "is", shot_name]]
                         shot = self.sg.find_one("Shot", sg_filter, shot_fields, sort_by_fields)
 
-                    # The fallback is to try to find the PublishedFile linked to the shot OpenClip and use the same entity
+                    # The fallback is to try to find the PublishedFile linked to
+                    # the shot OpenClip and use the same entity.
                     if not shot and "openClipResolvedPath" in asset_info:
                         filters = [["project", "is", project]]
                         fields = ["path", "entity"]
@@ -295,24 +330,13 @@ class FlameItemCollector(HookBaseClass):
                     # Get the items that can be created from this asset dictionary
                     items = self.create_render_items(parent_item, asset_info)
                     for item in items:
-                        # This item is from a batch render
-                        item.properties["fromBatch"] = True
-
-                        # Let's keep a reference to the asset info dict
-                        item.properties["assetInfo"] = asset_info
-
-                        # Batch hook do not set the assetType field
-                        item.properties["assetInfo"]["assetType"] = "video"
-
-                        # Add the current asset job id if there's one
-                        job_id = asset_info.get("backgroundJobId")
-                        if job_id:
-                            item.properties["backgroundJobId"] = job_id
-
-                        # TODO: Rendering with Background Reactor trigger the postRender hook and start the publish
-                        # process. This implies that the media might not be ready at the thumbnail generation and return
-                        # an error. Right now, the background job fail and retry later until the moment when the media is
-                        # ready, but we might want to have a cleaner way to handle this case.
+                        # TODO: Rendering with Background Reactor trigger the
+                        # postRender hook and start the publish process. This
+                        # implies that the media might not be ready at the
+                        # thumbnail generation and return an error. Right now,
+                        # the background job fail and retry later until the
+                        # moment when the media is ready, but we might want to
+                        # have a cleaner way to handle this case.
 
                         # Set the context based on the most precise entity available
                         if shot:
@@ -359,22 +383,35 @@ class FlameItemCollector(HookBaseClass):
 
         video_info = asset_info.copy()
         video_info["path"] = video_info["resolvedPath"]
-        video = self.create_video_items(parent_item, asset_info)
-
-        re.match(r"(.*)(\[\d+-\d+\])(.+)", asset_info["resolvedPath"])
+        video_info["assetType"] = "video"
+        video = self.create_video_items(parent_item, video_info)
 
         batch, openclip = [None], [None]
         if "setupResolvedPath" in asset_info:
             batch_info = asset_info.copy()
             batch_info["path"] = batch_info["setupResolvedPath"]
+            batch_info["assetType"] = "batch"
             batch = self.create_batch_items(parent_item, batch_info)
 
         if "openClipResolvedPath" in asset_info:
             openclip_info = asset_info.copy()
             openclip_info["path"] = openclip_info["openClipResolvedPath"]
+            openclip_info["assetType"] = "batchOpenClip"
             openclip = self.create_batchOpenClip_items(parent_item, openclip_info)
 
-        return [item for item in video + batch + openclip if item is not None]
+        # Add the current asset job id if there's one
+        job_id = asset_info.get("backgroundJobId")
+
+        items = []
+        for item in video + batch + openclip:
+            if item is not None:
+                item.properties["fromBatch"] = True
+                if job_id:
+                    item.properties["backgroundJobId"] = job_id
+                items.append(item)
+        return items
+
+
 
     def create_batch_items(self, parent_item, asset_info):
         """
@@ -398,6 +435,7 @@ class FlameItemCollector(HookBaseClass):
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
+        item.properties["assetInfo"] = asset_info
 
         return [item]
 
@@ -423,6 +461,7 @@ class FlameItemCollector(HookBaseClass):
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
+        item.properties["assetInfo"] = asset_info
 
         return [item]
 
@@ -448,6 +487,7 @@ class FlameItemCollector(HookBaseClass):
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
+        item.properties["assetInfo"] = asset_info
 
         return [item]
 
@@ -491,6 +531,7 @@ class FlameItemCollector(HookBaseClass):
 
         item.properties["path"] = name_path
         item.properties["file_path"] = path
+        item.properties["assetInfo"] = asset_info
 
         return [item]
 
@@ -518,6 +559,7 @@ class FlameItemCollector(HookBaseClass):
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
+        item.properties["assetInfo"] = asset_info
 
         return [item]
 
@@ -543,6 +585,7 @@ class FlameItemCollector(HookBaseClass):
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
+        item.properties["assetInfo"] = asset_info
 
         return [item]
 
@@ -568,6 +611,7 @@ class FlameItemCollector(HookBaseClass):
         item.thumbnail_enabled = False
 
         item.properties["path"] = path
+        item.properties["assetInfo"] = asset_info
 
         return [item]
 
