@@ -17,7 +17,6 @@ import pwd
 import re
 import sys
 import uuid
-import sgtk
 import pickle
 import logging
 import logging.handlers
@@ -25,6 +24,8 @@ import pprint
 import traceback
 import subprocess
 import tempfile
+
+import sgtk
 from sgtk import TankError
 
 LOG_CHANNEL = "sgtk.tk-flame"
@@ -1483,9 +1484,6 @@ class FlameEngine(sgtk.platform.Engine):
         # run as current user, not as root
         backburner_args.append("-userRights")
 
-        # attach the executable to the backburner job
-        backburner_args.append("-attach")
-
         # increase the max task length to 600 minutes
         backburner_args.append("-timeout:600")
 
@@ -1592,9 +1590,10 @@ class FlameEngine(sgtk.platform.Engine):
         pickle.dump(data, fh)
         fh.close()
 
-        full_cmd = "%s %s %s %s" % (
+        full_cmd = "%s %s %s %s %s" % (
             backburner_job_cmd,
             " ".join(backburner_args),
+            self.python_executable,
             backburner_bootstrap,
             session_file
         )
