@@ -34,14 +34,24 @@ import os
 import sys
 import pickle
 
+# Set the certificates for urllib2 if certifi is available.
+if not "SSL_CERT_FILE" in os.environ:
+    try:
+        import certifi
+    except ImportError:
+        certifi = None
+        pass
+
+    if certifi:
+        os.environ['SSL_CERT_FILE'] = certifi.where()
+
 pickle_file = sys.argv[1]
 
 if not os.path.exists(pickle_file):
     raise IOError("Cannot find backburner command file '%s'!" % pickle_file)
 
-fh = open(pickle_file, "rb")
-data = pickle.load(fh)
-fh.close()
+with open(pickle_file, "rb") as fh:
+    data = pickle.load(fh)
 
 # get the data out of our pickle
 sgtk_core_location = data["sgtk_core_location"]
