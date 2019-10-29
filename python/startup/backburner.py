@@ -35,7 +35,7 @@ import sys
 import pickle
 
 # Set the certificates for urllib2 if certifi is available.
-if not "SSL_CERT_FILE" in os.environ:
+if "SSL_CERT_FILE" not in os.environ:
     try:
         import certifi
     except ImportError:
