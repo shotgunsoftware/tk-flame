@@ -1292,9 +1292,11 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: path
         """
-        path = self.get_setting("backburner_shared_tmp")
+        path = os.environ.get("SHOTGUN_FLAME_BACKBURNER_SHARED_TMP", self.get_setting("backburner_shared_tmp"))
+                          
         if not path:
             path = tempfile.gettempdir()
+
         return path
 
 
