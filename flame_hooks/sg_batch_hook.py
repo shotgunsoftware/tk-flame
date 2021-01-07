@@ -36,6 +36,7 @@ def batchSetupLoaded(setupPath):
     :param setupPath: File path of the setup being loaded.
     """
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # We can't do anything without the Shotgun engine.
@@ -53,6 +54,7 @@ def batchSetupSaved(setupPath):
     :param setupPath: File path of the setup being loaded.
     """
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # We can't do anything without the Shotgun engine.
@@ -77,6 +79,7 @@ def batchRenderBegin(info, userData, *args, **kwargs):
     :note: This hook is available in Flame 2019.1 and up only.
     """
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # We can't do anything without the Shotgun engine.
@@ -104,6 +107,7 @@ def batchRenderEnd(info, userData, *args, **kwargs):
     :note: This hook is available in Flame 2019.1 and up only.
     """
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # We can't do anything without the Shotgun engine.
@@ -134,6 +138,7 @@ def batch_burn_begin(info, userData, *args, **kwargs):
     :note: This hook is available in Flame 2020 and up only.
     """
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # We can't do anything without the Shotgun engine.
@@ -161,6 +166,7 @@ def batch_burn_end(info, userData, *args, **kwargs):
     :note: This hook is available in Flame 2020 and up only.
     """
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # We can't do anything without the Shotgun engine.
@@ -175,6 +181,7 @@ def batch_burn_end(info, userData, *args, **kwargs):
 
     if isinstance(engine.export_info, list) and engine.export_info:
         _show_publisher()
+
 
 # tell Flame not to display the fish cursor while we process the hook
 batchRenderEnd.func_dict["waitCursor"] = False
@@ -215,6 +222,7 @@ def batchExportBegin(info, userData):
                      This can be used by the hook to pass black box data around.
     """
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # We can't do anything without the Shotgun engine.
@@ -261,6 +269,7 @@ def batchExportEnd(info, userData):
                      This can be used by the hook to pass black box data around.
     """
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # We can't do anything without the Shotgun engine.

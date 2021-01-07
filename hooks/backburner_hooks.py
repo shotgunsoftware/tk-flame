@@ -30,14 +30,17 @@ class BackburnerHooks(HookBaseClass):
     # default height for thumbs
     SHOTGUN_THUMBNAIL_TARGET_HEIGHT = 400
 
-    FFMPEG_PRESET = "-threads 2 -vcodec libx264 -me_method umh -directpred 3 -coder ac -me_range 16 -g 250 -rc_eq " \
-                    "'blurCplx^(1-qComp)' -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71428572 -b_qfactor 0.76923078 " \
-                    "-b_strategy 1 -qcomp 0.6 -qmin 10 -qmax 51 -qdiff 4  -trellis 1 -subq 6 -partitions " \
-                    "+parti8x8+parti4x4+partp8x8+partp4x4+partb8x8 -bidir_refine 1 -cmp 1 -flags2 fastpskip -flags2 " \
-                    "dct8x8 -flags2 mixed_refs -flags2 wpred -refs 2 -deblockalpha 0 -deblockbeta 0 -bf 3 -crf 18 "
+    FFMPEG_PRESET = (
+        "-threads 2 -vcodec libx264 -me_method umh -directpred 3 -coder ac -me_range 16 -g 250 -rc_eq "
+        "'blurCplx^(1-qComp)' -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71428572 -b_qfactor 0.76923078 "
+        "-b_strategy 1 -qcomp 0.6 -qmin 10 -qmax 51 -qdiff 4  -trellis 1 -subq 6 -partitions "
+        "+parti8x8+parti4x4+partp8x8+partp4x4+partb8x8 -bidir_refine 1 -cmp 1 -flags2 fastpskip -flags2 "
+        "dct8x8 -flags2 mixed_refs -flags2 wpred -refs 2 -deblockalpha 0 -deblockbeta 0 -bf 3 -crf 18 "
+    )
 
-
-    def upload_to_shotgun(self, path, targets, field_name, display_name, files_to_delete):
+    def upload_to_shotgun(
+        self, path, targets, field_name, display_name, files_to_delete
+    ):
         """
         Upload a file to Shotgun, link it to the targets and delete the file.
 
@@ -56,7 +59,7 @@ class BackburnerHooks(HookBaseClass):
                 entity_id=target["id"],
                 path=path,
                 field_name=field_name,
-                display_name=display_name
+                display_name=display_name,
             )
         if files_to_delete is not None:
             for file_to_delete in files_to_delete:
@@ -77,9 +80,7 @@ class BackburnerHooks(HookBaseClass):
                 "request_type": "update",
                 "entity_type": target["type"],
                 "entity_id": target["id"],
-                "data": {
-                    "sg_path_to_movie": path
-                }
+                "data": {"sg_path_to_movie": path},
             }
             batch_data.append(data)
         self.parent.shotgun.batch(batch_data)
@@ -90,20 +91,22 @@ class BackburnerHooks(HookBaseClass):
     def attach_jpg_preview(self, path, width, height, targets, display_name):
         # first figure out a good scale-down res
         scaled_down_width, scaled_down_height = self._calculate_aspect_ratio(
-            self.SHOTGUN_THUMBNAIL_TARGET_HEIGHT,
-            width,
-            height
+            self.SHOTGUN_THUMBNAIL_TARGET_HEIGHT, width, height
         )
 
-        input_cmd = "%s -n \"%s@CLIP\" -h %s -W %s -H %s -L" % (
+        input_cmd = '%s -n "%s@CLIP" -h %s -W %s -H %s -L' % (
             self.parent.get_read_frame_path(),
             path,
             "%s:Gateway" % self.parent.get_server_hostname(),
             scaled_down_width,
-            scaled_down_height
+            scaled_down_height,
         )
 
-        jpg_fd, jpg_path = mkstemp(suffix=".jpg", prefix=display_name + ".", dir=self.parent.get_backburner_tmp())
+        jpg_fd, jpg_path = mkstemp(
+            suffix=".jpg",
+            prefix=display_name + ".",
+            dir=self.parent.get_backburner_tmp(),
+        )
         try:
             full_cmd = "%s > %s" % (input_cmd, jpg_path)
 
@@ -113,7 +116,9 @@ class BackburnerHooks(HookBaseClass):
 
             if return_code:
                 self.parent.log_warning(
-                    "Thumbnail process failed!\nError code: %s\nOutput:\n%s" % (return_code, stderr))
+                    "Thumbnail process failed!\nError code: %s\nOutput:\n%s"
+                    % (return_code, stderr)
+                )
                 return return_code
 
             for target in targets:
@@ -122,7 +127,7 @@ class BackburnerHooks(HookBaseClass):
                     entity_id=target["id"],
                     path=jpg_path,
                     field_name="thumb_image",
-                    display_name=display_name
+                    display_name=display_name,
                 )
 
         finally:
@@ -132,37 +137,47 @@ class BackburnerHooks(HookBaseClass):
     def attach_mov_preview(self, path, width, height, targets, display_name, fps):
         # first figure out a good scale-down res
         scaled_down_width, scaled_down_height = self._calculate_aspect_ratio(
-            self.SHOTGUN_QUICKTIME_TARGET_HEIGHT,
-            width,
-            height
+            self.SHOTGUN_QUICKTIME_TARGET_HEIGHT, width, height
         )
 
-        input_cmd = "%s -n \"%s@CLIP\" -h %s -W %s -H %s -L -N -1 -r" % (
+        input_cmd = '%s -n "%s@CLIP" -h %s -W %s -H %s -L -N -1 -r' % (
             self.parent.get_read_frame_path(),
             path,
             "%s:Gateway" % self.parent.get_server_hostname(),
             scaled_down_width,
-            scaled_down_height
+            scaled_down_height,
         )
 
         ffmpeg_cmd = "%s -f rawvideo -top -1 -r %s -pix_fmt rgb24 -s %sx%s -i - -y" % (
             self.parent.get_ffmpeg_path(),
             fps,
             scaled_down_width,
-            scaled_down_height
+            scaled_down_height,
         )
 
-        mov_fd, mov_path = mkstemp(suffix=".mov", prefix=display_name + ".", dir=self.parent.get_backburner_tmp())
+        mov_fd, mov_path = mkstemp(
+            suffix=".mov",
+            prefix=display_name + ".",
+            dir=self.parent.get_backburner_tmp(),
+        )
 
         try:
-            full_cmd = "%s | %s %s %s" % (input_cmd, ffmpeg_cmd, self.FFMPEG_PRESET, mov_path)
+            full_cmd = "%s | %s %s %s" % (
+                input_cmd,
+                ffmpeg_cmd,
+                self.FFMPEG_PRESET,
+                mov_path,
+            )
 
             mov_job = subprocess.Popen([full_cmd], stdout=subprocess.PIPE, shell=True)
             _, stderr = mov_job.communicate()
             return_code = mov_job.returncode
 
             if return_code:
-                self.parent.log_warning("Movie process failed!\nError code: %s\nOutput:\n%s" % (return_code, stderr))
+                self.parent.log_warning(
+                    "Movie process failed!\nError code: %s\nOutput:\n%s"
+                    % (return_code, stderr)
+                )
                 return return_code
 
             if self.parent.get_setting("bypass_server_transcoding"):
@@ -177,7 +192,7 @@ class BackburnerHooks(HookBaseClass):
                     entity_id=target["id"],
                     path=mov_path,
                     field_name=field_name,
-                    display_name=display_name
+                    display_name=display_name,
                 )
 
         finally:
@@ -186,23 +201,25 @@ class BackburnerHooks(HookBaseClass):
 
     def _calculate_aspect_ratio(self, target_height, width, height):
         """
-            Calculation of aspect ratio.
+        Calculation of aspect ratio.
 
-            Takes the given width and height and produces a scaled width and height given
-            the following constraints:
+        Takes the given width and height and produces a scaled width and height given
+        the following constraints:
 
-            - the height should be target_height or lower if the original height is lower
-            - width and height both need to be divisible by four (ffmpeg requirement)
-            - the aspect ratio needs to be as close as possible to the original one
+        - the height should be target_height or lower if the original height is lower
+        - width and height both need to be divisible by four (ffmpeg requirement)
+        - the aspect ratio needs to be as close as possible to the original one
 
-            :param target_height: The desired height
-            :param width: The current width
-            :param height: The current height
-            :returns: int tuple, e.g. (768, 440)
-            """
+        :param target_height: The desired height
+        :param width: The current width
+        :param height: The current height
+        :returns: int tuple, e.g. (768, 440)
+        """
 
-        self.parent.log_debug("Trying to find a scaled down resolution "
-                              "with height %s for %sx%s" % (target_height, width, height))
+        self.parent.log_debug(
+            "Trying to find a scaled down resolution "
+            "with height %s for %sx%s" % (target_height, width, height)
+        )
 
         # If the target_height is bigger than the height, we don't want to enlarge the resolution but we still want to
         # make sure that both width and height is divisible by four

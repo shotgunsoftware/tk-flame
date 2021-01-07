@@ -32,12 +32,7 @@ class CreateCutPlugin(HookBaseClass):
         """
         Path to an png icon on disk
         """
-        return os.path.join(
-            self.disk_location,
-            os.pardir,
-            "icons",
-            "publish.png"
-        )
+        return os.path.join(self.disk_location, os.pardir, "icons", "publish.png")
 
     @property
     def name(self):
@@ -119,7 +114,11 @@ class CreateCutPlugin(HookBaseClass):
         shot_context = item.context.entity and item.context.entity.get("type") == "Shot"
 
         # Not available from batch render
-        accepted = cut_supported and shot_context and not item.properties.get("fromBatch", False)
+        accepted = (
+            cut_supported
+            and shot_context
+            and not item.properties.get("fromBatch", False)
+        )
 
         return {"accepted": accepted}
 
@@ -140,22 +139,26 @@ class CreateCutPlugin(HookBaseClass):
         # Make sure that we have the context dict in the item properties
         if "context" not in item.properties:
             self.cache_entities(item.parent, [item.context.entity])
-            item.properties["context"] = item.parent.properties["Shot"][item.context.entity["id"]]
+            item.properties["context"] = item.parent.properties["Shot"][
+                item.context.entity["id"]
+            ]
 
         # Make sure that we have the Sequence in our context dict
         if "Sequence" not in item.properties["context"]:
             sequence_fields = ["cuts", "shots", "code"]
             sequence = self.sg.find_one(
-                "Sequence",
-                [["shots", "is", item.context.entity]],
-                sequence_fields
+                "Sequence", [["shots", "is", item.context.entity]], sequence_fields
             )
             self.cache_entities(item.parent, [sequence])
 
-            if sequence \
-                    and sequence["type"] in item.parent.properties and \
-                            sequence["id"] in item.parent.properties[sequence["type"]]:
-                item.properties["context"]["Sequence"] = item.parent.properties[sequence["type"]][sequence["id"]]
+            if (
+                sequence
+                and sequence["type"] in item.parent.properties
+                and sequence["id"] in item.parent.properties[sequence["type"]]
+            ):
+                item.properties["context"]["Sequence"] = item.parent.properties[
+                    sequence["type"]
+                ][sequence["id"]]
             else:
                 pass  # TODO
 
@@ -185,10 +188,12 @@ class CreateCutPlugin(HookBaseClass):
             # Try to find the previous cut to determine the Cut revision number
             prev_cut = self.sg.find_one(
                 "Cut",
-                [["code", "is", cut_code],
-                 ["entity", "is", item.properties["context"]["Sequence"]]],
+                [
+                    ["code", "is", cut_code],
+                    ["entity", "is", item.properties["context"]["Sequence"]],
+                ],
                 cut_fields,
-                [{"field_name": "revision_number", "direction": "desc"}]
+                [{"field_name": "revision_number", "direction": "desc"}],
             )
 
             # Determine the revision number based on the previous Cut
@@ -205,15 +210,17 @@ class CreateCutPlugin(HookBaseClass):
                     "entity": item.properties["context"]["Sequence"],
                     "code": cut_code,
                     "revision_number": next_revision_number,
-                    "fps": float(asset_info["sequenceFps"])
-                }
+                    "fps": float(asset_info["sequenceFps"]),
+                },
             )
 
             # Cache this cut!
             self.cache_entities(item.parent, [cut])
 
             # Save this Cut on the context to share it to the other items of the Sequence context
-            item.properties["context"]["Sequence"]["Cut"] = item.parent.properties[cut["type"]][cut["id"]]
+            item.properties["context"]["Sequence"]["Cut"] = item.parent.properties[
+                cut["type"]
+            ][cut["id"]]
 
         # Build the CutItem information dictionary
         cut_item_data = self._cutitem_data(item)
@@ -234,7 +241,9 @@ class CreateCutPlugin(HookBaseClass):
         self.cache_entities(item.parent, [cut_item])
 
         # Save that CutItem in the Context
-        item.properties["context"]["CutItem"] = item.parent.properties[cut_item["type"]][cut_item["id"]]
+        item.properties["context"]["CutItem"] = item.parent.properties[
+            cut_item["type"]
+        ][cut_item["id"]]
 
         # Add the CutItem to the thumbnail generation target list
         targets.append(cut_item)
@@ -250,7 +259,7 @@ class CreateCutPlugin(HookBaseClass):
                 path=path,
                 dependencies=item.properties.get("backgroundJobId"),
                 target_entities=targets,
-                asset_info=asset_info
+                asset_info=asset_info,
             )
 
     def finalize(self, settings, item):
@@ -270,19 +279,33 @@ class CreateCutPlugin(HookBaseClass):
             cut_items = self.sg.find(
                 "CutItem",
                 [["cut", "is", item.properties["context"]["Sequence"]["Cut"]]],
-                ["timecode_edit_in_text", "timecode_edit_out_text", "cut_item_duration"],
-                [{"field_name": "cut_order", "direction": "asc"}]  # We want them sorted to save time later
+                [
+                    "timecode_edit_in_text",
+                    "timecode_edit_out_text",
+                    "cut_item_duration",
+                ],
+                [
+                    {"field_name": "cut_order", "direction": "asc"}
+                ],  # We want them sorted to save time later
             )
 
             # Build the Cut metadata
             cut_data = {
-                "duration": sum([int(cut_item["cut_item_duration"]) for cut_item in cut_items]),  # Sum of the CutItems
-                "timecode_start_text": cut_items[0]["timecode_edit_in_text"],  # Beginning of the first CutItem
-                "timecode_end_text": cut_items[-1]["timecode_edit_out_text"]  # End of the last CutItem
+                "duration": sum(
+                    [int(cut_item["cut_item_duration"]) for cut_item in cut_items]
+                ),  # Sum of the CutItems
+                "timecode_start_text": cut_items[0][
+                    "timecode_edit_in_text"
+                ],  # Beginning of the first CutItem
+                "timecode_end_text": cut_items[-1][
+                    "timecode_edit_out_text"
+                ],  # End of the last CutItem
             }
 
             # Update teh Cut metadata
-            self.sg.update("Cut", item.properties["context"]["Sequence"]["Cut"]["id"], cut_data)
+            self.sg.update(
+                "Cut", item.properties["context"]["Sequence"]["Cut"]["id"], cut_data
+            )
 
             # Delete the Cut in the context to ensure that the finalization step is not repeated
             del item.properties["context"]["Sequence"]["Cut"]
@@ -314,27 +337,37 @@ class CreateCutPlugin(HookBaseClass):
             "shot": item.properties.get("Shot"),
             "code": asset_info["assetName"],
             "version": item.properties.get("Version"),
-            "cut_order": asset_info.get("segmentIndex", 1)
+            "cut_order": asset_info.get("segmentIndex", 1),
         }
 
-        cutitem_data["cut_item_duration"] = cutitem_data["cut_item_out"] - cutitem_data["cut_item_in"] + 1
+        cutitem_data["cut_item_duration"] = (
+            cutitem_data["cut_item_out"] - cutitem_data["cut_item_in"] + 1
+        )
 
         # Generate the timecode based fields
-        cutitem_data["timecode_cut_item_in_text"] = self._frames_to_timecode(cutitem_data["cut_item_in"],
-                                                                             drop=asset_info["drop"],
-                                                                             frame_rate=float(asset_info["fps"]))
+        cutitem_data["timecode_cut_item_in_text"] = self._frames_to_timecode(
+            cutitem_data["cut_item_in"],
+            drop=asset_info["drop"],
+            frame_rate=float(asset_info["fps"]),
+        )
 
-        cutitem_data["timecode_cut_item_out_text"] = self._frames_to_timecode(cutitem_data["cut_item_out"],
-                                                                              drop=asset_info["drop"],
-                                                                              frame_rate=float(asset_info["fps"]))
+        cutitem_data["timecode_cut_item_out_text"] = self._frames_to_timecode(
+            cutitem_data["cut_item_out"],
+            drop=asset_info["drop"],
+            frame_rate=float(asset_info["fps"]),
+        )
 
-        cutitem_data["timecode_edit_in_text"] = self._frames_to_timecode(cutitem_data["edit_in"],
-                                                                         drop=asset_info["sequenceDrop"],
-                                                                         frame_rate=float(asset_info["sequenceFps"]))
+        cutitem_data["timecode_edit_in_text"] = self._frames_to_timecode(
+            cutitem_data["edit_in"],
+            drop=asset_info["sequenceDrop"],
+            frame_rate=float(asset_info["sequenceFps"]),
+        )
 
-        cutitem_data["timecode_edit_out_text"] = self._frames_to_timecode(cutitem_data["edit_out"],
-                                                                          drop=asset_info["sequenceDrop"],
-                                                                          frame_rate=float(asset_info["sequenceFps"]))
+        cutitem_data["timecode_edit_out_text"] = self._frames_to_timecode(
+            cutitem_data["edit_out"],
+            drop=asset_info["sequenceDrop"],
+            frame_rate=float(asset_info["sequenceFps"]),
+        )
 
         return cutitem_data
 
@@ -349,8 +382,10 @@ class CreateCutPlugin(HookBaseClass):
         :returns: SMPTE timecode as string, e.g. '01:02:12:32' or '01:02:12;32'
         """
         if drop and frame_rate not in [29.97, 59.94]:
-            raise NotImplementedError("Time code calculation logic only supports drop frame "
-                                      "calculations for 29.97 and 59.94 fps.")
+            raise NotImplementedError(
+                "Time code calculation logic only supports drop frame "
+                "calculations for 29.97 and 59.94 fps."
+            )
 
         # for a good discussion around time codes and sample code, see
         # http://andrewduncan.net/timecodes/

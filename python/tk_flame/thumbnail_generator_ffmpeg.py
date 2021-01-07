@@ -16,6 +16,7 @@ __all__ = ["ThumbnailGeneratorFFmpeg"]
 
 from .thumbnail_generator import ThumbnailGenerator
 
+
 class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
     """
     Thumbnail generator based on ffmpeg and read_frame.
@@ -25,7 +26,9 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
         super(ThumbnailGeneratorFFmpeg, self).__init__(engine)
         self._job_ids = []
 
-    def _generate_preview(self, path, display_name, target_entities, asset_info, dependencies):
+    def _generate_preview(
+        self, path, display_name, target_entities, asset_info, dependencies
+    ):
         """
         Generate a preview for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with
@@ -47,8 +50,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
         self.engine.log_debug("Create and Upload Preview using ffmpeg")
         job_context = "Create and Upload Shotgun Preview"
         job_name = self.engine.sanitize_backburner_job_name(
-            job_name=display_name,
-            job_suffix=" - %s" % job_context
+            job_name=display_name, job_suffix=" - %s" % job_context
         )
         job_description = "%s for %s" % (job_context, path)
         job_id = self.engine.create_local_backburner_job(
@@ -63,12 +65,14 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
                 "height": asset_info["height"],
                 "path": path,
                 "display_name": display_name,
-                "fps": asset_info["fps"]
-            }
+                "fps": asset_info["fps"],
+            },
         )
         self._job_ids.append(job_id)
 
-    def _generate_thumbnail(self, path, display_name, target_entities, asset_info, dependencies):
+    def _generate_thumbnail(
+        self, path, display_name, target_entities, asset_info, dependencies
+    ):
         """
         Generate a thumbnail for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with
@@ -90,8 +94,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
         self.engine.log_debug("Create and Upload Thumbnail using ffmpeg")
         job_context = "Create and Upload Shotgun Thumbnail"
         job_name = self.engine.sanitize_backburner_job_name(
-            job_name=display_name,
-            job_suffix=" - %s" % job_context
+            job_name=display_name, job_suffix=" - %s" % job_context
         )
         job_description = "%s for %s" % (job_context, path)
         job_id = self.engine.create_local_backburner_job(
@@ -105,8 +108,8 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
                 "width": asset_info["width"],
                 "height": asset_info["height"],
                 "path": path,
-                "display_name": display_name
-            }
+                "display_name": display_name,
+            },
         )
         self._job_ids.append(job_id)
 

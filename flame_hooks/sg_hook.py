@@ -10,8 +10,10 @@
 
 import os
 
-def appExit( info ):
+
+def appExit(info):
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
     # Nothing to do if no Shotgun engine has been initialized.
@@ -21,7 +23,10 @@ def appExit( info ):
 
 def getCustomUIActions():
 
-    version = [os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION"), os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION")]
+    version = [
+        os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION"),
+        os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION"),
+    ]
     major_version = next((v for v in version), None)
 
     if major_version is not None and int(major_version) >= 2018:
@@ -31,7 +36,8 @@ def getCustomUIActions():
 
     return getMainMenuCustomUIActions()
 
-def getMainMenuCustomUIActions( ):
+
+def getMainMenuCustomUIActions():
     """
     Hook returning the custom ui actions to display to the user in the contextual menu.
 
@@ -68,9 +74,10 @@ def getMainMenuCustomUIActions( ):
     """
     # first, get the toolkit engine
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine. 
+    # We can't do anything without the Shotgun engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return ()
@@ -84,14 +91,15 @@ def getMainMenuCustomUIActions( ):
     for (instance_name, display_name, command_name, callback) in commands:
         context_commands.append((command_name, display_name))
 
-
-
     # now add any 'normal' registered commands not already in the actions dict
     # omit system actions that are on the context menu
     context_command_names = [context_command[0] for context_command in context_commands]
     for engine_command_name in engine.commands:
         properties = engine.commands[engine_command_name]["properties"]
-        if engine_command_name not in context_command_names and properties.get("type") != "context_menu":
+        if (
+            engine_command_name not in context_command_names
+            and properties.get("type") != "context_menu"
+        ):
             context_command_names.append(engine_command_name)
             context_commands.append((engine_command_name, engine_command_name))
 
@@ -100,17 +108,17 @@ def getMainMenuCustomUIActions( ):
         return ()
 
     # sorts the list to have Log out option always appear last, Shotgun Python Console prior, and the rest in same order
-    context_commands.sort(key=lambda el: ('Log Out' in el, 'Shotgun Python Console...' in el, None))
+    context_commands.sort(
+        key=lambda el: ("Log Out" in el, "Shotgun Python Console..." in el, None)
+    )
 
     # generate flame data structure
-    actions = [{"name": command_name, "caption": display_name} for (command_name, display_name) in context_commands]
+    actions = [
+        {"name": command_name, "caption": display_name}
+        for (command_name, display_name) in context_commands
+    ]
 
-    return (
-        {
-            "name": "Shotgun",
-            "actions": tuple(actions)
-        },
-    )
+    return ({"name": "Shotgun", "actions": tuple(actions)},)
 
 
 def customUIAction(info, userData):
@@ -125,9 +133,10 @@ def customUIAction(info, userData):
     """
     # first, get the toolkit engine
     import sgtk
+
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine. 
+    # We can't do anything without the Shotgun engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return

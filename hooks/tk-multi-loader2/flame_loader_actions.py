@@ -83,8 +83,10 @@ class FlameLoaderActions(HookBaseClass):
         """
 
         app = self.parent
-        app.log_debug("Generate actions called for UI element %s. "
-                      "Actions: %s. Publish Data: %s" % (ui_area, actions, sg_publish_data))
+        app.log_debug(
+            "Generate actions called for UI element %s. "
+            "Actions: %s. Publish Data: %s" % (ui_area, actions, sg_publish_data)
+        )
 
         action_instances = []
 
@@ -93,38 +95,46 @@ class FlameLoaderActions(HookBaseClass):
             return action_instances
 
         if SETUP_ACTION in actions and hasattr(flame.batch, "append_setup"):
-            action_instances.append({
-                "name": SETUP_ACTION,
-                "params": None,
-                "caption": "Load and Append Batch Setup",
-                "description": "Load and append a batch setup file to the current Batch Group."
-            })
+            action_instances.append(
+                {
+                    "name": SETUP_ACTION,
+                    "params": None,
+                    "caption": "Load and Append Batch Setup",
+                    "description": "Load and append a batch setup file to the current Batch Group.",
+                }
+            )
 
         if CLIP_ACTION in actions and hasattr(flame.batch, "import_clip"):
-            action_instances.append({
-                "name": CLIP_ACTION,
-                "params": None,
-                "caption": "Import Clip",
-                "description": "Import a clip to the current Batch Group."
-            })
+            action_instances.append(
+                {
+                    "name": CLIP_ACTION,
+                    "params": None,
+                    "caption": "Import Clip",
+                    "description": "Import a clip to the current Batch Group.",
+                }
+            )
 
         if SHOT_CREATE_ACTION in actions and hasattr(flame.batch, "create_batch_group"):
-            action_instances.append({
-                "name": SHOT_CREATE_ACTION,
-                "params": None,
-                "caption": "Create Batch Group",
-                "description": "Create a Batch setup inside a new Batch Group."
-            })
+            action_instances.append(
+                {
+                    "name": SHOT_CREATE_ACTION,
+                    "params": None,
+                    "caption": "Create Batch Group",
+                    "description": "Create a Batch setup inside a new Batch Group.",
+                }
+            )
 
         if SHOT_LOAD_ACTION in actions and hasattr(flame.batch, "load_setup"):
             batch_paths = self._get_batch_path_from_sg_publish_data(sg_publish_data)
             if batch_paths is not None:
-                action_instances.append({
-                    "name": SHOT_LOAD_ACTION,
-                    "params": None,
-                    "caption": "Load in new Batch Group",
-                    "description": "Load a Batch setup file inside a new Batch Group."
-                })
+                action_instances.append(
+                    {
+                        "name": SHOT_LOAD_ACTION,
+                        "params": None,
+                        "caption": "Load in new Batch Group",
+                        "description": "Load a Batch setup file inside a new Batch Group.",
+                    }
+                )
 
         return action_instances
 
@@ -171,8 +181,10 @@ class FlameLoaderActions(HookBaseClass):
         """
 
         app = self.parent
-        app.log_debug("Execute action called for action %s. "
-                      "Parameters: %s. Publish Data: %s" % (name, params, sg_publish_data))
+        app.log_debug(
+            "Execute action called for action %s. "
+            "Parameters: %s. Publish Data: %s" % (name, params, sg_publish_data)
+        )
 
         try:
             if name == CLIP_ACTION:
@@ -258,7 +270,7 @@ class FlameLoaderActions(HookBaseClass):
 
         # The clip name doesn't directly exists, but it might
         # contain a pattern that we need to resolve.
-        elif clip_path and '%' in clip_path:
+        elif clip_path and "%" in clip_path:
             new_path = self._handle_frame_range(clip_path)["path"]
 
             # The sequence exists on disk
@@ -268,7 +280,9 @@ class FlameLoaderActions(HookBaseClass):
 
             # The sequence doesn't exist on disk
             else:
-                raise FlameLoaderActionError("Sequence not found on disk - '%s'" % new_path)
+                raise FlameLoaderActionError(
+                    "Sequence not found on disk - '%s'" % new_path
+                )
 
         # Clip path doesn't exists and doesn't contain any pattern
         else:
@@ -292,7 +306,9 @@ class FlameLoaderActions(HookBaseClass):
 
         sg_info = self._get_batch_info_from_sg_publish_data(sg_publish_data)
         if sg_info is None:
-            raise FlameLoaderActionError("Cannot load a Batch Group from Shotgun using this Shot")
+            raise FlameLoaderActionError(
+                "Cannot load a Batch Group from Shotgun using this Shot"
+            )
 
         self._go_to_batch_on_action()
 
@@ -308,9 +324,9 @@ class FlameLoaderActions(HookBaseClass):
             # We found a batch file so let's import it
             if batch_path and self._exists(batch_path):
                 app.log_debug(
-                    "Creating the '%s' batch group using '%s'" % (
-                        sg_publish_data['code'], batch_path
-                    ))
+                    "Creating the '%s' batch group using '%s'"
+                    % (sg_publish_data["code"], batch_path)
+                )
                 flame.batch.create_batch_group(sg_publish_data["code"])
                 if not flame.batch.load_setup(batch_path):
                     raise FlameLoaderActionError("Unable to load the Batch Setup")
@@ -343,8 +359,11 @@ class FlameLoaderActions(HookBaseClass):
         :rtype: [str]
         """
 
-        return [entry[0] for entry in self.parent.get_setting("action_mappings", {}).items() if
-                SETUP_ACTION in entry[1]]
+        return [
+            entry[0]
+            for entry in self.parent.get_setting("action_mappings", {}).items()
+            if SETUP_ACTION in entry[1]
+        ]
 
     @property
     def import_location(self):
@@ -391,7 +410,7 @@ class FlameLoaderActions(HookBaseClass):
         """
         return os.environ.get(
             "SHOTGUN_FLAME_MEDIA_PATH_ROOT",
-            self.parent.engine.get_setting("media_path_root", "")
+            self.parent.engine.get_setting("media_path_root", ""),
         )
 
     @property
@@ -404,7 +423,7 @@ class FlameLoaderActions(HookBaseClass):
         """
         return os.environ.get(
             "SHOTGUN_FLAME_MEDIA_PATH_PATTERN",
-            "<shot name>_{segment_name}_v<version>.<frame>"
+            "<shot name>_{segment_name}_v<version>.<frame>",
         )
 
     @property
@@ -436,7 +455,9 @@ class FlameLoaderActions(HookBaseClass):
         :return: Setup path pattern
         :type: str
         """
-        return os.environ.get("SHOTGUN_FLAME_SETUP_PATH_PATTERN", "<shot name>.v<version>")
+        return os.environ.get(
+            "SHOTGUN_FLAME_SETUP_PATH_PATTERN", "<shot name>.v<version>"
+        )
 
     @property
     def media_path_template(self):
@@ -570,7 +591,7 @@ class FlameLoaderActions(HookBaseClass):
             "segment_name": clip["Sequence Name"],
             "version": "<version>",
             "SEQ": "<frame>",
-            "flame.frame" : "<frame>"
+            "flame.frame": "<frame>",
         }
 
         file_format = {
@@ -588,7 +609,7 @@ class FlameLoaderActions(HookBaseClass):
             "tga": "Targa",
             "tif": "Tiff",
             "tiff": "Tiff",
-            "rla": "Wavefront"
+            "rla": "Wavefront",
         }
 
         # The order is important when setting the attributes
@@ -614,8 +635,7 @@ class FlameLoaderActions(HookBaseClass):
         # Specify where to write our media
         if self.use_template and self.media_path_template:
             media_path, media_path_pattern, media_ext = self._build_path_from_template(
-                self.media_path_template,
-                fields
+                self.media_path_template, fields
             )
             write_file_info["media_path"] = media_path
             write_file_info["media_path_pattern"] = media_path_pattern
@@ -624,12 +644,16 @@ class FlameLoaderActions(HookBaseClass):
             write_file_info["file_type"] = file_format.get(media_ext)
 
             keys = self.media_path_template.keys
-            write_file_info["version_padding"] = int(keys['version'].format_spec)
-            padding = keys.get("flame.frame", keys.get('SEQ', None))
-            write_file_info["frame_padding"] = int(padding.format_spec) if padding is not None else 8
+            write_file_info["version_padding"] = int(keys["version"].format_spec)
+            padding = keys.get("flame.frame", keys.get("SEQ", None))
+            write_file_info["frame_padding"] = (
+                int(padding.format_spec) if padding is not None else 8
+            )
         elif self.media_path_pattern:
             write_file_info["media_path"] = self.media_path_root
-            write_file_info["media_path_pattern"] = self.media_path_pattern.format(**fields)
+            write_file_info["media_path_pattern"] = self.media_path_pattern.format(
+                **fields
+            )
 
         if "version_padding" not in write_file_info and self.version_padding:
             write_file_info["version_padding"] = self.version_padding
@@ -644,10 +668,14 @@ class FlameLoaderActions(HookBaseClass):
         if open_clip_path is not None:
             write_file_info["create_clip_path"] = os.path.splitext(open_clip_path)[0]
         elif self.use_template and self.clip_path_template:
-            _, clip_path, _ = self._build_path_from_template(self.clip_path_template, fields)
+            _, clip_path, _ = self._build_path_from_template(
+                self.clip_path_template, fields
+            )
             write_file_info["create_clip_path"] = clip_path
         elif self.clip_path_pattern:
-            write_file_info["create_clip_path"] = self.clip_path_pattern.format(**fields)
+            write_file_info["create_clip_path"] = self.clip_path_pattern.format(
+                **fields
+            )
 
         # Open Clip must be converted to paths relative to the media root.
         media_path = write_file_info.get("media_path")
@@ -670,10 +698,14 @@ class FlameLoaderActions(HookBaseClass):
 
         # Create a .batch file
         if self.use_template and self.setup_path_template:
-            _, setup_path, _ = self._build_path_from_template(self.setup_path_template, fields)
+            _, setup_path, _ = self._build_path_from_template(
+                self.setup_path_template, fields
+            )
             write_file_info["include_setup_path"] = setup_path
         elif self.setup_path_pattern:
-            write_file_info["include_setup_path"] = self.setup_path_pattern.format(**fields)
+            write_file_info["include_setup_path"] = self.setup_path_pattern.format(
+                **fields
+            )
 
         return write_file_info
 
@@ -722,7 +754,9 @@ class FlameLoaderActions(HookBaseClass):
         """
         app = self.parent
 
-        app.log_debug("Getting path and frame range information from '%s'" % sg_published_files)
+        app.log_debug(
+            "Getting path and frame range information from '%s'" % sg_published_files
+        )
         # First loop populates the list of valid published files in the shot
         published_files = []
 
@@ -736,11 +770,13 @@ class FlameLoaderActions(HookBaseClass):
                 "version_number",
                 "code",
                 "updated_at",
-                "name"
+                "name",
             ]
             sg_type = "PublishedFile"
 
-            file_info = self.parent.shotgun.find_one(sg_type, filters=sg_filters, fields=sg_fields)
+            file_info = self.parent.shotgun.find_one(
+                sg_type, filters=sg_filters, fields=sg_fields
+            )
 
             try:
                 # Get the local path of the published file
@@ -760,12 +796,11 @@ class FlameLoaderActions(HookBaseClass):
                     published_files.append(
                         {
                             "path": path_info["path"],
-                            "frame_range":
-                                {
-                                    "start_frame": int(path_info["start_frame"]),
-                                    "end_frame": int(path_info["end_frame"])
-                                },
-                            "info": file_info
+                            "frame_range": {
+                                "start_frame": int(path_info["start_frame"]),
+                                "end_frame": int(path_info["end_frame"]),
+                            },
+                            "info": file_info,
                         }
                     )
                 else:
@@ -807,7 +842,6 @@ class FlameLoaderActions(HookBaseClass):
         # We want to get the one with the latest iteration
         return self._latest_version_filter(batchs)[0]["path"] if batchs else None
 
-
     def _get_batch_info_from_sg_publish_data(self, sg_publish_data):
         """
         Gets the publish Batch file dictionnary from shotgun data dictionnary
@@ -817,11 +851,12 @@ class FlameLoaderActions(HookBaseClass):
         """
 
         sg_filters = [["id", "is", sg_publish_data["id"]]]
-        sg_fields = ["sg_published_files",  # List of linked PublishedFile
-                     "code",  # Name of the Shot
-                     "sg_versions",  # List of linked Version
-                     "sg_sequence"  # Linked Sequence
-                    ]
+        sg_fields = [
+            "sg_published_files",  # List of linked PublishedFile
+            "code",  # Name of the Shot
+            "sg_versions",  # List of linked Version
+            "sg_sequence",  # Linked Sequence
+        ]
         sg_type = "Shot"
 
         sg_info = self.parent.shotgun.find_one(
@@ -917,7 +952,9 @@ class FlameLoaderActions(HookBaseClass):
             if info["published_file_type"]["name"] in "Flame OpenClip":
                 open_clips.append(published_file)
 
-        return self._latest_version_filter(open_clips)[0]["path"] if open_clips else None
+        return (
+            self._latest_version_filter(open_clips)[0]["path"] if open_clips else None
+        )
 
     def _extract_frame_range_from_version(self, sg_info):
         """
@@ -954,7 +991,10 @@ class FlameLoaderActions(HookBaseClass):
                 if version_data["frame_range"] is not None:
                     try:
                         # The current sg_version is more recent that the one we use
-                        if latest_update is None or latest_update < version_data["updated_at"]:
+                        if (
+                            latest_update is None
+                            or latest_update < version_data["updated_at"]
+                        ):
                             latest_update = version_data["updated_at"]
                             first_frame, last_frame = list(
                                 map(int, version_data["frame_range"].split("-"))
@@ -962,7 +1002,9 @@ class FlameLoaderActions(HookBaseClass):
                     except (AttributeError, ValueError):
                         pass
 
-        app.log_debug("Found first frame = %s and last frame = %s" % (first_frame, last_frame))
+        app.log_debug(
+            "Found first frame = %s and last frame = %s" % (first_frame, last_frame)
+        )
         return first_frame, last_frame
 
     @staticmethod
@@ -985,11 +1027,17 @@ class FlameLoaderActions(HookBaseClass):
                 latest_clips[clip["info"]["name"]] = clip
             else:
                 # The other clip have a greater version so let's keep it
-                if other_clip["info"]["version_number"] > clip["info"]["version_number"]:
+                if (
+                    other_clip["info"]["version_number"]
+                    > clip["info"]["version_number"]
+                ):
                     continue
 
                 # The other clip have a smaller version so let's swap them
-                elif other_clip["info"]["version_number"] < clip["info"]["version_number"]:
+                elif (
+                    other_clip["info"]["version_number"]
+                    < clip["info"]["version_number"]
+                ):
                     latest_clips[clip["info"]["name"]] = clip
 
                 # They both have the same version so let's keep the newest one
@@ -1013,10 +1061,10 @@ class FlameLoaderActions(HookBaseClass):
         ranges = FlameLoaderActions._guess_frame_range(path)
 
         # Cuts off everything after the position of the formatting char.
-        path_end = path[path.find('%'):]
+        path_end = path[path.find("%") :]
 
         # Get the formatting alone
-        formatting_str = path_end[:path_end.find('d') + 1]
+        formatting_str = path_end[: path_end.find("d") + 1]
 
         # Gets the formatted frames numbers
         start_frame = formatting_str % int(ranges[0]) if ranges[0] is not None else None
@@ -1028,14 +1076,12 @@ class FlameLoaderActions(HookBaseClass):
             frame_range = start_frame
         else:
             # Generates back the frame range, now formatted
-            frame_range = "[{}-{}]".format(
-                start_frame, end_frame
-            )
+            frame_range = "[{}-{}]".format(start_frame, end_frame)
 
         return {
             "path": path.replace(formatting_str, frame_range),
             "start_frame": start_frame,
-            "end_frame": end_frame
+            "end_frame": end_frame,
         }
 
     @staticmethod
@@ -1061,9 +1107,13 @@ class FlameLoaderActions(HookBaseClass):
 
         # Lets retrieve all the files that's in the folder of the file to match
         try:
-            files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
+            files = [
+                f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))
+            ]
         except OSError:
-            raise FlameLoaderActionError("Unable to guess the frame range for '%s'" % path)
+            raise FlameLoaderActionError(
+                "Unable to guess the frame range for '%s'" % path
+            )
 
         for f in files:
             # It doesn't match our pattern
@@ -1071,7 +1121,7 @@ class FlameLoaderActions(HookBaseClass):
                 continue
 
             # Lets isolate the potential frame number from the file name
-            frame = f[len(match.group(1)):-len(match.group(3))]
+            frame = f[len(match.group(1)) : -len(match.group(3))]
 
             # It's not a frame that match our pattern
             if len(frame) != frame_len and not frame.isdigit():
@@ -1149,14 +1199,10 @@ class FlameLoaderActions(HookBaseClass):
         # Build the path from the template
         path = template._apply_fields(
             fields,
-            ignore_types=[
-                "version",
-                "SEQ",
-                "flame.frame",
-                "Shot",
-                "segment_name"
-            ]
-        ).replace(template.root_path, "", 1)[1:]  # remove the root path from the path and the first "/"
+            ignore_types=["version", "SEQ", "flame.frame", "Shot", "segment_name"],
+        ).replace(template.root_path, "", 1)[
+            1:
+        ]  # remove the root path from the path and the first "/"
 
         path, ext = os.path.splitext(path)
         return template.root_path, path, ext.lower()
