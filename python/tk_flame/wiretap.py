@@ -43,13 +43,27 @@ class WiretapError(TankError):
 # where each method internally is prefixed with
 # WireTap, hence the dropping of the namespace.
 try:
-    from adsk.libwiretapPythonClientAPI import WireTapClientInit, WireTapClientUninit, WireTapNodeHandle, WireTapServerHandle, WireTapInt, WireTapStr
+    from adsk.libwiretapPythonClientAPI import (
+        WireTapClientInit,
+        WireTapClientUninit,
+        WireTapNodeHandle,
+        WireTapServerHandle,
+        WireTapInt,
+        WireTapStr,
+    )
 except ImportError:
     # Older version of Flame distributed that in the
     # /opt/Autodesk/<app>_<version>/python directory which required the current
     # working directory to be that directory in order to work.
     #
-    from libwiretapPythonClientAPI import WireTapClientInit, WireTapClientUninit, WireTapNodeHandle, WireTapServerHandle, WireTapInt, WireTapStr
+    from libwiretapPythonClientAPI import (
+        WireTapClientInit,
+        WireTapClientUninit,
+        WireTapNodeHandle,
+        WireTapServerHandle,
+        WireTapInt,
+        WireTapStr,
+    )
 
 from .project_create_dialog import ProjectCreateDialog
 from .qt_task import start_qt_app_and_show_modal
