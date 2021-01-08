@@ -37,7 +37,7 @@ class FlameLauncher(SoftwareLauncher):
         "Flame": "icon_256.png",
         "Flame Assist": "flame_assist_icon_256.png",
         "Flare": "flare_icon_256.png",
-        "Flame Premium": "icon_256.png"
+        "Flame Premium": "icon_256.png",
     }
 
     # Named regex strings to insert into the executable template paths when
@@ -52,7 +52,7 @@ class FlameLauncher(SoftwareLauncher):
         "linux2": {
             "version": "\d.*",  # starts with a number followed by anything
             "executable": "[\w]+",  # word characters (a-z0-9)
-        }
+        },
     }
 
     # This dictionary defines a list of executable template strings for each
@@ -70,7 +70,7 @@ class FlameLauncher(SoftwareLauncher):
             # /usr/discreet/flamepremium_2017.1/bin/startApplication
             "/usr/discreet/{executable}_{version}/bin/startApplication",
             "/opt/Autodesk/{executable}_{version}/bin/startApplication",
-        ]
+        ],
     }
 
     @property
@@ -104,7 +104,7 @@ class FlameLauncher(SoftwareLauncher):
                 "SHOTGUN_SITE": self.sgtk.shotgun_url,
                 "SHOTGUN_ENTITY_ID": str(self.context.project["id"]),
                 "SHOTGUN_ENTITY_TYPE": str(self.context.project["type"]),
-                "SHOTGUN_ENTITY_NAME": str(self.context.project["name"])
+                "SHOTGUN_ENTITY_NAME": str(self.context.project["name"]),
             }
         else:
             self.logger.debug("Using the legacy bootstrap on Flame launch.")
@@ -115,7 +115,7 @@ class FlameLauncher(SoftwareLauncher):
             # its bootstrapping of SGTK during launch.
             env = {
                 "TOOLKIT_ENGINE_NAME": self.engine_name,
-                "TOOLKIT_CONTEXT": sgtk.context.serialize(self.context)
+                "TOOLKIT_CONTEXT": sgtk.context.serialize(self.context),
             }
 
             # We also need to store the various components of the Flame
@@ -143,10 +143,12 @@ class FlameLauncher(SoftwareLauncher):
                 self.logger.debug(
                     "Flame app executable has been flattened. The flattened "
                     "path that will be parsed and used at launch time is: %s",
-                    app_path
+                    app_path,
                 )
 
-            self.logger.debug("Parsing Flame (%s) to determine Flame version...", app_path)
+            self.logger.debug(
+                "Parsing Flame (%s) to determine Flame version...", app_path
+            )
             major, minor, patch, version_str = self._get_flame_version(app_path)
             self.logger.debug("Found Flame version: %s", version_str)
 
@@ -172,7 +174,9 @@ class FlameLauncher(SoftwareLauncher):
                     app_folder,
                     "python",
                 )
-                self.logger.debug("Adding wiretap root path to PYTHONPATH: %s", wiretap_path)
+                self.logger.debug(
+                    "Adding wiretap root path to PYTHONPATH: %s", wiretap_path
+                )
                 sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
             else:
                 raise TankError(
@@ -183,7 +187,7 @@ class FlameLauncher(SoftwareLauncher):
             # when submitting Backburner jobs.
             env["TOOLKIT_FLAME_PYTHON_BINARY"] = "%s/python/%s/bin/python" % (
                 env["TOOLKIT_FLAME_INSTALL_ROOT"],
-                version_str
+                version_str,
             )
 
             # We need to override the exec_path and args that will be used
@@ -221,8 +225,7 @@ class FlameLauncher(SoftwareLauncher):
                 supported_sw_versions.append(sw_version)
             else:
                 self.logger.debug(
-                    "SoftwareVersion %s is not supported: %s" %
-                    (sw_version, reason)
+                    "SoftwareVersion %s is not supported: %s" % (sw_version, reason)
                 )
 
         return supported_sw_versions
@@ -241,8 +244,7 @@ class FlameLauncher(SoftwareLauncher):
             self.logger.debug("Processing template %s.", executable_template)
 
             executable_matches = self._glob_and_match(
-                executable_template,
-                executable_regexp
+                executable_template, executable_regexp
             )
 
             # Extract all products from that executable.
@@ -259,8 +261,7 @@ class FlameLauncher(SoftwareLauncher):
                 # then an executable name should be available. We can map that
                 # to the proper product.
                 if not executable_product:
-                    executable_product = \
-                        self.EXECUTABLE_TO_PRODUCT.get(executable_name)
+                    executable_product = self.EXECUTABLE_TO_PRODUCT.get(executable_name)
 
                 # Unknown product
                 if not executable_product:
@@ -271,25 +272,27 @@ class FlameLauncher(SoftwareLauncher):
                     executable_product = "Flame Assist"
 
                 # only include the products that are covered in the EXECUTABLE_TO_PRODUCT dict
-                if not executable_product.startswith("Flame") and not executable_product.startswith("Flare"):
+                if not executable_product.startswith(
+                    "Flame"
+                ) and not executable_product.startswith("Flare"):
                     self.logger.debug(
-                        "Product '%s' is unrecognized. Skipping." %
-                        (executable_product,)
+                        "Product '%s' is unrecognized. Skipping."
+                        % (executable_product,)
                     )
                     continue
 
                 # exclude Technology demo apps
                 if executable_app and "Technology Demo" in executable_app:
                     self.logger.debug(
-                        "Ignoring '%s %s - %s'" %
-                        (executable_product, executable_version, executable_app)
+                        "Ignoring '%s %s - %s'"
+                        % (executable_product, executable_version, executable_app)
                     )
                     continue
 
                 # figure out which icon to use
                 icon_path = os.path.join(
                     self.disk_location,
-                    self.ICON_LOOKUP.get(executable_product, self.ICON_LOOKUP["Flame"])
+                    self.ICON_LOOKUP.get(executable_product, self.ICON_LOOKUP["Flame"]),
                 )
                 self.logger.debug("Using icon path: %s" % (icon_path,))
 
@@ -298,7 +301,7 @@ class FlameLauncher(SoftwareLauncher):
                         executable_version,
                         executable_product,
                         executable_path,
-                        icon_path
+                        icon_path,
                     )
                 )
 
@@ -307,7 +310,7 @@ class FlameLauncher(SoftwareLauncher):
     def _get_flame_version(self, flame_path):
         """
         Returns the version string for the given Flame path
-        
+
         <INSTALL_ROOT>/flameassist_2016.2/bin/startApplication        --> (2016, 2, 0, "2016.2")
         <INSTALL_ROOT>/flameassist_2016.3/bin/startApplication        --> (2016, 3, 0, "2016.3")
         <INSTALL_ROOT>/flameassist_2016.0.3.322/bin/startApplication  --> (2016, 0, 3, "2016.0.3.322")
@@ -323,7 +326,9 @@ class FlameLauncher(SoftwareLauncher):
         # do a quick check to ensure that we are running 2015.2 or later
         re_match = re.search("/fla[mr]e[^_]*_([^/]+)/bin", flame_path)
         if not re_match:
-            raise TankError("Cannot extract Flame version number from the path '%s'!" % flame_path)
+            raise TankError(
+                "Cannot extract Flame version number from the path '%s'!" % flame_path
+            )
         version_str = re_match.group(1)
 
         # Examples:

@@ -34,12 +34,7 @@ class CreatePublishPlugin(HookBaseClass):
         """
 
         # look for icon one level up from this hook's folder in "icons" folder
-        return os.path.join(
-            self.disk_location,
-            os.pardir,
-            "icons",
-            "publish.png"
-        )
+        return os.path.join(self.disk_location, os.pardir, "icons", "publish.png")
 
     @property
     def name(self):
@@ -118,12 +113,13 @@ class CreatePublishPlugin(HookBaseClass):
             item.context,
             item.properties["path"],
             item.name,
-            filters=["sg_status_list", "is_not", None]
+            filters=["sg_status_list", "is_not", None],
         )
 
         return {
             "accepted": True,
-            "checked": len(publishes) == 0  # Checked if there's no conflicting PublishedFiles
+            "checked": len(publishes)
+            == 0,  # Checked if there's no conflicting PublishedFiles
         }
 
     def validate(self, settings, item):
@@ -167,7 +163,9 @@ class CreatePublishPlugin(HookBaseClass):
             "description": item.description,
             "version_number": version_number,
             "published_file_type": item.display_type,
-            "version_entity": item.properties.get("Version"),  # Available if the CreateVersionPlugin was enabled
+            "version_entity": item.properties.get(
+                "Version"
+            ),  # Available if the CreateVersionPlugin was enabled
             "thumbnail_path": item.get_thumbnail_as_path(),
         }
 
@@ -175,7 +173,11 @@ class CreatePublishPlugin(HookBaseClass):
         published_file = sgtk.util.register_publish(**publish_data)
 
         # Create a Thumbnail in Background for compatible Flame related PublishedFile
-        if item.display_type in ["Flame OpenClip", "Flame Render", "Flame Batch OpenClip"]:
+        if item.display_type in [
+            "Flame OpenClip",
+            "Flame Render",
+            "Flame Batch OpenClip",
+        ]:
             # For file sequences, the hooks we want the path as provided by flame.
             path = item.properties.get("file_path", path)
 
@@ -185,7 +187,7 @@ class CreatePublishPlugin(HookBaseClass):
                 path=path,
                 dependencies=item.properties.get("backgroundJobId"),
                 target_entities=[published_file],
-                asset_info=asset_info
+                asset_info=asset_info,
             )
 
         # Save the PublishedFile for the others plugins

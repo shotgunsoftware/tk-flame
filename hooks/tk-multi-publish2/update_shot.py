@@ -33,12 +33,7 @@ class UpdateShotPlugin(HookBaseClass):
         Path to an png icon on disk
         """
         # look for icon one level up from this hook's folder in "icons" folder
-        return os.path.join(
-            self.disk_location,
-            os.pardir,
-            "icons",
-            "publish.png"
-        )
+        return os.path.join(self.disk_location, os.pardir, "icons", "publish.png")
 
     @property
     def name(self):
@@ -114,7 +109,11 @@ class UpdateShotPlugin(HookBaseClass):
         """
 
         # Only available on a Shot Context and from a batch render
-        is_accepted = item.context.entity and item.context.entity.get("type") == "Shot" and not item.properties.get("fromBatch", False)
+        is_accepted = (
+            item.context.entity
+            and item.context.entity.get("type") == "Shot"
+            and not item.properties.get("fromBatch", False)
+        )
 
         return {"accepted": is_accepted}
 
@@ -134,18 +133,26 @@ class UpdateShotPlugin(HookBaseClass):
         # Make sure that we have the context dict in the item properties
         if "context" not in item.properties:
             self.cache_entities(item.parent, [item.context.entity])
-            item.properties["context"] = item.parent.properties[item.context.entity["type"]][item.context.entity["id"]]
+            item.properties["context"] = item.parent.properties[
+                item.context.entity["type"]
+            ][item.context.entity["id"]]
 
         # Make sure that we have the Sequence in our context dict
         if "Sequence" not in item.properties["context"]:
             sequence_fields = ["cuts", "shots", "code"]
-            sequence = self.sg.find_one("Sequence", [["shots", "is", item.context.entity]], sequence_fields)
+            sequence = self.sg.find_one(
+                "Sequence", [["shots", "is", item.context.entity]], sequence_fields
+            )
             self.cache_entities(item.parent, [sequence])
 
-            if sequence \
-                    and sequence["type"] in item.parent.properties and \
-                            sequence["id"] in item.parent.properties[sequence["type"]]:
-                item.properties["context"]["Sequence"] = item.parent.properties[sequence["type"]][sequence["id"]]
+            if (
+                sequence
+                and sequence["type"] in item.parent.properties
+                and sequence["id"] in item.parent.properties[sequence["type"]]
+            ):
+                item.properties["context"]["Sequence"] = item.parent.properties[
+                    sequence["type"]
+                ][sequence["id"]]
             else:
                 pass
 
@@ -172,7 +179,7 @@ class UpdateShotPlugin(HookBaseClass):
             target.append(sequence)
 
         # Update the Shot on shotgun
-        self.sg.update("Shot", item.context.entity['id'], shot_data)
+        self.sg.update("Shot", item.context.entity["id"], shot_data)
 
         # Create the Image thumbnail in background
         if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
@@ -185,7 +192,7 @@ class UpdateShotPlugin(HookBaseClass):
                 path=path,
                 dependencies=item.properties.get("backgroundJobId"),
                 target_entities=target,
-                asset_info=asset_info
+                asset_info=asset_info,
             )
 
     def finalize(self, settings, item):
@@ -220,14 +227,18 @@ class UpdateShotPlugin(HookBaseClass):
             "description": item.description,
             "sg_cut_in": asset_info["recordIn"],
             "sg_cut_out": asset_info["recordOut"] - 1,
-            "sg_cut_order": asset_info.get("segmentIndex", 1)
+            "sg_cut_order": asset_info.get("segmentIndex", 1),
         }
 
         shot_data["sg_head_in"] = shot_data["sg_cut_in"] - asset_info["handleIn"]
         shot_data["sg_tail_out"] = shot_data["sg_cut_out"] + asset_info["handleOut"]
 
-        shot_data["sg_cut_duration"] = shot_data["sg_cut_out"] - shot_data["sg_cut_in"] + 1
-        shot_data["sg_working_duration"] = shot_data["sg_tail_out"] - shot_data["sg_head_in"] + 1
+        shot_data["sg_cut_duration"] = (
+            shot_data["sg_cut_out"] - shot_data["sg_cut_in"] + 1
+        )
+        shot_data["sg_working_duration"] = (
+            shot_data["sg_tail_out"] - shot_data["sg_head_in"] + 1
+        )
 
         return shot_data
 

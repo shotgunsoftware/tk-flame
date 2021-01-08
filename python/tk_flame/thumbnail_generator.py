@@ -10,6 +10,7 @@
 
 __all__ = ["ThumbnailGenerator"]
 
+
 class ThumbnailGenerator(object):
     """
     Abstract interface of a thumbnail generator of Flame's exported assets.
@@ -33,7 +34,15 @@ class ThumbnailGenerator(object):
         """
         return entity.get("type") == "Version"
 
-    def generate(self, path, display_name, target_entities, asset_info, dependencies, favor_preview=True):
+    def generate(
+        self,
+        path,
+        display_name,
+        target_entities,
+        asset_info,
+        dependencies,
+        favor_preview=True,
+    ):
         """
         Generate a thumbnail or a preview for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with
@@ -62,7 +71,9 @@ class ThumbnailGenerator(object):
         if bypass_server_transcoding:
             self.engine.log_debug("Bypass Shotgun transcoding setting ENABLED.")
 
-        generate_previews = favor_preview and self.engine.get_setting("generate_previews")
+        generate_previews = favor_preview and self.engine.get_setting(
+            "generate_previews"
+        )
         if not generate_previews:
             self.engine.log_debug("Generation of preview DISABLED.")
 
@@ -89,7 +100,7 @@ class ThumbnailGenerator(object):
                 display_name=display_name,
                 target_entities=preview_entities,
                 asset_info=asset_info,
-                dependencies=dependencies
+                dependencies=dependencies,
             )
 
         if len(thumbnail_entities) > 0:
@@ -98,10 +109,12 @@ class ThumbnailGenerator(object):
                 display_name=display_name,
                 target_entities=thumbnail_entities,
                 asset_info=asset_info,
-                dependencies=dependencies
+                dependencies=dependencies,
             )
 
-    def _generate_preview(self, path, display_name, target_entities, asset_info, dependencies):
+    def _generate_preview(
+        self, path, display_name, target_entities, asset_info, dependencies
+    ):
         """
         Generate a preview for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with
@@ -122,7 +135,9 @@ class ThumbnailGenerator(object):
         """
         raise NotImplementedError
 
-    def _generate_thumbnail(self, path, display_name, target_entities, asset_info, dependencies):
+    def _generate_thumbnail(
+        self, path, display_name, target_entities, asset_info, dependencies
+    ):
         """
         Generate a thumbnail for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with

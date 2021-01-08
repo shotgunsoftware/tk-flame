@@ -85,10 +85,14 @@ class FlameEngine(sgtk.platform.Engine):
             # The 'SHOTGUN_FLAME_VERSION' environment variable comes from Flame plugin
             # The 'TOOLKIT_FLAME_VERSION' environment variable comes from Flame classic config
             if "SHOTGUN_FLAME_VERSION" in os.environ:
-                host_info["version"] = os.environ.get("SHOTGUN_FLAME_VERSION", "unknown")
+                host_info["version"] = os.environ.get(
+                    "SHOTGUN_FLAME_VERSION", "unknown"
+                )
 
             elif "TOOLKIT_FLAME_VERSION" in os.environ:
-                host_info["version"] = os.environ.get("TOOLKIT_FLAME_VERSION", "unknown")
+                host_info["version"] = os.environ.get(
+                    "TOOLKIT_FLAME_VERSION", "unknown"
+                )
 
         except:
             # Fallback to initialization value above
@@ -115,11 +119,12 @@ class FlameEngine(sgtk.platform.Engine):
         # version of Flame we are running
         try:
             import flame
+
             self.set_version_info(
                 major_version_str=flame.get_version_major(),
                 minor_version_str=flame.get_version_minor(),
                 full_version_str=flame.get_version(),
-                patch_version_str=flame.get_version_patch()
+                patch_version_str=flame.get_version_patch(),
             )
             # If we get to here, the install root can only be /opt/Autodesk
             self._install_root = "/opt/Autodesk"
@@ -142,8 +147,10 @@ class FlameEngine(sgtk.platform.Engine):
         elif engine_mode_str == "DCC":
             self._engine_mode = self.ENGINE_MODE_DCC
         else:
-            raise TankError("Unknown launch mode '%s' defined in "
-                            "environment variable TOOLKIT_FLAME_ENGINE_MODE!" % engine_mode_str)
+            raise TankError(
+                "Unknown launch mode '%s' defined in "
+                "environment variable TOOLKIT_FLAME_ENGINE_MODE!" % engine_mode_str
+            )
 
         # Transcoder, thumbnail generator and local movie generator will be
         # initialized on first request for them since, in order to know which
@@ -179,6 +186,7 @@ class FlameEngine(sgtk.platform.Engine):
         if self.has_ui:
             # tell QT to interpret C strings as utf-8
             from sgtk.platform.qt import QtCore
+
             utf8 = QtCore.QTextCodec.codecForName("utf-8")
             QtCore.QTextCodec.setCodecForCStrings(utf8)
 
@@ -208,7 +216,9 @@ class FlameEngine(sgtk.platform.Engine):
             else:
                 try:
                     current_flame_project = flame.project.current_project
-                    current_flame_project.shotgun_project_name = self.context.project.get("name")
+                    current_flame_project.shotgun_project_name = (
+                        self.context.project.get("name")
+                    )
                 except Exception:
                     self.logger.debug(
                         "Was unable to set the current Flame project's "
@@ -245,23 +255,20 @@ class FlameEngine(sgtk.platform.Engine):
         # Set up a rotating logger with 4MiB max file size
         if using_safe_log_file:
             rotating = logging.handlers.RotatingFileHandler(
-                log_file,
-                maxBytes=4 * 1024 * 1024,
-                backupCount=10
+                log_file, maxBytes=4 * 1024 * 1024, backupCount=10
             )
         else:
             rotating = logging.handlers.RotatingFileHandler(
-                log_file,
-                maxBytes=0,
-                backupCount=50,
-                delay=True
+                log_file, maxBytes=0, backupCount=50, delay=True
             )
             # Always rotate. Current user might not have the correct permission to open this file
             if os.path.exists(log_file):
                 rotating.doRollover()  # Will open file after roll over
 
         rotating.setFormatter(
-            logging.Formatter("%(asctime)s [%(levelname)s] PID %(process)d: %(message)s")
+            logging.Formatter(
+                "%(asctime)s [%(levelname)s] PID %(process)d: %(message)s"
+            )
         )
         # create a global logging object
         logger = logging.getLogger(LOG_CHANNEL)
@@ -276,9 +283,13 @@ class FlameEngine(sgtk.platform.Engine):
 
         # now that we have a logger, we can warn about a non-std log file :)
         if using_safe_log_file:
-            logger.error("Cannot write to standard log file location %s! Please check "
-                         "the filesystem permissions. As a fallback, logs will be "
-                         "written to %s instead.", std_log_file, log_file)
+            logger.error(
+                "Cannot write to standard log file location %s! Please check "
+                "the filesystem permissions. As a fallback, logs will be "
+                "written to %s instead.",
+                std_log_file,
+                log_file,
+            )
 
     def set_python_executable(self, python_path):
         """
@@ -289,14 +300,17 @@ class FlameEngine(sgtk.platform.Engine):
         """
         self._python_executable_path = python_path
         self.log_debug(
-            "This engine is running python interpreter '%s'" % self._python_executable_path
+            "This engine is running python interpreter '%s'"
+            % self._python_executable_path
         )
 
-    def set_version_info(self,
-                         major_version_str,
-                         minor_version_str,
-                         full_version_str,
-                         patch_version_str="0"):
+    def set_version_info(
+        self,
+        major_version_str,
+        minor_version_str,
+        full_version_str,
+        patch_version_str="0",
+    ):
         """
         Specifies which version of Flame this engine is running.
         This is typically populated as part of the engine startup.
@@ -310,9 +324,11 @@ class FlameEngine(sgtk.platform.Engine):
             "full": full_version_str,
             "major": major_version_str,
             "minor": minor_version_str,
-            "patch": patch_version_str
+            "patch": patch_version_str,
         }
-        self.log_debug("This engine is running with Flame version '%s'" % self._flame_version)
+        self.log_debug(
+            "This engine is running with Flame version '%s'" % self._flame_version
+        )
 
     def set_install_root(self, install_root):
         """
@@ -358,7 +374,9 @@ class FlameEngine(sgtk.platform.Engine):
                 # name instead.
                 instance_name = "tk-flame"
 
-            commands_by_instance.setdefault(instance_name, []).append((name, value["callback"]))
+            commands_by_instance.setdefault(instance_name, []).append(
+                (name, value["callback"])
+            )
 
         # go through the values from the setting and return any matching commands
         ret_value = []
@@ -392,7 +410,9 @@ class FlameEngine(sgtk.platform.Engine):
         # run any commands registered via run_at_startup
         commands_to_start = self._get_commands_matching_setting("run_at_startup")
         for (instance_name, command_name, callback) in commands_to_start:
-            self.log_debug("Running at startup: (%s, %s)" % (instance_name, command_name))
+            self.log_debug(
+                "Running at startup: (%s, %s)" % (instance_name, command_name)
+            )
             callback()
 
     def destroy_engine(self):
@@ -435,7 +455,9 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: path to python, e.g. '/usr/discreet/python/2016.0.0.322/bin/python'
         """
         if self._python_executable_path is None:
-            raise TankError("Python executable has not been defined for this engine instance!")
+            raise TankError(
+                "Python executable has not been defined for this engine instance!"
+            )
 
         return self._python_executable_path
 
@@ -450,7 +472,9 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Preset version, as string, e.g. '5'
         """
         if self._flame_version is None:
-            raise TankError("Cannot determine preset version - No Flame DCC version specified!")
+            raise TankError(
+                "Cannot determine preset version - No Flame DCC version specified!"
+            )
 
         if self.is_version_less_than("2016.1"):
             # for version 2016 before ext 1, export preset is v5
@@ -479,20 +503,18 @@ class FlameEngine(sgtk.platform.Engine):
         # If possible use the Flame python API to get the presets location
         try:
             import flame
-            if 'PyExporter' in dir(flame):
+
+            if "PyExporter" in dir(flame):
                 return flame.PyExporter.get_presets_base_dir(
-                    flame.PyExporter.PresetVisibility.Shotgun)
+                    flame.PyExporter.PresetVisibility.Shotgun
+                )
         except:
             pass
 
         if self.is_version_less_than("2017"):
             # flame 2016 presets structure
             return os.path.join(
-                self.install_root,
-                "presets",
-                self.flame_version,
-                "export",
-                "presets"
+                self.install_root, "presets", self.flame_version, "export", "presets"
             )
 
         # flame 2017+ presets structure (note the extra flame folder)
@@ -502,7 +524,7 @@ class FlameEngine(sgtk.platform.Engine):
             self.flame_version,
             "export",
             "presets",
-            "flame"
+            "flame",
         )
 
     @staticmethod
@@ -517,14 +539,11 @@ class FlameEngine(sgtk.platform.Engine):
         """
         if not os.path.isabs(preset_path):
             import flame
+
             presets_dir = flame.PyExporter.get_presets_dir(
-                flame.PyExporter.PresetVisibility.Shotgun,
-                preset_type
+                flame.PyExporter.PresetVisibility.Shotgun, preset_type
             )
-            preset_path = os.path.join(
-                presets_dir,
-                preset_path
-            )
+            preset_path = os.path.join(presets_dir, preset_path)
         return preset_path
 
     @property
@@ -535,9 +554,10 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Path as string
         """
         import flame
+
         return self._get_full_preset_path(
             self.get_setting("thumbnails_preset_path"),
-            flame.PyExporter.PresetType.Image_Sequence
+            flame.PyExporter.PresetType.Image_Sequence,
         )
 
     @property
@@ -548,9 +568,9 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Path as string
         """
         import flame
+
         return self._get_full_preset_path(
-            self.get_setting("previews_preset_path"),
-            flame.PyExporter.PresetType.Movie
+            self.get_setting("previews_preset_path"), flame.PyExporter.PresetType.Movie
         )
 
     @property
@@ -564,9 +584,10 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Path as string
         """
         import flame
+
         return self._get_full_preset_path(
             self.get_setting("local_movies_preset_path"),
-            flame.PyExporter.PresetType.Movie
+            flame.PyExporter.PresetType.Movie,
         )
 
     @property
@@ -576,12 +597,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: Path as string
         """
-        return os.path.join(
-            self.install_root,
-            "wiretap",
-            "tools",
-            self.flame_version
-        )
+        return os.path.join(self.install_root, "wiretap", "tools", self.flame_version)
 
     def _is_version_less_than(self, major, minor, patch):
         """
@@ -712,6 +728,7 @@ class FlameEngine(sgtk.platform.Engine):
         has_ui = False
         try:
             from sgtk.platform.qt import QtCore
+
             if QtCore.QCoreApplication.instance():
                 # there is an active application
                 has_ui = True
@@ -726,24 +743,21 @@ class FlameEngine(sgtk.platform.Engine):
         top of the Flame interface
         """
         if not self.has_ui:
-            self.log_error("Sorry, this environment does not support UI display! Cannot show "
-                           "the requested panel '%s'." % title)
+            self.log_error(
+                "Sorry, this environment does not support UI display! Cannot show "
+                "the requested panel '%s'." % title
+            )
             return None
 
         from sgtk.platform.qt import QtCore
 
         # create the dialog:
         dialog, widget = self._create_dialog_with_widget(
-            title,
-            bundle,
-            widget_class,
-            *args,
-            **kwargs
+            title, bundle, widget_class, *args, **kwargs
         )
         dialog.setWindowFlags(
-            dialog.windowFlags() |
-            QtCore.Qt.WindowStaysOnTopHint &
-            ~QtCore.Qt.WindowCloseButtonHint
+            dialog.windowFlags()
+            | QtCore.Qt.WindowStaysOnTopHint & ~QtCore.Qt.WindowCloseButtonHint
         )
 
         self.created_qt_dialogs.append(dialog)
@@ -819,25 +833,22 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: the created widget_class instance
         """
         if not self.has_ui:
-            self.log_error("Sorry, this environment does not support UI display! Cannot show "
-                           "the requested window '%s'." % title)
+            self.log_error(
+                "Sorry, this environment does not support UI display! Cannot show "
+                "the requested window '%s'." % title
+            )
             return None
 
         from sgtk.platform.qt import QtCore
 
         # create the dialog:
         dialog, widget = self._create_dialog_with_widget(
-            title,
-            bundle,
-            widget_class,
-            *args,
-            **kwargs
+            title, bundle, widget_class, *args, **kwargs
         )
 
         dialog.setWindowFlags(
-            dialog.windowFlags() |
-            QtCore.Qt.WindowStaysOnTopHint &
-            ~QtCore.Qt.WindowCloseButtonHint
+            dialog.windowFlags()
+            | QtCore.Qt.WindowStaysOnTopHint & ~QtCore.Qt.WindowCloseButtonHint
         )
 
         self.created_qt_dialogs.append(dialog)
@@ -867,7 +878,9 @@ class FlameEngine(sgtk.platform.Engine):
                 self.log_debug("Closing dialog %s." % dialog_window_title)
                 dialog.close()
             except Exception, exception:
-                self.log_error("Cannot close dialog %s: %s" % (dialog_window_title, exception))
+                self.log_error(
+                    "Cannot close dialog %s: %s" % (dialog_window_title, exception)
+                )
 
     @staticmethod
     def log_debug(msg):
@@ -955,11 +968,15 @@ class FlameEngine(sgtk.platform.Engine):
             sg_data = self.shotgun.find_one(
                 publish_type,
                 [
-                    [type_link_field, "is", self.get_setting("flame_batch_publish_type")],
-                    ["entity", "is", self.context.entity]
+                    [
+                        type_link_field,
+                        "is",
+                        self.get_setting("flame_batch_publish_type"),
+                    ],
+                    ["entity", "is", self.context.entity],
                 ],
                 ["path"],
-                order=[{"field_name": "created_at", "direction": "desc"}]
+                order=[{"field_name": "created_at", "direction": "desc"}],
             )
 
             if sg_data:
@@ -1052,18 +1069,28 @@ class FlameEngine(sgtk.platform.Engine):
             self._export_info = {}
 
         if sequence_name not in self._export_info:
-            self._export_info[sequence_name] = {shot_name: {asset_type: {asset_name: [asset_info]}}}
+            self._export_info[sequence_name] = {
+                shot_name: {asset_type: {asset_name: [asset_info]}}
+            }
 
         elif shot_name not in self._export_info[sequence_name]:
-            self._export_info[sequence_name][shot_name] = {asset_type: {asset_name: [asset_info]}}
+            self._export_info[sequence_name][shot_name] = {
+                asset_type: {asset_name: [asset_info]}
+            }
 
         elif asset_type not in self._export_info[sequence_name][shot_name]:
-            self._export_info[sequence_name][shot_name][asset_type] = {asset_name: [asset_info]}
+            self._export_info[sequence_name][shot_name][asset_type] = {
+                asset_name: [asset_info]
+            }
 
         elif asset_name not in self._export_info[sequence_name][shot_name][asset_type]:
-            self._export_info[sequence_name][shot_name][asset_type][asset_name] = [asset_info]
+            self._export_info[sequence_name][shot_name][asset_type][asset_name] = [
+                asset_info
+            ]
         else:
-            self._export_info[sequence_name][shot_name][asset_type][asset_name].append(asset_info)
+            self._export_info[sequence_name][shot_name][asset_type][asset_name].append(
+                asset_info
+            )
 
     def cache_batch_export_asset(self, info):
         """
@@ -1121,8 +1148,10 @@ class FlameEngine(sgtk.platform.Engine):
         :param callbacks: Dictionary of callbacks, see above for details.
         """
         if menu_caption in self._registered_export_instances:
-            raise TankError("There is already a menu export preset named '%s'! "
-                            "Please ensure your preset names are unique" % menu_caption)
+            raise TankError(
+                "There is already a menu export preset named '%s'! "
+                "Please ensure your preset names are unique" % menu_caption
+            )
 
         self.log_debug("Registered export preset '%s' with engine." % menu_caption)
         self._registered_export_instances[menu_caption] = callbacks
@@ -1148,10 +1177,8 @@ class FlameEngine(sgtk.platform.Engine):
         if preset_name not in self._registered_export_instances:
             raise TankError(
                 "The export preset '%s' is not registered with the current engine. "
-                "Current presets are: %s" % (
-                    preset_name,
-                    self._registered_export_instances.keys()
-                )
+                "Current presets are: %s"
+                % (preset_name, self._registered_export_instances.keys())
             )
 
         session_id = "tk_%s" % uuid.uuid4().hex
@@ -1264,7 +1291,9 @@ class FlameEngine(sgtk.platform.Engine):
             self.log_debug("Checking %s" % registered_batch_instance)
             if callback_name in registered_batch_instance:
                 # the app has registered interest in this!
-                self.log_debug("Executing callback %s" % registered_batch_instance[callback_name])
+                self.log_debug(
+                    "Executing callback %s" % registered_batch_instance[callback_name]
+                )
                 registered_batch_instance[callback_name](info)
 
     ################################################################################################
@@ -1279,9 +1308,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: hostname string
         """
-        return self.execute_hook_method(
-            "project_startup_hook",
-            "get_server_hostname")
+        return self.execute_hook_method("project_startup_hook", "get_server_hostname")
 
     def get_backburner_tmp(self):
         """
@@ -1292,13 +1319,15 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: path
         """
-        path = os.environ.get("SHOTGUN_FLAME_BACKBURNER_SHARED_TMP", self.get_setting("backburner_shared_tmp"))
-                          
+        path = os.environ.get(
+            "SHOTGUN_FLAME_BACKBURNER_SHARED_TMP",
+            self.get_setting("backburner_shared_tmp"),
+        )
+
         if not path:
             path = tempfile.gettempdir()
 
         return path
-
 
     @property
     def _flame_exporter_supported(self):
@@ -1325,14 +1354,11 @@ class FlameEngine(sgtk.platform.Engine):
         tk_flame = self.import_module("tk_flame")
 
         if self._flame_exporter_supported:
-            self._transcoder = tk_flame.Transcoder(
-                engine=self
-            )
+            self._transcoder = tk_flame.Transcoder(engine=self)
         else:
             raise Exception("Transcoder not supported")
 
         return self._transcoder
-
 
     @property
     def thumbnail_generator(self):
@@ -1347,13 +1373,9 @@ class FlameEngine(sgtk.platform.Engine):
         tk_flame = self.import_module("tk_flame")
 
         if self._flame_exporter_supported:
-            self._thumbnail_generator = tk_flame.ThumbnailGeneratorFlame(
-                engine=self
-            )
+            self._thumbnail_generator = tk_flame.ThumbnailGeneratorFlame(engine=self)
         else:
-            self._thumbnail_generator = tk_flame.ThumbnailGeneratorFFmpeg(
-                engine=self
-            )
+            self._thumbnail_generator = tk_flame.ThumbnailGeneratorFFmpeg(engine=self)
         return self._thumbnail_generator
 
     @property
@@ -1369,13 +1391,9 @@ class FlameEngine(sgtk.platform.Engine):
         tk_flame = self.import_module("tk_flame")
 
         if self._flame_exporter_supported:
-            self._thumbnail_generator = tk_flame.LocalMovieGeneratorFlame(
-                engine=self
-            )
+            self._thumbnail_generator = tk_flame.LocalMovieGeneratorFlame(engine=self)
         else:
-            self._thumbnail_generator = tk_flame.LocalMovieGeneratorFFmpeg(
-                engine=self
-            )
+            self._thumbnail_generator = tk_flame.LocalMovieGeneratorFFmpeg(engine=self)
         return self._thumbnail_generator
 
     @staticmethod
@@ -1399,7 +1417,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         completion_groups = re.match(
             r"((?:default)|(?:leaveInQueue)|(?:delete)|(?:archive))(?:\:([0-9]+))*$",
-            completion
+            completion,
         )
         if not completion_groups:
             raise TankError("Invalid backburner completion setting: %s" % completion)
@@ -1416,7 +1434,8 @@ class FlameEngine(sgtk.platform.Engine):
                 completion_handling_delay = int(completion_handling_delay)
             except ValueError, error:
                 raise TankError(
-                    "Invalid backburner completion delay setting: %s: %s" % (completion, error)
+                    "Invalid backburner completion delay setting: %s: %s"
+                    % (completion, error)
                 )
         return (completion_handling, completion_handling_delay)
 
@@ -1439,8 +1458,8 @@ class FlameEngine(sgtk.platform.Engine):
         if (len(job_name) + len(job_prefix) + len(job_suffix)) > max_length:
             sanitized_job_name = "%s%s...%s" % (
                 job_prefix,
-                job_name[:max(10, max_length - 3 - len(job_prefix) - len(job_suffix))],
-                job_suffix
+                job_name[: max(10, max_length - 3 - len(job_prefix) - len(job_suffix))],
+                job_suffix,
             )
         else:
             sanitized_job_name = job_prefix + job_name + job_suffix
@@ -1448,15 +1467,22 @@ class FlameEngine(sgtk.platform.Engine):
         # Trim the end if still too large
         #
         if len(sanitized_job_name) > max_length:
-            sanitized_job_name = "%s%s...%s" % sanitized_job_name[:(max_length - 3)]
+            sanitized_job_name = "%s%s...%s" % sanitized_job_name[: (max_length - 3)]
 
         # remove any non-trivial characters
         #
         return re.sub(r"[^0-9a-zA-Z_\-,\. %]+", "_", sanitized_job_name)
 
-
-    def create_local_backburner_job(self, job_name, description, dependencies,
-                                    instance, method_name, args, backburner_server_host=None):
+    def create_local_backburner_job(
+        self,
+        job_name,
+        description,
+        dependencies,
+        instance,
+        method_name,
+        args,
+        backburner_server_host=None,
+    ):
         """
         Run a method in the local backburner queue.
 
@@ -1489,7 +1515,10 @@ class FlameEngine(sgtk.platform.Engine):
         # increase the max task length to 600 minutes
         backburner_args.append("-timeout:600")
 
-        completion_handling, completion_handling_delay = self.get_backburner_job_completion()
+        (
+            completion_handling,
+            completion_handling_delay,
+        ) = self.get_backburner_job_completion()
         if completion_handling:
             completion_arg = "-" + completion_handling
             if completion_handling_delay is not None:
@@ -1497,8 +1526,10 @@ class FlameEngine(sgtk.platform.Engine):
             backburner_args.append(completion_arg)
 
         # add basic job info
-        backburner_args.append("-jobName:\"%s\"" % self.sanitize_backburner_job_name(job_name))
-        backburner_args.append("-description:\"%s\"" % description)
+        backburner_args.append(
+            '-jobName:"%s"' % self.sanitize_backburner_job_name(job_name)
+        )
+        backburner_args.append('-description:"%s"' % description)
 
         # Specifying a remote backburner manager is only supported on 2016.1 and above
         if not self.is_version_less_than("2016.1"):
@@ -1508,20 +1539,20 @@ class FlameEngine(sgtk.platform.Engine):
                 # which manager to choose from. (They might be none running locally)
                 # Before 2018, you needed root privileges to execute this command.
                 backburner_server_cmd = os.path.join(
-                    self._install_root,
-                    "backburner",
-                    "backburnerServer"
+                    self._install_root, "backburner", "backburnerServer"
                 )
-                bb_manager = subprocess.check_output([backburner_server_cmd, "-q", "MANAGER"])
+                bb_manager = subprocess.check_output(
+                    [backburner_server_cmd, "-q", "MANAGER"]
+                )
                 bb_manager = bb_manager.strip("\n")
 
             if bb_manager:
-                backburner_args.append("-manager:\"%s\"" % bb_manager)
+                backburner_args.append('-manager:"%s"' % bb_manager)
 
         # Set the server group to the backburner job
         bb_server_group = self.get_setting("backburner_server_group")
         if bb_server_group:
-            backburner_args.append("-group:\"%s\"" % bb_server_group)
+            backburner_args.append('-group:"%s"' % bb_server_group)
 
         # Specify the backburner server if provided
         bb_servers = backburner_server_host
@@ -1529,7 +1560,7 @@ class FlameEngine(sgtk.platform.Engine):
             # Otherwise, fallback to the global backburner servers setting
             bb_servers = self.get_setting("backburner_servers")
         if bb_servers:
-            backburner_args.append("-servers:\"%s\"" % bb_servers)
+            backburner_args.append('-servers:"%s"' % bb_servers)
 
         # Check where the temporary data has/will be written. If the job is
         # allow on remote host, it must be on a shared location. Do our best
@@ -1540,14 +1571,14 @@ class FlameEngine(sgtk.platform.Engine):
             tempfile.gettempdir(),
             "/tmp",
             "/var/tmp",
-            "/usr/tmp"
+            "/usr/tmp",
         ]
         localhost = os.uname()[1].split(".")[0]
         if not bb_server_group and not bb_servers:
             # No servers/groups sepecified and local path.
             # Force the job to run on local server.
             if temp_dir_is_local:
-                backburner_args.append("-servers:\"%s\"" % localhost)
+                backburner_args.append('-servers:"%s"' % localhost)
         else:
             # Possible remote server but local only path.
             # Fail the job creation with an explicit message.
@@ -1559,7 +1590,6 @@ class FlameEngine(sgtk.platform.Engine):
                     "the configuration files." % temp_dir
                 )
 
-
         # Set the backburner job dependencies
         if dependencies:
             if isinstance(dependencies, list):
@@ -1569,20 +1599,21 @@ class FlameEngine(sgtk.platform.Engine):
 
         # call the bootstrap script
         backburner_bootstrap = os.path.join(
-            self.disk_location,
-            "python",
-            "startup",
-            "backburner.py"
+            self.disk_location, "python", "startup", "backburner.py"
         )
 
         # now we need to capture all of the environment and everything in a file
         # (thanks backburner!) so that we can replay it later when the task wakes up
-        session_file = os.path.join(temp_dir, "tk_backburner_%s.pickle" % uuid.uuid4().hex)
+        session_file = os.path.join(
+            temp_dir, "tk_backburner_%s.pickle" % uuid.uuid4().hex
+        )
 
         data = {}
         data["engine_instance"] = self.instance_name
         data["serialized_context"] = sgtk.context.serialize(self.context)
-        data["instance"] = instance if isinstance(instance, str) else instance.instance_name
+        data["instance"] = (
+            instance if isinstance(instance, str) else instance.instance_name
+        )
         data["method_to_execute"] = method_name
         data["args"] = args
         data["sgtk_core_location"] = os.path.dirname(sgtk.__path__[0])
@@ -1597,7 +1628,7 @@ class FlameEngine(sgtk.platform.Engine):
             " ".join(backburner_args),
             self.python_executable,
             backburner_bootstrap,
-            session_file
+            session_file,
         )
 
         # On old Flame version, python hooks are running root. We need to run the command as the
@@ -1624,9 +1655,7 @@ class FlameEngine(sgtk.platform.Engine):
 
             # kick it off
             backburner_job_submission = subprocess.Popen(
-                [full_cmd],
-                stdout=subprocess.PIPE,
-                shell=True
+                [full_cmd], stdout=subprocess.PIPE, shell=True
             )
             stdout, stderr = backburner_job_submission.communicate()
 
@@ -1763,10 +1792,9 @@ def sgtk_exception_trap(ex_cls, ex, tb):
             # for TankErrors, we don't show the whole stack trace
             error_message = "A Shotgun error was reported:\n\n%s" % ex
         else:
-            error_message = "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s" % (
-                ex,
-                ex_cls,
-                traceback_str
+            error_message = (
+                "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s"
+                % (ex, ex_cls, traceback_str)
             )
     except:
         pass
@@ -1774,6 +1802,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
     # now try to output it
     try:
         from sgtk.platform.qt import QtGui, QtCore
+
         if QtCore.QCoreApplication.instance():
             # there is an application running - so pop up a message!
             QtGui.QMessageBox.critical(None, "Shotgun General Error", error_message)
@@ -1785,7 +1814,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
         error_message = "An exception was raised:\n\n%s (%s)\n\nTraceback:\n%s" % (
             ex,
             ex_cls,
-            traceback_str
+            traceback_str,
         )
         logging.getLogger(LOG_CHANNEL).error(error_message)
     except:

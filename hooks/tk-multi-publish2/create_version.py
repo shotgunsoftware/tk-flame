@@ -35,12 +35,7 @@ class CreateVersionPlugin(HookBaseClass):
         """
 
         # look for icon one level up from this hook's folder in "icons" folder
-        return os.path.join(
-            self.disk_location,
-            os.pardir,
-            "icons",
-            "publish.png"
-        )
+        return os.path.join(self.disk_location, os.pardir, "icons", "publish.png")
 
     @property
     def name(self):
@@ -151,7 +146,7 @@ class CreateVersionPlugin(HookBaseClass):
             description=item.description,
             entity=item.context.entity,
             sg_task=item.context.task,
-            sg_path_to_frames=path
+            sg_path_to_frames=path,
         )
 
         ver_data["sg_department"] = "Flame"
@@ -179,7 +174,9 @@ class CreateVersionPlugin(HookBaseClass):
         if "sourceIn" in asset_info and "sourceOut" in asset_info:
             ver_data["sg_first_frame"] = asset_info["sourceIn"]
             ver_data["sg_last_frame"] = asset_info["sourceOut"] - 1
-            ver_data["frame_count"] = int(ver_data["sg_last_frame"]) - int(ver_data["sg_first_frame"]) + 1
+            ver_data["frame_count"] = (
+                int(ver_data["sg_last_frame"]) - int(ver_data["sg_first_frame"]) + 1
+            )
 
         # Create the Version
         version = self.sg.create("Version", ver_data)
@@ -196,7 +193,8 @@ class CreateVersionPlugin(HookBaseClass):
             path=file_path,
             dependencies=dependencies,
             target_entities=[version],
-            asset_info=asset_info)
+            asset_info=asset_info,
+        )
 
     def finalize(self, settings, item):
         """

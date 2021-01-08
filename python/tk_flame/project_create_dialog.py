@@ -13,6 +13,7 @@ from sgtk import TankError
 from sgtk.platform.qt import QtCore, QtGui
 from .ui.project_create_dialog import Ui_ProjectCreateDialog
 
+
 class ProjectCreateDialog(QtGui.QWidget):
     """
     Project setup dialog for Flame
@@ -21,16 +22,18 @@ class ProjectCreateDialog(QtGui.QWidget):
     # map the tab indices in the UI to constants
     (TAB_GENERAL, TAB_RESOLUTION, TAB_OLD_PROXY, TAB_NEW_PROXY) = range(4)
 
-    def __init__(self,
-                 project_name,
-                 user_name,
-                 workspace_name,
-                 default_volume_name,
-                 volume_names,
-                 host_name,
-                 default_group_name,
-                 group_names,
-                 project_settings):
+    def __init__(
+        self,
+        project_name,
+        user_name,
+        workspace_name,
+        default_volume_name,
+        volume_names,
+        host_name,
+        default_group_name,
+        group_names,
+        project_settings,
+    ):
 
         """
         Constructor
@@ -118,7 +121,9 @@ class ProjectCreateDialog(QtGui.QWidget):
         self.ui.height.setText(str(project_settings.get("FrameHeight")))
 
         self.__set_combo_value(project_settings, self.ui.depth, "FrameDepth")
-        self.__set_combo_value(project_settings, self.ui.field_dominance, "FieldDominance")
+        self.__set_combo_value(
+            project_settings, self.ui.field_dominance, "FieldDominance"
+        )
         self.__set_combo_value(project_settings, self.ui.frame_rate, "FrameRate")
 
         aspect_ratio = project_settings.get("AspectRatio")
@@ -143,7 +148,9 @@ class ProjectCreateDialog(QtGui.QWidget):
         """
         # set up signals for interaction
         self.ui.proxy_width_hint.valueChanged.connect(self._on_proxy_width_hint_change)
-        self.ui.proxy_min_frame_size.valueChanged.connect(self._on_proxy_min_frame_size_change)
+        self.ui.proxy_min_frame_size.valueChanged.connect(
+            self._on_proxy_min_frame_size_change
+        )
         self.ui.proxy_mode.currentIndexChanged.connect(self._on_proxy_mode_change)
 
         enable_proxy = project_settings.get("ProxyEnable") == "true"
@@ -153,11 +160,11 @@ class ProjectCreateDialog(QtGui.QWidget):
         self.ui.proxy_mode.setCurrentIndex(-1)
 
         if enable_proxy == False and proxy_min_frame_size == 0:
-            self.ui.proxy_mode.setCurrentIndex(0) # off
+            self.ui.proxy_mode.setCurrentIndex(0)  # off
         elif enable_proxy == False and proxy_min_frame_size > 0:
-            self.ui.proxy_mode.setCurrentIndex(1) # conditionally
+            self.ui.proxy_mode.setCurrentIndex(1)  # conditionally
         else:
-            self.ui.proxy_mode.setCurrentIndex(2) # on
+            self.ui.proxy_mode.setCurrentIndex(2)  # on
 
         self.__set_combo_value(project_settings, self.ui.proxy_depth, "ProxyDepthMode")
         self.__set_combo_value(project_settings, self.ui.proxy_quality, "ProxyQuality")
@@ -173,7 +180,6 @@ class ProjectCreateDialog(QtGui.QWidget):
         self.ui.proxy_width_hint.setValue(pwh)
         self.ui.proxy_min_frame_size.setValue(pmfs)
 
-
     def __set_up_new_proxy_tab(self, project_settings):
         """
         Populate the proxy UI tab with values from
@@ -184,7 +190,9 @@ class ProjectCreateDialog(QtGui.QWidget):
                                  the project_startup_hook's get_project_settings method
         """
         # set the quality combo
-        self.__set_combo_value(project_settings, self.ui.new_proxy_quality, "ProxyQuality")
+        self.__set_combo_value(
+            project_settings, self.ui.new_proxy_quality, "ProxyQuality"
+        )
 
         # set the checkbox
         if project_settings.get("ProxyRegenState") == "true":
@@ -280,7 +288,9 @@ class ProjectCreateDialog(QtGui.QWidget):
         elif self.ui.aspect_ratio.currentIndex() == 1:
             settings["AspectRatio"] = "1.777778"
         else:
-            settings["AspectRatio"] = "%4f" % (float(settings["FrameWidth"]) / float(settings["FrameHeight"]))
+            settings["AspectRatio"] = "%4f" % (
+                float(settings["FrameWidth"]) / float(settings["FrameHeight"])
+            )
 
         if self._engine.is_version_less_than("2016.1"):
             # old proxy settings
@@ -292,21 +302,31 @@ class ProjectCreateDialog(QtGui.QWidget):
                 settings["ProxyEnable"] = "false"
                 settings["ProxyWidthHint"] = "%s" % self.ui.proxy_width_hint.value()
                 settings["ProxyDepthMode"] = self.ui.proxy_depth.currentText()
-                settings["ProxyMinFrameSize"] = "%s" % self.ui.proxy_min_frame_size.value()
-                settings["ProxyAbove8bits"] = "true" if self.ui.proxy_above_8_bits.isChecked() else "false"
+                settings["ProxyMinFrameSize"] = (
+                    "%s" % self.ui.proxy_min_frame_size.value()
+                )
+                settings["ProxyAbove8bits"] = (
+                    "true" if self.ui.proxy_above_8_bits.isChecked() else "false"
+                )
                 settings["ProxyQuality"] = self.ui.proxy_quality.currentText()
 
             else:
                 settings["ProxyEnable"] = "true"
                 settings["ProxyWidthHint"] = "%s" % self.ui.proxy_width_hint.value()
                 settings["ProxyDepthMode"] = self.ui.proxy_depth.currentText()
-                settings["ProxyMinFrameSize"] = "%s" % self.ui.proxy_min_frame_size.value()
-                settings["ProxyAbove8bits"] = "true" if self.ui.proxy_above_8_bits.isChecked() else "false"
+                settings["ProxyMinFrameSize"] = (
+                    "%s" % self.ui.proxy_min_frame_size.value()
+                )
+                settings["ProxyAbove8bits"] = (
+                    "true" if self.ui.proxy_above_8_bits.isChecked() else "false"
+                )
                 settings["ProxyQuality"] = self.ui.proxy_quality.currentText()
 
         else:
             # new (2016.1 and above) proxy settings
-            settings["ProxyRegenState"] = "true" if self.ui.new_generate_proxies.isChecked() else "false"
+            settings["ProxyRegenState"] = (
+                "true" if self.ui.new_generate_proxies.isChecked() else "false"
+            )
             settings["ProxyQuality"] = self.ui.new_proxy_quality.currentText()
             settings["ProxyMinFrameSize"] = "%s" % self.ui.new_proxy_width.value()
 

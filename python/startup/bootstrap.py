@@ -1,11 +1,11 @@
 # Copyright (c) 2014 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 
@@ -21,10 +21,11 @@ import sys
 # in this script has been reproduced in tk-flame/startup.py as part of
 # the classic configuration launch process.
 
+
 def _get_flame_version(flame_path):
     """
     Returns the version string for the given Flame path
-    
+
     <INSTALL_ROOT>/flameassist_2016.2/bin/startApplication        --> (2016, 2, 0, "2016.2")
     <INSTALL_ROOT>/flameassist_2016.3/bin/startApplication        --> (2016, 3, 0, "2016.3")
     <INSTALL_ROOT>/flameassist_2016.0.3.322/bin/startApplication  --> (2016, 0, 3, "2016.0.3.322")
@@ -40,7 +41,9 @@ def _get_flame_version(flame_path):
     # do a quick check to ensure that we are running 2015.2 or later
     re_match = re.search("/fla[mr]e[^_]*_([^/]+)/bin", flame_path)
     if not re_match:
-        raise TankError("Cannot extract Flame version number from the path '%s'!" % flame_path)
+        raise TankError(
+            "Cannot extract Flame version number from the path '%s'!" % flame_path
+        )
     version_str = re_match.group(1)
 
     # Examples:
@@ -113,11 +116,16 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     (major_ver, minor_ver, patch_ver, version_str) = _get_flame_version(app_path)
 
     if major_ver < 2016:
-        raise TankError("In order to run the Shotgun integration, you need at least Flame 2016!")
+        raise TankError(
+            "In order to run the Shotgun integration, you need at least Flame 2016!"
+        )
 
     # first of all, check that the executable path to Flame exists
     if not os.path.exists(app_path):
-        raise TankError("Cannot launch the Flame/Flare integration environment - the path '%s' does not exist on disk!" % app_path)
+        raise TankError(
+            "Cannot launch the Flame/Flare integration environment - the path '%s' does not exist on disk!"
+            % app_path
+        )
 
     # update the environment prior to launch
     os.environ["TOOLKIT_ENGINE_NAME"] = engine_instance_name
@@ -138,7 +146,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
         install_root = re_match.group(1)
         app_folder = re_match.group(2)
 
-        wiretap_path = os.path.join(install_root, app_folder, "python" )
+        wiretap_path = os.path.join(install_root, app_folder, "python")
 
     sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
 
@@ -151,18 +159,21 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     if sys.platform == "darwin":
         # add system libraries
         sgtk.util.prepend_path_to_env_var(
-            "DYLD_FRAMEWORK_PATH",
-            "%s/lib64/%s/framework" % (install_root, version_str)
+            "DYLD_FRAMEWORK_PATH", "%s/lib64/%s/framework" % (install_root, version_str)
         )
 
     elif sys.platform == "linux2":
         # add python related libraries
 
         # on Flame, each version is managed separately
-        sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "%s/python/%s/lib" % (install_root, version_str))
+        sgtk.util.prepend_path_to_env_var(
+            "LD_LIBRARY_PATH", "%s/python/%s/lib" % (install_root, version_str)
+        )
 
         # add system libraries
-        sgtk.util.prepend_path_to_env_var("LD_LIBRARY_PATH", "%s/lib64/%s" % (install_root, version_str))
+        sgtk.util.prepend_path_to_env_var(
+            "LD_LIBRARY_PATH", "%s/lib64/%s" % (install_root, version_str)
+        )
 
     # figure out the python location
     python_binary = "%s/python/%s/bin/python" % (install_root, version_str)

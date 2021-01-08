@@ -15,6 +15,7 @@ import tempfile
 
 from sgtk import TankError
 
+
 class Transcoder(object):
     """
     Thumbnail generator based on Flame export API
@@ -38,14 +39,16 @@ class Transcoder(object):
         :returns clip: Flame's Python API clip object or none.
         """
         import flame
+
         clips = flame.import_clips(path)
         self.engine.log_debug("Imported '%s' -> [%s]" % (path, clips))
         if not clips:
             self.engine.log_warning("%s does not points to a clip" % path)
             return None
         elif len(clips) > 1:
-            self.engine.log_warning("%s points to more than one clip." \
-                                    " First one will be used." % path)
+            self.engine.log_warning(
+                "%s points to more than one clip." " First one will be used." % path
+            )
         return clips[0]
 
     @staticmethod
@@ -83,12 +86,13 @@ class Transcoder(object):
                 pass
 
             def postExportAsset(self, info, userData, *args, **kwargs):
-                del args, kwargs # Unused necessary parameters
+                del args, kwargs  # Unused necessary parameters
                 userData[self._user_data_job_key] = info["backgroundJobId"]
 
             def exportOverwriteFile(self, path, *args, **kwargs):
-                del path, args, kwargs # Unused necessary parameters
+                del path, args, kwargs  # Unused necessary parameters
                 return "overwrite"
+
         return PythonHookOverride(user_data_job_key)
 
     def _create_temporary_file(self, extension, clip):
@@ -102,8 +106,8 @@ class Transcoder(object):
         :returns path: String of the path created.
         """
         (tmp_fd, path) = tempfile.mkstemp(
-            suffix=extension,
-            dir=self.engine.get_backburner_tmp())
+            suffix=extension, dir=self.engine.get_backburner_tmp()
+        )
         os.close(tmp_fd)
         clip.name = os.path.splitext(os.path.basename(path))[0]
         return path
@@ -128,8 +132,8 @@ class Transcoder(object):
             return None
 
         (tmp_fd, path) = tempfile.mkstemp(
-            suffix=".clip",
-            dir=self.engine.get_backburner_tmp())
+            suffix=".clip", dir=self.engine.get_backburner_tmp()
+        )
 
         metadata = {}
         metadata["path"] = src_path
@@ -139,12 +143,17 @@ class Transcoder(object):
         if channels_encoding is None:
             channels_encoding = "Float" if "fp" in asset_info["depth"] else "Integer"
         metadata["channelsEncoding"] = channels_encoding
-        metadata["channelsDepth"] = asset_info["depth"].replace("-bit", "").replace(" fp", "")
+        metadata["channelsDepth"] = (
+            asset_info["depth"].replace("-bit", "").replace(" fp", "")
+        )
         metadata["pixelLayout"] = asset_info.get("pixelLayout", "RGB")
         metadata["nbChannels"] = len(metadata["pixelLayout"])
         try:
-            metadata["pixelRatio"] = asset_info.get("aspectRatio", 1.0) \
-                                   * asset_info["height"] / asset_info["width"]
+            metadata["pixelRatio"] = (
+                asset_info.get("aspectRatio", 1.0)
+                * asset_info["height"]
+                / asset_info["width"]
+            )
         except ZeroDivisionError:
             metadata["pixelRatio"] = 1.0
 
@@ -153,7 +162,7 @@ class Transcoder(object):
             metadata["fieldDominance"] = 0
         if scan_format == "FIELD_2":
             metadata["fieldDominance"] = 1
-        else: # PROGRESSIVE
+        else:  # PROGRESSIVE
             metadata["fieldDominance"] = 2
         metadata["colourSpace"] = asset_info.get("colourSpace", "Unknown")
 
@@ -168,9 +177,7 @@ class Transcoder(object):
         metadata["sampleRate"] = asset_info.get("fps")
 
         extension = os.path.splitext(src_path)[1].lower()
-        handlers = {
-            ".mov": "Quicktime"
-        }
+        handlers = {".mov": "Quicktime"}
         handler = handlers.get(extension, None)
         if handler is not None:
             metadata["handler"] = "<handler><name>%s</name></handler>" % handler
@@ -210,20 +217,25 @@ class Transcoder(object):
                </feeds>
               </track>
              </tracks>
-            </clip>""".format(**metadata))
+            </clip>""".format(
+                **metadata
+            ),
+        )
         os.close(tmp_fd)
         return path
 
-    def transcode(self,
-                  src_path,
-                  dst_path,
-                  extension,
-                  display_name,
-                  job_context,
-                  preset_path,
-                  asset_info,
-                  dependencies,
-                  poster_frame=None):
+    def transcode(
+        self,
+        src_path,
+        dst_path,
+        extension,
+        display_name,
+        job_context,
+        preset_path,
+        asset_info,
+        dependencies,
+        poster_frame=None,
+    ):
         """
         Generate a preview for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with
@@ -243,6 +255,7 @@ class Transcoder(object):
         """
 
         import flame
+
         temp_files = []
 
         # If we depend on a backburner jobs we cannot reimport the exported
@@ -256,8 +269,7 @@ class Transcoder(object):
         if dependencies is not None:
             if os.path.splitext(src_path)[-1].lower() != ".clip":
                 path_to_import = self._create_open_clip_file(
-                    src_path=src_path,
-                    asset_info=asset_info
+                    src_path=src_path, asset_info=asset_info
                 )
                 temp_files.append(path_to_import)
             else:
@@ -266,15 +278,11 @@ class Transcoder(object):
             path_to_import = src_path
         clip = self._import_clip(path=path_to_import)
         if clip is None:
-            raise TankError(
-                "%s cannot be imported to be transcoded." % path_to_import
-            )
-
+            raise TankError("%s cannot be imported to be transcoded." % path_to_import)
 
         if dst_path is None:
             actual_dst_path = self._create_temporary_file(
-                extension=extension,
-                clip=clip
+                extension=extension, clip=clip
             )
             temp_files.append(actual_dst_path)
         else:
@@ -289,27 +297,33 @@ class Transcoder(object):
             clip.out_mark = poster_frame + 1
             exporter.export_between_marks = True
 
-        self.engine.log_debug("Exporting using preset '%s' to '%s' depending on '%s'" % \
-                              (preset_path, actual_dst_path, dependencies))
+        self.engine.log_debug(
+            "Exporting using preset '%s' to '%s' depending on '%s'"
+            % (preset_path, actual_dst_path, dependencies)
+        )
 
         background_job_settings = flame.PyExporter.BackgroundJobSettings()
         background_job_settings.name = self.engine.sanitize_backburner_job_name(
-            job_name=display_name,
-            job_suffix=" - %s" % job_context
+            job_name=display_name, job_suffix=" - %s" % job_context
         )
         background_job_settings.description = "%s for %s - %s -> %s" % (
             job_context,
             display_name,
             src_path,
-            dst_path
+            dst_path,
         )
         background_job_settings.dependencies = dependencies
 
-        completion_handling, completion_handling_delay = self.engine.get_backburner_job_completion()
+        (
+            completion_handling,
+            completion_handling_delay,
+        ) = self.engine.get_backburner_job_completion()
         if completion_handling:
             background_job_settings.completion_handling = completion_handling
             if completion_handling_delay is not None:
-                background_job_settings.completion_handling_delay = completion_handling_delay
+                background_job_settings.completion_handling_delay = (
+                    completion_handling_delay
+                )
 
         hooks_user_data = {}
         transcoder_job_key = "transcoder_job"
@@ -319,5 +333,6 @@ class Transcoder(object):
             output_directory=self.engine.get_backburner_tmp(),
             background_job_settings=background_job_settings,
             hooks=self._build_python_hook_override(transcoder_job_key),
-            hooks_user_data=hooks_user_data)
+            hooks_user_data=hooks_user_data,
+        )
         return (actual_dst_path, hooks_user_data.get(transcoder_job_key), temp_files)

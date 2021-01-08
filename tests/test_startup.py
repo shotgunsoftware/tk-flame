@@ -13,7 +13,7 @@ import os
 import sys
 
 from tank_test.tank_test_base import TankTestBase
-from tank_test.tank_test_base import setUpModule # noqa
+from tank_test.tank_test_base import setUpModule  # noqa
 
 import sgtk
 
@@ -29,6 +29,7 @@ class TestStartup(TankTestBase):
     """
     Tests the startup logic for Flame.
     """
+
     FLAME_2018_PATH = "/opt/Autodesk/flame_2018/bin/startApplication"
     FLAME_2018_INSTALL_ROOT = "/opt/Autodesk"
     FLAME_2018_PYTHON = "/opt/Autodesk/python/2018/bin/python"
@@ -66,9 +67,9 @@ class TestStartup(TankTestBase):
         return expected
 
     def _get_classic_args_2018(self):
-        return (
-            "'%s/python/startup/app_launcher.py' "
-            "%s " % (repo_root, self.FLAME_2018_PATH)
+        return "'%s/python/startup/app_launcher.py' " "%s " % (
+            repo_root,
+            self.FLAME_2018_PATH,
         )
 
     def test_flame_2018(self):
@@ -79,10 +80,12 @@ class TestStartup(TankTestBase):
             "tk-flame",
             self.FLAME_2018_PATH,
             self._get_classic_environment_2018(),
-            self._get_classic_args_2018()
+            self._get_classic_args_2018(),
         )
 
-    def _test_launch_information(self, engine_name, dcc_path, expected_env, expected_args):
+    def _test_launch_information(
+        self, engine_name, dcc_path, expected_env, expected_args
+    ):
         """
         Validates that a given DCC has the right LaunchInformation.
 
@@ -97,10 +100,7 @@ class TestStartup(TankTestBase):
 
         launch_info = flame_launcher.prepare_launch(dcc_path, "")
 
-        self.assertEqual(
-            expected_args,
-            launch_info.args
-        )
+        self.assertEqual(expected_args, launch_info.args)
 
         # Ensure the environment variables from the LaunchInfo are the same as the expected ones.
         self.assertListEqual(

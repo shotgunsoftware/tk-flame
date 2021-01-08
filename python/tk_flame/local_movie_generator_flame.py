@@ -18,6 +18,7 @@ import os
 
 from .local_movie_generator import LocalMovieGenerator
 
+
 class LocalMovieGeneratorFlame(LocalMovieGenerator):
     """
     Local movie generator of Flame's exported assets based on Flame export API.
@@ -26,7 +27,15 @@ class LocalMovieGeneratorFlame(LocalMovieGenerator):
     def __init__(self, engine):
         super(LocalMovieGeneratorFlame, self).__init__(engine)
 
-    def _generate(self, src_path, dst_path, display_name, target_entities, asset_info, dependencies):
+    def _generate(
+        self,
+        src_path,
+        dst_path,
+        display_name,
+        target_entities,
+        asset_info,
+        dependencies,
+    ):
         """
         Generate a local movie file from a Flame exported assets and link
         it to a list of Shotgun entities in the Path to movie field.
@@ -54,5 +63,5 @@ class LocalMovieGeneratorFlame(LocalMovieGenerator):
             preset_path=self.engine.local_movies_preset_path,
             asset_info=asset_info,
             dependencies=dependencies,
-            poster_frame=None
+            poster_frame=None,
         )

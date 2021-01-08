@@ -34,12 +34,7 @@ class UpdateCutPlugin(HookBaseClass):
         """
 
         # look for icon one level up from this hook's folder in "icons" folder
-        return os.path.join(
-            self.disk_location,
-            os.pardir,
-            "icons",
-            "publish.png"
-        )
+        return os.path.join(self.disk_location, os.pardir, "icons", "publish.png")
 
     @property
     def name(self):
@@ -119,7 +114,9 @@ class UpdateCutPlugin(HookBaseClass):
         # Only available on Shot context
         shot_context = item.context.entity and item.context.entity.get("type") == "Shot"
 
-        accepted = cut_supported and shot_context and item.properties.get("fromBatch", False)
+        accepted = (
+            cut_supported and shot_context and item.properties.get("fromBatch", False)
+        )
 
         # If the context is correct, try to find the CutItem to Update
         if accepted:
@@ -127,10 +124,7 @@ class UpdateCutPlugin(HookBaseClass):
                 "CutItem",
                 [["shot", "is", item.context.entity]],
                 ["cut_order", "cut"],
-                [{
-                    "field_name": "cut.Cut.revision_number",
-                    "direction": "desc"
-                }]
+                [{"field_name": "cut.Cut.revision_number", "direction": "desc"}],
             )
 
             # Accept only if we know what CutItem to update
@@ -191,7 +185,7 @@ class UpdateCutPlugin(HookBaseClass):
                 path=path,
                 dependencies=item.properties.get("backgroundJobId"),
                 target_entities=targets,
-                asset_info=asset_info
+                asset_info=asset_info,
             )
 
     def finalize(self, settings, item):

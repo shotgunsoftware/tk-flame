@@ -16,6 +16,7 @@ __all__ = ["ThumbnailGeneratorFlame"]
 
 from .thumbnail_generator import ThumbnailGenerator
 
+
 class ThumbnailGeneratorFlame(ThumbnailGenerator):
     """
     Thumbnail generator based on Flame export API
@@ -26,7 +27,9 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         self._preview_jobs = {}
         self._thumbnail_jobs = {}
 
-    def _generate_preview(self, path, display_name, target_entities, asset_info, dependencies):
+    def _generate_preview(
+        self, path, display_name, target_entities, asset_info, dependencies
+    ):
         """
         Generate a preview for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with
@@ -59,7 +62,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 preset_path=self.engine.previews_preset_path,
                 asset_info=asset_info,
                 dependencies=dependencies,
-                poster_frame=None
+                poster_frame=None,
             )
 
             self._preview_jobs[path] = {
@@ -67,12 +70,16 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 "dependencies": job_id,
                 "target_entities": target_entities,
                 "path": dst_path,
-                "files_to_delete": files_to_delete
+                "files_to_delete": files_to_delete,
             }
         else:
-            preview_job["target_entities"] = preview_job["target_entities"] + target_entities
+            preview_job["target_entities"] = (
+                preview_job["target_entities"] + target_entities
+            )
 
-    def _generate_thumbnail(self, path, display_name, target_entities, asset_info, dependencies):
+    def _generate_thumbnail(
+        self, path, display_name, target_entities, asset_info, dependencies
+    ):
         """
         Generate a thumbnail for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with
@@ -107,7 +114,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 preset_path=self.engine.thumbnails_preset_path,
                 asset_info=asset_info,
                 dependencies=dependencies,
-                poster_frame=poster_frame
+                poster_frame=poster_frame,
             )
 
             self._thumbnail_jobs[path] = {
@@ -115,10 +122,12 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 "dependencies": job_id,
                 "target_entities": target_entities,
                 "path": dst_path,
-                "files_to_delete": files_to_delete
+                "files_to_delete": files_to_delete,
             }
         else:
-            thumbnail_job["target_entities"] = thumbnail_job["target_entities"] + target_entities
+            thumbnail_job["target_entities"] = (
+                thumbnail_job["target_entities"] + target_entities
+            )
 
     def _upload_thumbnail_job(self, thumbnail_job):
         """
@@ -129,13 +138,12 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         """
         job_context = "Upload Shotgun Thumbnail"
         job_name = self.engine.sanitize_backburner_job_name(
-            job_name=thumbnail_job.get("display_name"),
-            job_suffix=" - %s" % job_context
+            job_name=thumbnail_job.get("display_name"), job_suffix=" - %s" % job_context
         )
         job_description = "%s for %s\nTemporary file %s" % (
             job_context,
             thumbnail_job.get("display_name"),
-            thumbnail_job.get("path")
+            thumbnail_job.get("path"),
         )
         return self.engine.create_local_backburner_job(
             job_name=job_name,
@@ -148,8 +156,8 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 "path": thumbnail_job.get("path"),
                 "field_name": "thumb_image",
                 "display_name": thumbnail_job.get("display_name"),
-                "files_to_delete": thumbnail_job.get("files_to_delete")
-            }
+                "files_to_delete": thumbnail_job.get("files_to_delete"),
+            },
         )
 
     def _upload_preview_job(self, preview_job):
@@ -167,13 +175,12 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
 
         job_context = "Upload Shotgun Preview"
         job_name = self.engine.sanitize_backburner_job_name(
-            job_name=preview_job.get("display_name"),
-            job_suffix=" - %s" % job_context
+            job_name=preview_job.get("display_name"), job_suffix=" - %s" % job_context
         )
         job_description = "%s for %s\nTemporary file %s" % (
             job_context,
             preview_job.get("display_name"),
-            preview_job.get("path")
+            preview_job.get("path"),
         )
         return self.engine.create_local_backburner_job(
             job_name=job_name,
@@ -186,8 +193,8 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 "path": preview_job.get("path"),
                 "field_name": field_name,
                 "display_name": preview_job.get("display_name"),
-                "files_to_delete": preview_job.get("files_to_delete")
-            }
+                "files_to_delete": preview_job.get("files_to_delete"),
+            },
         )
 
     def finalize(self, path=None):

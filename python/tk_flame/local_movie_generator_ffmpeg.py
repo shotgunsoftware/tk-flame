@@ -16,6 +16,7 @@ __all__ = ["LocalMovieGeneratorFFmpeg"]
 
 from .local_movie_generator import LocalMovieGenerator
 
+
 class LocalMovieGeneratorFFmpeg(LocalMovieGenerator):
     """
     Local movie generator based on FFMpeg and read_frame.
@@ -24,7 +25,15 @@ class LocalMovieGeneratorFFmpeg(LocalMovieGenerator):
     def __init__(self, engine):
         super(LocalMovieGeneratorFFmpeg, self).__init__(engine)
 
-    def _generate(self, src_path, dst_path, display_name, target_entities, asset_info, dependencies):
+    def _generate(
+        self,
+        src_path,
+        dst_path,
+        display_name,
+        target_entities,
+        asset_info,
+        dependencies,
+    ):
         """
         Generate a thumbnail or a preview for a given media asset and link
         it to a list of Shotgun entities. Multiple call to this method with

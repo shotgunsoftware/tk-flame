@@ -14,6 +14,7 @@ Abstract interface of a local movie generator of Flame's exported assets.
 
 __all__ = ["LocalMovieGenerator"]
 
+
 class LocalMovieGenerator(object):
     """
     Abstract interface of a local movie generator of Flame's exported assets.
@@ -29,7 +30,15 @@ class LocalMovieGenerator(object):
         """
         return self._engine
 
-    def generate(self, src_path, dst_path, display_name, target_entities, asset_info, dependencies):
+    def generate(
+        self,
+        src_path,
+        dst_path,
+        display_name,
+        target_entities,
+        asset_info,
+        dependencies,
+    ):
         """
         Generate a local movie file from a Flame exported assets and link
         it to a list of Shotgun entities in the Path to movie field.
@@ -57,7 +66,7 @@ class LocalMovieGenerator(object):
             display_name=display_name,
             target_entities=target_entities,
             asset_info=asset_info,
-            dependencies=dependencies
+            dependencies=dependencies,
         )
 
         self.engine.create_local_backburner_job(
@@ -69,11 +78,19 @@ class LocalMovieGenerator(object):
             args={
                 "targets": target_entities,
                 "path": dst_path,
-                "files_to_delete": files_to_delete
-            }
+                "files_to_delete": files_to_delete,
+            },
         )
 
-    def _generate(self, src_path, dst_path, display_name, target_entities, asset_info, dependencies):
+    def _generate(
+        self,
+        src_path,
+        dst_path,
+        display_name,
+        target_entities,
+        asset_info,
+        dependencies,
+    ):
         """
         Implmentation of the generator. See generate() for details.
         """

@@ -74,7 +74,7 @@ COMMON_FILE_INFO = {
         "extensions": ["batch"],
         "icon": "SG_Batch.png",
         "item_type": "file.batch",
-    }
+    },
 }
 
 
@@ -112,10 +112,8 @@ class FlameItemCollector(HookBaseClass):
         return {
             "Task Templates": {
                 "type": "dict",
-                "default": {
-                    "Shot": "Basic shot template"
-                },
-                "description": "Task template to use on entity creation (Entity -> Task Template)"
+                "default": {"Shot": "Basic shot template"},
+                "description": "Task template to use on entity creation (Entity -> Task Template)",
             }
         }
 
@@ -130,23 +128,31 @@ class FlameItemCollector(HookBaseClass):
         """
 
         try:
-            self.engine.show_busy("Preparing Publish...", "Collecting assets to publish...")
+            self.engine.show_busy(
+                "Preparing Publish...", "Collecting assets to publish..."
+            )
 
             task_templates_setting = settings.get("Task Templates", None)
-            task_templates_names = task_templates_setting.value if task_templates_setting else {}
+            task_templates_names = (
+                task_templates_setting.value if task_templates_setting else {}
+            )
 
-            shot_task_template_code, shot_task_template = task_templates_names.get("Shot", ""), None
+            shot_task_template_code, shot_task_template = (
+                task_templates_names.get("Shot", ""),
+                None,
+            )
             if shot_task_template_code:
                 shot_task_template = self.sg.find_one(
-                    "TaskTemplate",
-                    [["code", "is", shot_task_template_code]]
+                    "TaskTemplate", [["code", "is", shot_task_template_code]]
                 )
 
-            sequence_task_template_code, sequence_task_template = task_templates_names.get("Sequence", ""), None
+            sequence_task_template_code, sequence_task_template = (
+                task_templates_names.get("Sequence", ""),
+                None,
+            )
             if sequence_task_template_code:
                 sequence_task_template = self.sg.find_one(
-                    "TaskTemplate",
-                    [["code", "is", sequence_task_template_code]]
+                    "TaskTemplate", [["code", "is", sequence_task_template_code]]
                 )
 
             # Current project
@@ -156,7 +162,13 @@ class FlameItemCollector(HookBaseClass):
             export_context = self.engine.export_info
 
             # Shotgun queries constants
-            shot_fields = ["code", "sg_cut_in", "sg_cut_out", "sg_head_in", "sg_tail_out"]
+            shot_fields = [
+                "code",
+                "sg_cut_in",
+                "sg_cut_out",
+                "sg_head_in",
+                "sg_tail_out",
+            ]
             sequence_fields = ["cuts", "shots", "code"]
             sort_by_fields = [{"field_name": "created_at", "direction": "desc"}]
 
@@ -176,13 +188,10 @@ class FlameItemCollector(HookBaseClass):
                         # The latest if there's more than one Sequence.
                         sg_filter = [
                             ["code", "is", sequence_name],
-                            ["project", "is", project]
+                            ["project", "is", project],
                         ]
                         sequence = self.sg.find_one(
-                            "Sequence",
-                            sg_filter,
-                            sequence_fields,
-                            sort_by_fields
+                            "Sequence", sg_filter, sequence_fields, sort_by_fields
                         )
 
                         if not sequence:
@@ -191,7 +200,7 @@ class FlameItemCollector(HookBaseClass):
                             seq_data = {
                                 "code": sequence_name,
                                 "project": project,
-                                "task_template": sequence_task_template
+                                "task_template": sequence_task_template,
                             }
 
                             sequence = self.sg.create("Sequence", seq_data)
@@ -216,10 +225,7 @@ class FlameItemCollector(HookBaseClass):
                                 # We try to find the right Shot.
                                 # The latest if there's more than one Shot.
                                 shot = self.sg.find_one(
-                                    "Shot",
-                                    sg_filter,
-                                    shot_fields,
-                                    sort_by_fields
+                                    "Shot", sg_filter, shot_fields, sort_by_fields
                                 )
 
                             if not shot:
@@ -228,7 +234,7 @@ class FlameItemCollector(HookBaseClass):
                                 shot_data = {
                                     "code": shot_name,
                                     "project": project,
-                                    "task_template": shot_task_template
+                                    "task_template": shot_task_template,
                                 }
 
                                 if sequence:
@@ -249,12 +255,14 @@ class FlameItemCollector(HookBaseClass):
                             "video",
                             "movie",
                             "audio",
-                            "sequence"
+                            "sequence",
                         ]
 
                         # The next level of dictionary have the asset type as
                         # key and a dictionary as value.
-                        for asset_type, asset_type_info in sorted(shot_info.items(), key=lambda i: key_order.index(i[0])):
+                        for asset_type, asset_type_info in sorted(
+                            shot_info.items(), key=lambda i: key_order.index(i[0])
+                        ):
 
                             # The next level of dictionary have the asset name
                             # as key and a list as value.
@@ -266,8 +274,12 @@ class FlameItemCollector(HookBaseClass):
 
                                     # Dynamically get the right function based
                                     # on the type.
-                                    if hasattr(self, "create_{}_items".format(asset_type)):
-                                        create_items = getattr(self, "create_{}_items".format(asset_type))
+                                    if hasattr(
+                                        self, "create_{}_items".format(asset_type)
+                                    ):
+                                        create_items = getattr(
+                                            self, "create_{}_items".format(asset_type)
+                                        )
                                     else:
                                         # This is a new assetType and not supported by the this collector
                                         continue
@@ -288,11 +300,17 @@ class FlameItemCollector(HookBaseClass):
 
                                         # Set the context based on the most precise entity available
                                         if shot:
-                                            item.context = self.publisher.sgtk.context_from_entity_dictionary(shot)
+                                            item.context = self.publisher.sgtk.context_from_entity_dictionary(
+                                                shot
+                                            )
                                         elif sequence:
-                                            item.context = self.publisher.sgtk.context_from_entity_dictionary(sequence)
+                                            item.context = self.publisher.sgtk.context_from_entity_dictionary(
+                                                sequence
+                                            )
                                         else:
-                                            item.context = self.publisher.sgtk.context_from_entity_dictionary(project)
+                                            item.context = self.publisher.sgtk.context_from_entity_dictionary(
+                                                project
+                                            )
 
                                         # This item cannot have another context than this one
                                         item.context_change_allowed = False
@@ -308,7 +326,9 @@ class FlameItemCollector(HookBaseClass):
                     # The latest if there's more than one Shot.
                     if shot_name:
                         sg_filter = [["code", "is", shot_name]]
-                        shot = self.sg.find_one("Shot", sg_filter, shot_fields, sort_by_fields)
+                        shot = self.sg.find_one(
+                            "Shot", sg_filter, shot_fields, sort_by_fields
+                        )
 
                     # The fallback is to try to find the PublishedFile linked to
                     # the shot OpenClip and use the same entity.
@@ -323,7 +343,9 @@ class FlameItemCollector(HookBaseClass):
 
                         # Try to find a PublishedFile with the same path as the OpenClip
                         for publish_file in published_files:
-                            if asset_info["openClipResolvedPath"] in publish_file.get("path", {}).get("url", ""):
+                            if asset_info["openClipResolvedPath"] in publish_file.get(
+                                "path", {}
+                            ).get("url", ""):
                                 shot = publish_file.get("entity", None)
                                 break
 
@@ -341,9 +363,15 @@ class FlameItemCollector(HookBaseClass):
                         # Set the context based on the most precise entity available
                         if shot:
                             self.cache_entities(parent_item, [shot])
-                            item.context = self.publisher.sgtk.context_from_entity_dictionary(shot)
+                            item.context = (
+                                self.publisher.sgtk.context_from_entity_dictionary(shot)
+                            )
                         else:
-                            item.context = self.publisher.sgtk.context_from_entity_dictionary(project)
+                            item.context = (
+                                self.publisher.sgtk.context_from_entity_dictionary(
+                                    project
+                                )
+                            )
 
                         # This item cannot have another context than this one
                         item.context_change_allowed = False
@@ -411,8 +439,6 @@ class FlameItemCollector(HookBaseClass):
                 items.append(item)
         return items
 
-
-
     def create_batch_items(self, parent_item, asset_info):
         """
         Create items based on a batch asset dictionary.
@@ -426,11 +452,7 @@ class FlameItemCollector(HookBaseClass):
 
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item(
-            "flame.batch",
-            "Flame Batch File",
-            name
-        )
+        item = parent_item.create_item("flame.batch", "Flame Batch File", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
@@ -453,9 +475,7 @@ class FlameItemCollector(HookBaseClass):
         name = self.parent.util.get_publish_name(path)
 
         item = parent_item.create_item(
-            "flame.batchOpenClip",
-            "Flame Batch OpenClip",
-            name
+            "flame.batchOpenClip", "Flame Batch OpenClip", name
         )
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
@@ -478,11 +498,7 @@ class FlameItemCollector(HookBaseClass):
 
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item(
-            "flame.openClip",
-            "Flame OpenClip",
-            name
-        )
+        item = parent_item.create_item("flame.openClip", "Flame OpenClip", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
@@ -514,14 +530,9 @@ class FlameItemCollector(HookBaseClass):
 
         # get the publish name for this file path. this will ensure we get a
         # consistent name across version publishes of this file.
-        name = self.parent.util.get_publish_name(
-            name_path, sequence=is_sequence)
+        name = self.parent.util.get_publish_name(name_path, sequence=is_sequence)
 
-        item = parent_item.create_item(
-            "flame.video",
-            "Flame Render",
-            name
-        )
+        item = parent_item.create_item("flame.video", "Flame Render", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
@@ -550,11 +561,7 @@ class FlameItemCollector(HookBaseClass):
         # consistent name across version publishes of this file.
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item(
-            "flame.movie",
-            "Flame Render",
-            name
-        )
+        item = parent_item.create_item("flame.movie", "Flame Render", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
@@ -576,11 +583,7 @@ class FlameItemCollector(HookBaseClass):
 
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item(
-            "flame.audio",
-            "Flame Audio",
-            name
-        )
+        item = parent_item.create_item("flame.audio", "Flame Audio", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
@@ -602,11 +605,7 @@ class FlameItemCollector(HookBaseClass):
 
         name = self.parent.util.get_publish_name(path)
 
-        item = parent_item.create_item(
-            "flame.sequence",
-            "Flame Sequence",
-            name
-        )
+        item = parent_item.create_item("flame.sequence", "Flame Sequence", name)
         item.set_icon_from_path(icon)
         item.thumbnail_enabled = False
 
@@ -629,8 +628,10 @@ class FlameItemCollector(HookBaseClass):
         else:
             # Avoiding the os.path.join because resolvedPath might start with /
             path = os.path.normpath(
-                os.path.sep.join([asset_info.get("destinationPath", ""),
-                                  asset_info["resolvedPath"]]))
+                os.path.sep.join(
+                    [asset_info.get("destinationPath", ""), asset_info["resolvedPath"]]
+                )
+            )
 
         return path
 
@@ -683,16 +684,13 @@ class FlameItemCollector(HookBaseClass):
                 item_type = "%s.%s" % (item_type, "sequence")
                 is_sequence = True
 
-        display_name = publisher.util.get_publish_name(
-            path, sequence=is_sequence)
+        display_name = publisher.util.get_publish_name(path, sequence=is_sequence)
 
         # create and populate the item
-        file_item = parent_item.create_item(
-            item_type, type_display, display_name)
+        file_item = parent_item.create_item(item_type, type_display, display_name)
 
         # if the supplied path is an image, use the path as # the thumbnail.
-        if (item_type.startswith("file.image") or
-                item_type.startswith("file.texture")):
+        if item_type.startswith("file.image") or item_type.startswith("file.texture"):
             file_item.set_thumbnail_from_path(path)
 
             # disable thumbnail creation since we get it for free
@@ -729,8 +727,7 @@ class FlameItemCollector(HookBaseClass):
         folder = sgtk.util.ShotgunPath.normalize(folder)
 
         publisher = self.parent
-        img_sequences = publisher.util.get_frame_sequences(
-            folder)
+        img_sequences = publisher.util.get_frame_sequences(folder)
 
         file_items = []
 
@@ -752,14 +749,11 @@ class FlameItemCollector(HookBaseClass):
             img_seq_files.sort()
             first_frame_file = img_seq_files[0]
             display_name = publisher.util.get_publish_name(
-                first_frame_file, sequence=True)
+                first_frame_file, sequence=True
+            )
 
             # create and populate the item
-            file_item = parent_item.create_item(
-                item_type,
-                type_display,
-                display_name
-            )
+            file_item = parent_item.create_item(item_type, type_display, display_name)
 
             file_item.set_icon_from_path(icon_path)
 
@@ -857,7 +851,7 @@ class FlameItemCollector(HookBaseClass):
             item_type=item_type,
             type_display=type_display,
             icon_name=icon_name,
-            path=path
+            path=path,
         )
 
     @staticmethod
@@ -872,7 +866,7 @@ class FlameItemCollector(HookBaseClass):
         """
         match = re.match(r"(.*\.)((?:\[\d+-\d+\])|(?:\d+))(\..*)", path)
         if not match:
-            return [] # The path is not a sequence
+            return []  # The path is not a sequence
 
         # Get the first and last frame of the sequence
         frame_range = match.group(2).replace("[", "").replace("]", "").split("-")
