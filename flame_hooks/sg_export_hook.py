@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # Note! This file implements the exportHook interface from Flame 2015.2
+from __future__ import absolute_import
 import os
 
 
@@ -80,7 +81,7 @@ def preCustomExport(info, userData):
 
 
 # tell Flame not to display the fish cursor while we process the hook
-preCustomExport.func_dict["waitCursor"] = False
+preCustomExport.__dict__["waitCursor"] = False
 
 
 def postCustomExport(info, userData):
@@ -190,7 +191,7 @@ def postExport(info, userData):
 
 
 # tell Flame not to display the fish cursor while we process the hook
-postExport.func_dict["waitCursor"] = False
+postExport.__dict__["waitCursor"] = False
 
 
 def preExportSequence(info, userData):

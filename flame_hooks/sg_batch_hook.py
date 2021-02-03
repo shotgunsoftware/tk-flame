@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+from __future__ import absolute_import
 import os
 
 
@@ -184,7 +185,7 @@ def batch_burn_end(info, userData, *args, **kwargs):
 
 
 # tell Flame not to display the fish cursor while we process the hook
-batchRenderEnd.func_dict["waitCursor"] = False
+batchRenderEnd.__dict__["waitCursor"] = False
 
 
 def batchExportBegin(info, userData):
@@ -284,4 +285,4 @@ def batchExportEnd(info, userData):
 
 
 # tell Flame not to display the fish cursor while we process the hook
-batchExportEnd.func_dict["waitCursor"] = False
+batchExportEnd.__dict__["waitCursor"] = False

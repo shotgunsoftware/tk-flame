@@ -12,12 +12,13 @@
 A Toolkit engine for Flame
 """
 
+from __future__ import absolute_import
 import os
 import pwd
 import re
 import sys
 import uuid
-import pickle
+import sgtk.util.pickle
 import logging
 import logging.handlers
 import pprint
@@ -57,7 +58,7 @@ class FlameEngine(sgtk.platform.Engine):
     SGTK_LOG_FILE_SAFE = "/tmp/tk-flame.log"
 
     # define constants for the various modes the engine can execute in
-    (ENGINE_MODE_DCC, ENGINE_MODE_PRELAUNCH, ENGINE_MODE_BACKBURNER) = range(3)
+    (ENGINE_MODE_DCC, ENGINE_MODE_PRELAUNCH, ENGINE_MODE_BACKBURNER) = list(range(3))
 
     @property
     def host_info(self):
@@ -877,7 +878,7 @@ class FlameEngine(sgtk.platform.Engine):
                 #
                 self.log_debug("Closing dialog %s." % dialog_window_title)
                 dialog.close()
-            except Exception, exception:
+            except Exception as exception:
                 self.log_error(
                     "Cannot close dialog %s: %s" % (dialog_window_title, exception)
                 )
@@ -1163,7 +1164,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         :returns: List of preset titles
         """
-        return self._registered_export_instances.keys()
+        return list(self._registered_export_instances.keys())
 
     def create_export_session(self, preset_name):
         """
@@ -1178,7 +1179,7 @@ class FlameEngine(sgtk.platform.Engine):
             raise TankError(
                 "The export preset '%s' is not registered with the current engine. "
                 "Current presets are: %s"
-                % (preset_name, self._registered_export_instances.keys())
+                % (preset_name, list(self._registered_export_instances.keys()))
             )
 
         session_id = "tk_%s" % uuid.uuid4().hex
@@ -1432,7 +1433,7 @@ class FlameEngine(sgtk.platform.Engine):
         else:
             try:
                 completion_handling_delay = int(completion_handling_delay)
-            except ValueError, error:
+            except ValueError as error:
                 raise TankError(
                     "Invalid backburner completion delay setting: %s: %s"
                     % (completion, error)
@@ -1692,7 +1693,7 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Absolute path as a string
         """
         # Wiretap Central can only be present on MacOS and on Linux
-        if sys.platform not in ["darwin", "linux2"]:
+        if sgtk.util.is_windows():
             raise TankError("Your operating system does not support Wiretap Central!")
 
         # Priority have to be given to every ".bin" executable on the Wiretap Central binary folder
@@ -1722,9 +1723,9 @@ class FlameEngine(sgtk.platform.Engine):
 
         :return: Path to the Wiretap Central binaries folder
         """
-        if sys.platform == "darwin":
+        if sgtk.util.is_macOS():
             return "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
-        elif sys.platform == "linux2":
+        elif sgtk.util.is_linux():
             return "/var/www/html/WiretapCentral/cgi-bin"
         return None
 
@@ -1736,9 +1737,9 @@ class FlameEngine(sgtk.platform.Engine):
 
         :return: Path to the legacy Wiretap Central binaries folder
         """
-        if sys.platform == "darwin":
+        if sgtk.util.is_macOS():
             return "/Library/WebServer/CGI-Executables/WiretapCentral"
-        elif sys.platform == "linux2":
+        elif sgtk.util.is_linux():
             return "/var/www/cgi-bin/WiretapCentral"
         return None
 

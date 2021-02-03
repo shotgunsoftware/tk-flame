@@ -9,6 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from __future__ import with_statement
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import sys
 
@@ -22,7 +24,7 @@ import contextlib
 
 
 repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-print "tk-flame repository root found at %s." % repo_root
+print("tk-flame repository root found at %s." % repo_root)
 
 
 class TestStartup(TankTestBase):

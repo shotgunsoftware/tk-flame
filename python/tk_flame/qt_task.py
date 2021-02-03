@@ -80,7 +80,7 @@ class QtTask(QtCore.QObject):
                 self._engine,
                 self._widget_class,
                 *self._args,
-                **self._kwargs
+                **self._kwargs,
             )
 
         except KeyboardInterrupt:

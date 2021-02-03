@@ -29,6 +29,7 @@ For more wiretap utilities, check out /usr/discreet/wiretap/tools/current
 
 """
 
+from __future__ import absolute_import
 import sgtk
 import xml.dom.minidom as minidom
 from sgtk import TankError

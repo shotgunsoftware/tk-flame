@@ -34,6 +34,8 @@
 #
 
 
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import sys
 
@@ -133,7 +135,7 @@ if __name__ == "__main__":
 
     # the first argument is always the path to the Flame executable
     if len(sys.argv) == 1:
-        print "Invalid syntax: app_launcher /path/to/flame args!"
+        print("Invalid syntax: app_launcher /path/to/flame args!")
         sys.exit(1)
 
     # the location of the actual tank core installation
@@ -145,7 +147,7 @@ if __name__ == "__main__":
     exit_code = 1
     try:
         exit_code = launch_flame(dcc_path, dcc_args)
-    except KeyboardInterrupt, e:
-        print "Process cancelled."
+    except KeyboardInterrupt as e:
+        print("Process cancelled.")
 
     sys.exit(exit_code)
