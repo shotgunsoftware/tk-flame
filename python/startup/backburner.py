@@ -33,7 +33,7 @@
 from __future__ import absolute_import
 import os
 import sys
-import sgtk.util.pickle
+import sgtk.util.pickle as pickle
 
 # Set the certificates for urllib2 if certifi is available.
 if "SSL_CERT_FILE" not in os.environ:

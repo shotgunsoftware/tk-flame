@@ -18,7 +18,7 @@ import pwd
 import re
 import sys
 import uuid
-import sgtk.util.pickle
+import sgtk.util.pickle as pickle
 import logging
 import logging.handlers
 import pprint

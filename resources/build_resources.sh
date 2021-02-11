@@ -23,7 +23,7 @@ function build_qt {
     $1 $2 > $UI_PYTHON_PATH/$3.py
 
     # replace PySide2 imports with tank.platform.qt and remove line containing Created by date
-    sed -i"" -e "s/from PySide2/from tank.platform.qt/g" -e "/# Created:/d" $UI_PYTHON_PATH/$3.py
+    sed -i"" -E "s/^(from PySide2)(.*)$/try:\n    from tank.platform.qt\2\nexcept ImportError:\n    \1\2/g" $UI_PYTHON_PATH/$3.py
 }
 
 function build_ui {
