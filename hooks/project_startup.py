@@ -9,8 +9,9 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
-Hook that handles logic and automation around automatic Flame project setup 
+Hook that handles logic and automation around automatic Flame project setup
 """
+from __future__ import absolute_import
 import sgtk
 from sgtk import TankError
 import os

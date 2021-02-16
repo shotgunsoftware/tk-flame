@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 
+from __future__ import absolute_import
 import sgtk
 from sgtk import TankError
 import os
@@ -156,13 +157,13 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     # inside an executing script as the dynamic loader sets up the load
     # order prior to the execution of any payload. This is why we need to
     # set this before we run the app launch script.
-    if sys.platform == "darwin":
+    if sgtk.util.is_macOS():
         # add system libraries
         sgtk.util.prepend_path_to_env_var(
             "DYLD_FRAMEWORK_PATH", "%s/lib64/%s/framework" % (install_root, version_str)
         )
 
-    elif sys.platform == "linux2":
+    elif sgtk.util.is_linux():
         # add python related libraries
 
         # on Flame, each version is managed separately

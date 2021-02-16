@@ -12,6 +12,7 @@
 """
 Hook that loads defines all the available actions, broken down by publish type.
 """
+from __future__ import absolute_import
 import collections
 import os
 import re
@@ -201,7 +202,7 @@ class FlameLoaderActions(HookBaseClass):
 
             else:
                 raise FlameLoaderActionError("Unknown action name: '{}'".format(name))
-        except FlameLoaderActionError, error:
+        except FlameLoaderActionError as error:
             # A FlameActionError reaching here means that something major have
             # stopped the current action
             QtGui.QMessageBox.critical(
@@ -1045,7 +1046,7 @@ class FlameLoaderActions(HookBaseClass):
                     if other_clip["info"]["updated_at"] < clip["info"]["updated_at"]:
                         latest_clips[clip["info"]["name"]] = clip
 
-        return latest_clips.values()
+        return list(latest_clips.values())
 
     @staticmethod
     def _handle_frame_range(path):

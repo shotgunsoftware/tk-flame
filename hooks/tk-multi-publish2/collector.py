@@ -8,6 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Ccollect_current_sceneode License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
+from __future__ import absolute_import
 import mimetypes
 import os
 import re
@@ -261,7 +262,7 @@ class FlameItemCollector(HookBaseClass):
                         # The next level of dictionary have the asset type as
                         # key and a dictionary as value.
                         for asset_type, asset_type_info in sorted(
-                            shot_info.items(), key=lambda i: key_order.index(i[0])
+                            list(shot_info.items()), key=lambda i: key_order.index(i[0])
                         ):
 
                             # The next level of dictionary have the asset name

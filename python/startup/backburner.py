@@ -30,9 +30,13 @@
 # this script will unpack the pickle parameters file, add sgtk to the pythonpath,
 # start an engine and finally run an app or engine hook method.
 
+from __future__ import absolute_import
 import os
 import sys
-import pickle
+try:
+    import sgtk.util.pickle as pickle
+except:
+    import pickle
 
 # Set the certificates for urllib2 if certifi is available.
 if "SSL_CERT_FILE" not in os.environ:
@@ -121,5 +125,5 @@ try:
     engine.log_debug("Trying to remove temporary pickle job file...")
     os.remove(pickle_file)
     engine.log_debug("Temporary pickle job successfully deleted.")
-except Exception, e:
+except Exception as e:
     engine.log_warning("Could not remove temporary file '%s': %s" % (pickle_file, e))
