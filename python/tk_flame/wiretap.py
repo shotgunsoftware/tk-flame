@@ -263,7 +263,7 @@ class WiretapHandler(object):
                     )
 
                 # read updated settings back from the UI and update our settings dict with these
-                for (k, v) in widget.get_settings().iteritems():
+                for (k, v) in widget.get_settings().items():
                     project_settings[k] = v
 
                 volume_name = widget.get_volume_name()
@@ -292,7 +292,7 @@ class WiretapHandler(object):
 
             self._engine.log_debug("A new project '%s' will be created." % project_name)
             self._engine.log_debug("The following settings will be used:")
-            for (k, v) in project_settings.iteritems():
+            for (k, v) in project_settings.items():
                 self._engine.log_debug("%s: %s" % (k, v))
 
             # create xml structure
