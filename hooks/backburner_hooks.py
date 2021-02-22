@@ -118,7 +118,7 @@ class BackburnerHooks(HookBaseClass):
             if return_code:
                 self.parent.log_warning(
                     "Thumbnail process failed!\nError code: %s\nOutput:\n%s"
-                    % (return_code, stderr)
+                    % (return_code, stderr.decode("utf-8"))
                 )
                 return return_code
 
@@ -177,7 +177,7 @@ class BackburnerHooks(HookBaseClass):
             if return_code:
                 self.parent.log_warning(
                     "Movie process failed!\nError code: %s\nOutput:\n%s"
-                    % (return_code, stderr)
+                    % (return_code, stderr.decode("utf-8"))
                 )
                 return return_code
 

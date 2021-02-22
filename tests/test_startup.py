@@ -111,6 +111,6 @@ class TestStartup(TankTestBase):
         )
 
         # Ensure each environment variable's value is the same as they expected ones.
-        for key, value in expected_env.iteritems():
+        for key, value in expected_env.items():
             self.assertIn(key, launch_info.environment)
             self.assertEqual(launch_info.environment[key], value)

@@ -365,7 +365,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         # return a dictionary grouping all the commands by instance name
         commands_by_instance = {}
-        for (name, value) in self.commands.iteritems():
+        for (name, value) in self.commands.items():
             app_instance = value["properties"].get("app")
             if app_instance:
                 instance_name = app_instance.instance_name
@@ -1545,7 +1545,7 @@ class FlameEngine(sgtk.platform.Engine):
                 bb_manager = subprocess.check_output(
                     [backburner_server_cmd, "-q", "MANAGER"]
                 )
-                bb_manager = bb_manager.strip("\n")
+                bb_manager = bb_manager.decode("utf-8").strip("\n")
 
             if bb_manager:
                 backburner_args.append('-manager:"%s"' % bb_manager)
@@ -1659,6 +1659,8 @@ class FlameEngine(sgtk.platform.Engine):
                 [full_cmd], stdout=subprocess.PIPE, shell=True
             )
             stdout, stderr = backburner_job_submission.communicate()
+            stdout = stdout.decode("utf-8") if stdout else None
+            stderr = stderr.decode("utf-8") if stderr else None
 
             self.log_debug(stdout)
 
