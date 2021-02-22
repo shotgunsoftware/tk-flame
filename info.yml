@@ -77,6 +77,13 @@ configuration:
                      Possible values are default, leaveInQueue, delete[:days], archive[:days].
                      Default will use the manager or application default for the action.
 
+    backburner_cmd_job_type:
+        type: str
+        default_value: "ShotgunCmdjob"
+        description: The type of command line job to send to Backburner.
+                     This is defined by the name of the Command Line Adapter binary in
+                     Backburner Adapters folders.
+                     Not all versions of Backburner support this feature.
 
 
     generate_thumbnails:

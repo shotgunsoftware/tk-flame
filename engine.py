@@ -162,6 +162,8 @@ class FlameEngine(sgtk.platform.Engine):
         self._thumbnail_generator = None
         self._local_movie_generator = None
 
+        self._cmdjob_supports_plugin_name = None
+
         super(FlameEngine, self).__init__(*args, **kwargs)
 
     def pre_app_init(self):
@@ -1397,6 +1399,23 @@ class FlameEngine(sgtk.platform.Engine):
             self._thumbnail_generator = tk_flame.LocalMovieGeneratorFFmpeg(engine=self)
         return self._thumbnail_generator
 
+    @property
+    def cmdjob_supports_plugin_name(self):
+        if self._cmdjob_supports_plugin_name is not None:
+            return self._cmdjob_supports_plugin_name
+
+        backburner_job_cmd = os.path.join(self._install_root, "backburner", "cmdjob")
+        backburner_job_cmd_usage = subprocess.Popen(
+            [backburner_job_cmd], stdout=subprocess.PIPE, shell=False
+        )
+
+        self._cmdjob_supports_plugin_name = False
+        for line in backburner_job_cmd_usage.communicate()[0].decode("utf-8").split("\n"):
+            if "-pluginName:" in line:
+                self._cmdjob_supports_plugin_name = True
+                break
+        return self._cmdjob_supports_plugin_name
+
     @staticmethod
     def is_thumbnail_supported_for_asset_type(asset_type):
         """
@@ -1532,6 +1551,11 @@ class FlameEngine(sgtk.platform.Engine):
         )
         backburner_args.append('-description:"%s"' % description)
 
+        if self.cmdjob_supports_plugin_name:
+            bb_cmd_job_type = self.get_setting("backburner_cmd_job_type")
+            if bb_cmd_job_type:
+                backburner_args.append('-pluginName:"%s"' % bb_cmd_job_type)
+
         # Specifying a remote backburner manager is only supported on 2016.1 and above
         if not self.is_version_less_than("2016.1"):
             bb_manager = self.get_setting("backburner_manager")
@@ -1579,7 +1603,14 @@ class FlameEngine(sgtk.platform.Engine):
             # No servers/groups sepecified and local path.
             # Force the job to run on local server.
             if temp_dir_is_local:
-                backburner_args.append('-servers:"%s"' % localhost)
+                local_servers = ",".join(
+                    [
+                        "{}{}".format(a, b)
+                        for b in ["", "-1", "-2", "-3", "-4", "-5", "-6", "-7"]
+                        for a in [localhost]
+                    ]
+                )
+                backburner_args.append('-servers:"%s"' % local_servers)
         else:
             # Possible remote server but local only path.
             # Fail the job creation with an explicit message.
