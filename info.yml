@@ -79,7 +79,7 @@ configuration:
 
     backburner_cmd_job_type:
         type: str
-        default_value: "UserCmdjobAdapter"
+        default_value: "ShotgunCmdjob"
         description: The type of command line job to send to Backburner.
                      This is defined by the name of the Command Line Adapter binary in
                      Backburner Adapters folders.
