@@ -182,7 +182,7 @@ class BackburnerHooks(HookBaseClass):
                 return return_code
 
             if self.parent.get_setting("bypass_server_transcoding"):
-                self.parent.log_debug("Bypass Shotgun transcoding setting enabled.")
+                self.parent.log_debug("Bypass SG transcoding setting enabled.")
                 field_name = "sg_uploaded_movie_mp4"
             else:
                 field_name = "sg_uploaded_movie"

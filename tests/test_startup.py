@@ -106,8 +106,7 @@ class TestStartup(TankTestBase):
 
         # Ensure the environment variables from the LaunchInfo are the same as the expected ones.
         self.assertListEqual(
-            sorted(expected_env.keys()),
-            sorted(launch_info.environment.keys()),
+            sorted(expected_env.keys()), sorted(launch_info.environment.keys()),
         )
 
         # Ensure each environment variable's value is the same as they expected ones.

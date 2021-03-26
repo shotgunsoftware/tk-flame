@@ -50,7 +50,7 @@ class UpdateCutPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "Update cut items in Shotgun for the given object"
+        return "Update cut items in SG for the given object"
 
     @property
     def settings(self):

@@ -61,7 +61,7 @@ class LocalMovieGeneratorFlame(LocalMovieGenerator):
             dst_path=dst_path,
             extension=os.path.splitext(dst_path)[-1],
             display_name=display_name,
-            job_context="Create Shotgun Local Movie",
+            job_context="Create SG Local Movie",
             preset_path=self.engine.local_movies_preset_path,
             asset_info=asset_info,
             dependencies=dependencies,

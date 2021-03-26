@@ -20,7 +20,7 @@
 # /usr/discreet/backburner/cmdjob
 # -userRights
 # -jobName:"Sequence 'aa002' - Uploading media to Shotgun"
-# -description:"Creates a new version record in Shotgun and uploads the associated Quicktime."
+# -description:"Creates a new version record in SG and uploads the associated Quicktime."
 # -servers:Mannes-MacBook-Pro-2.local
 # -dependencies:1587902041
 # /usr/discreet/Python-2.6.9/bin/python
@@ -33,6 +33,7 @@
 from __future__ import absolute_import
 import os
 import sys
+
 try:
     import sgtk.util.pickle as pickle
 except:

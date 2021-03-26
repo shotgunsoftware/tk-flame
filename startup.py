@@ -61,9 +61,7 @@ class FlameLauncher(SoftwareLauncher):
     # globbing and regex matches by replacing the named format placeholders
     # with an appropriate glob or regex string.
     EXECUTABLE_TEMPLATES = {
-        "darwin": [
-            "/opt/Autodesk/{executable}_{version}/bin/startApplication",
-        ],
+        "darwin": ["/opt/Autodesk/{executable}_{version}/bin/startApplication",],
         "linux2": [
             # /usr/discreet/flame_2017.1/bin/startApplication
             # /usr/discreet/flameassist_2017.1.pr70/bin/startApplication
@@ -171,9 +169,7 @@ class FlameLauncher(SoftwareLauncher):
                 env["TOOLKIT_FLAME_INSTALL_ROOT"] = match.group(1)
                 app_folder = match.group(2)
                 wiretap_path = os.path.join(
-                    env["TOOLKIT_FLAME_INSTALL_ROOT"],
-                    app_folder,
-                    "python",
+                    env["TOOLKIT_FLAME_INSTALL_ROOT"], app_folder, "python",
                 )
                 self.logger.debug(
                     "Adding wiretap root path to PYTHONPATH: %s", wiretap_path
@@ -200,10 +196,7 @@ class FlameLauncher(SoftwareLauncher):
             # <flame python> <tk-flame>/python/startup/app_launcher.py dcc_path dcc_args
             #
             launch_script = os.path.join(
-                os.path.dirname(__file__),
-                "python",
-                "startup",
-                "app_launcher.py",
+                os.path.dirname(__file__), "python", "startup", "app_launcher.py",
             )
             exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
             args = "'%s' %s %s" % (launch_script, app_path, args)

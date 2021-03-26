@@ -49,7 +49,7 @@ class UpdateShotPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "Update shot in Shotgun for the given object"
+        return "Update shot in SG for the given object"
 
     @property
     def settings(self):

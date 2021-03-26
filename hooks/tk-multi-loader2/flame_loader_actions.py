@@ -206,9 +206,7 @@ class FlameLoaderActions(HookBaseClass):
             # A FlameActionError reaching here means that something major have
             # stopped the current action
             QtGui.QMessageBox.critical(
-                None,
-                "Error",
-                str(error),
+                None, "Error", str(error),
             )
             app.log_error(error)
 
@@ -308,7 +306,7 @@ class FlameLoaderActions(HookBaseClass):
         sg_info = self._get_batch_info_from_sg_publish_data(sg_publish_data)
         if sg_info is None:
             raise FlameLoaderActionError(
-                "Cannot load a Batch Group from Shotgun using this Shot"
+                "Cannot load a Batch Group from SG using this Shot"
             )
 
         self._go_to_batch_on_action()
