@@ -84,8 +84,8 @@ configuration:
                      This is defined by the name of the Command Line Adapter binary in
                      Backburner Adapters folders.
                      Not all versions of Backburner support this feature.
-                     Older version should use UserCmdjobAdapter.
-                     Newer version should use ShotgunCmdjob.
+                     Pre Backburner 2022 should use UserCmdjobAdapter.
+                     Backburner 2022 and up should use ShotgunCmdjob.
 
     generate_thumbnails:
         type: bool
