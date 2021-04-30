@@ -1401,6 +1401,11 @@ class FlameEngine(sgtk.platform.Engine):
 
     @property
     def cmdjob_supports_plugin_name(self):
+        """
+        Return True if /opt/Autodesk/backburner/cmdjob tool supports the
+        -pluginName argument. This was added in Backburner 2022.
+        :return True or False:
+        """
         if self._cmdjob_supports_plugin_name is not None:
             return self._cmdjob_supports_plugin_name
 
