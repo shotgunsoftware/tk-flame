@@ -23,7 +23,7 @@
 #    instructions to the dynamic loader via LD_LIBRARY_PATH
 #
 # 2. The launch app will now call *this* script rather than the DCC which it was configured
-#    to launch. This script executes with /usr/discreet/Python-2.6.9/bin/python which is a known
+#    to launch. This script executes with /opt/Autodesk/pyton/<flame version>/bin/python which is a known
 #    environment with pyside etc. At this point, we start the engine and run a bunch of startup
 #    stuff. Note that this is now happening before Flame has actually launched. This startup
 #    includes ensuring that a new project exists. It also sets up the Flame envrironment variables,

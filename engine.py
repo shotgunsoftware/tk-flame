@@ -455,7 +455,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Returns the python executable associated with this engine
 
-        :returns: path to python, e.g. '/usr/discreet/python/2016.0.0.322/bin/python'
+        :returns: path to python, e.g. '/opt/Autodesk/python/<flame version>/bin/python'
         """
         if self._python_executable_path is None:
             raise TankError(
@@ -1415,7 +1415,9 @@ class FlameEngine(sgtk.platform.Engine):
         )
 
         self._cmdjob_supports_plugin_name = False
-        for line in backburner_job_cmd_usage.communicate()[0].decode("utf-8").split("\n"):
+        for line in (
+            backburner_job_cmd_usage.communicate()[0].decode("utf-8").split("\n")
+        ):
             if "-pluginName:" in line:
                 self._cmdjob_supports_plugin_name = True
                 break
