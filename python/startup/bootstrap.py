@@ -134,7 +134,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
 
     # ensure that we add the right location for the wiretap API.
     # on 2016 and above, we can use the one distributed with Flame
-    # in 2016: /usr/discreet/flameassist_2016.0.0.322/python
+    # in: /opt/Autodesk/flameassist_<version>/python
 
     wiretap_path = None
     install_root = None

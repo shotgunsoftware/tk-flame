@@ -17,13 +17,13 @@
 # this script is called.
 
 # typically, the following sort of command line is generated in create_local_backburner_job():
-# /usr/discreet/backburner/cmdjob
+# /opt/Autodesk/backburner/cmdjob
 # -userRights
 # -jobName:"Sequence 'aa002' - Uploading media to Shotgun"
 # -description:"Creates a new version record in Shotgun and uploads the associated Quicktime."
 # -servers:Mannes-MacBook-Pro-2.local
 # -dependencies:1587902041
-# /usr/discreet/Python-2.6.9/bin/python
+# /opt/Autodesk/python/<flame version>/bin/python
 # /Users/manne/git/tk-flame/python/startup/backburner.py
 # /var/folders/fq/65bs7wwx3mz7jdsh4vxm34xc0000gn/T/tk_backburner_f6a70d85fecf420a979357c9d9dd9278.pickle
 
@@ -33,6 +33,7 @@
 from __future__ import absolute_import
 import os
 import sys
+
 try:
     import sgtk.util.pickle as pickle
 except:
