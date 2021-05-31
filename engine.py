@@ -117,6 +117,8 @@ class FlameEngine(sgtk.platform.Engine):
         # the path to the associated python executable
         self._python_executable_path = None
 
+        self._log_file = None
+
         # version of Flame we are running
         try:
             import flame
@@ -248,24 +250,24 @@ class FlameEngine(sgtk.platform.Engine):
 
         # test if we can write to the default log file
         if os.access(os.path.dirname(std_log_file), os.W_OK):
-            log_file = std_log_file
+            self._log_file = std_log_file
             using_safe_log_file = False
         else:
             # cannot rotate file in this directory, write to tmp instead.
-            log_file = self.SGTK_LOG_FILE_SAFE
+            self._log_file = self.SGTK_LOG_FILE_SAFE
             using_safe_log_file = True
 
         # Set up a rotating logger with 4MiB max file size
         if using_safe_log_file:
             rotating = logging.handlers.RotatingFileHandler(
-                log_file, maxBytes=4 * 1024 * 1024, backupCount=10
+                self._log_file, maxBytes=4 * 1024 * 1024, backupCount=10
             )
         else:
             rotating = logging.handlers.RotatingFileHandler(
-                log_file, maxBytes=0, backupCount=50, delay=True
+                self._log_file, maxBytes=0, backupCount=50, delay=True
             )
             # Always rotate. Current user might not have the correct permission to open this file
-            if os.path.exists(log_file):
+            if os.path.exists(self._log_file):
                 rotating.doRollover()  # Will open file after roll over
 
         rotating.setFormatter(
@@ -293,6 +295,11 @@ class FlameEngine(sgtk.platform.Engine):
                 std_log_file,
                 log_file,
             )
+
+    @property
+    def log_file(self):
+        return self._log_file
+
 
     def set_python_executable(self, python_path):
         """
