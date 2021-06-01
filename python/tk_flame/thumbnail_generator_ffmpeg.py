@@ -48,7 +48,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
             the media is created in foreground.
         """
         self.engine.log_debug("Create and Upload Preview using ffmpeg")
-        job_context = "Create and Upload Shotgun Preview"
+        job_context = "Create and Upload SG Preview"
         job_name = self.engine.sanitize_backburner_job_name(
             job_name=display_name, job_suffix=" - %s" % job_context
         )
@@ -92,7 +92,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
             the media is created in foreground.
         """
         self.engine.log_debug("Create and Upload Thumbnail using ffmpeg")
-        job_context = "Create and Upload Shotgun Thumbnail"
+        job_context = "Create and Upload SG Thumbnail"
         job_name = self.engine.sanitize_backburner_job_name(
             job_name=display_name, job_suffix=" - %s" % job_context
         )

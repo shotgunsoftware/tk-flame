@@ -20,7 +20,7 @@
 # /opt/Autodesk/backburner/cmdjob
 # -userRights
 # -jobName:"Sequence 'aa002' - Uploading media to Shotgun"
-# -description:"Creates a new version record in Shotgun and uploads the associated Quicktime."
+# -description:"Creates a new version record in SG and uploads the associated Quicktime."
 # -servers:Mannes-MacBook-Pro-2.local
 # -dependencies:1587902041
 # /opt/Autodesk/python/<flame version>/bin/python

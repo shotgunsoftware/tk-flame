@@ -69,7 +69,7 @@ class ThumbnailGenerator(object):
         # a thumbnail
         bypass_server_transcoding = self.engine.get_setting("bypass_server_transcoding")
         if bypass_server_transcoding:
-            self.engine.log_debug("Bypass Shotgun transcoding setting ENABLED.")
+            self.engine.log_debug("Bypass SG transcoding setting ENABLED.")
 
         generate_previews = favor_preview and self.engine.get_setting(
             "generate_previews"

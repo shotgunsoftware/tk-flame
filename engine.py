@@ -211,18 +211,18 @@ class FlameEngine(sgtk.platform.Engine):
             except Exception:
                 self.logger.debug(
                     "Was unable to import the flame Python module. As a result, "
-                    "the Flame project will not be linked to associated Shotgun "
+                    "the Flame project will not be linked to associated SG "
                     "project using the Flame Python API. This shouldn't cause "
                     "any problems in the current session, but it does mean "
                     "that the user might be prompted to link this project to a "
-                    "Shotgun project if they launch Flame using the Toolkit "
+                    "SG project if they launch Flame using the Toolkit "
                     "plugin and open this same Flame project."
                 )
             else:
                 try:
                     current_flame_project = flame.project.current_project
-                    current_flame_project.shotgun_project_name = (
-                        self.context.project.get("name")
+                    current_flame_project.shotgun_project_name = self.context.project.get(
+                        "name"
                     )
                 except Exception:
                     self.logger.debug(
@@ -230,13 +230,13 @@ class FlameEngine(sgtk.platform.Engine):
                         "shotgun_project_name property. This shouldn't cause "
                         "any problems in the current session, but it does mean "
                         "that the user might be prompted to link this project to a "
-                        "Shotgun project if they launch Flame using the Toolkit "
+                        "SG project if they launch Flame using the Toolkit "
                         "plugin and open this same Flame project."
                     )
                 else:
                     self.logger.debug(
                         "Successfully linked the Flame project to its associated "
-                        "Shotgun project."
+                        "SG project."
                     )
 
     def _initialize_logging(self, install_root):
@@ -1718,7 +1718,7 @@ class FlameEngine(sgtk.platform.Engine):
                 return backburner_job_id
 
             else:
-                error = ["Shotgun backburner job could not be created."]
+                error = ["SG backburner job could not be created."]
                 if stderr:
                     error += ["Reason: " + stderr]
                 error += ["See backburner logs for details."]
@@ -1838,11 +1838,12 @@ def sgtk_exception_trap(ex_cls, ex, tb):
         traceback_str = "\n".join(traceback.format_tb(tb))
         if ex_cls == TankError:
             # for TankErrors, we don't show the whole stack trace
-            error_message = "A Shotgun error was reported:\n\n%s" % ex
+            error_message = "A SG error was reported:\n\n%s" % ex
         else:
-            error_message = (
-                "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s"
-                % (ex, ex_cls, traceback_str)
+            error_message = "A SG error was reported:\n\n%s (%s)\n\nTraceback:\n%s" % (
+                ex,
+                ex_cls,
+                traceback_str,
             )
     except:
         pass
@@ -1853,7 +1854,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
 
         if QtCore.QCoreApplication.instance():
             # there is an application running - so pop up a message!
-            QtGui.QMessageBox.critical(None, "Shotgun General Error", error_message)
+            QtGui.QMessageBox.critical(None, "SG General Error", error_message)
     except:
         pass
 

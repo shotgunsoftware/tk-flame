@@ -58,7 +58,7 @@ def appInitialized(projectName):
             engine.logger.debug(
                 "Was unable to import the flame Python module. As such, "
                 "it must be assumed that the Flame project change is "
-                "resulting in a change in Shotgun project. This means "
+                "resulting in a change in SG project. This means "
                 "that the user will see a QMessageBox warning if the "
                 "tk-flame engine's project_switching setting is false. "
                 "The API to allow this was introduced in 2018.2."
@@ -85,7 +85,7 @@ def appInitialized(projectName):
             QtGui.QMessageBox.warning(
                 None,
                 "No project switching!",
-                "The Shotgun integration does not currently support project switching.\n"
+                "The SG integration does not currently support project switching.\n"
                 "Even if you switch projects, any Shotgun-specific configuration will\n"
                 "remain connected to the initially loaded project.",
             )

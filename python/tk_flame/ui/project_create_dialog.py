@@ -491,13 +491,13 @@ class Ui_ProjectCreateDialog(object):
         self.label_9.setText("")
         self.label_5.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Project Name</b>", None))
 #if QT_CONFIG(tooltip)
-        self.project_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>Flame project name</b> is automatically generated based on your current Shotgun project. ", None))
+        self.project_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>Flame project name</b> is automatically generated based on your current SG project. ", None))
 #endif // QT_CONFIG(tooltip)
         self.project_name.setText(QCoreApplication.translate("ProjectCreateDialog", "xxx", None))
         self.label_7.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Storage Volume</b>", None))
         self.label_6.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>User</b>", None))
 #if QT_CONFIG(tooltip)
-        self.user_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>User Name</b> associated with your new Flame Project is based on the Shotgun user that matches your current login name.\n"
+        self.user_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>User Name</b> associated with your new Flame Project is based on the SG user that matches your current login name.\n"
 "", None))
 #endif // QT_CONFIG(tooltip)
         self.user_name.setText(QCoreApplication.translate("ProjectCreateDialog", "xxx", None))

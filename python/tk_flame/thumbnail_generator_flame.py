@@ -58,7 +58,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 dst_path=None,
                 extension=".mov",
                 display_name=display_name,
-                job_context="Create Shotgun Preview",
+                job_context="Create SG Preview",
                 preset_path=self.engine.previews_preset_path,
                 asset_info=asset_info,
                 dependencies=dependencies,
@@ -110,7 +110,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 dst_path=None,
                 extension=".jpg",
                 display_name=display_name,
-                job_context="Create Shotgun Thumbnail",
+                job_context="Create SG Thumbnail",
                 preset_path=self.engine.thumbnails_preset_path,
                 asset_info=asset_info,
                 dependencies=dependencies,
@@ -136,7 +136,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         :param thumbnail_job: Thumbnail generation job information.
         :return: Backburner job ID created.
         """
-        job_context = "Upload Shotgun Thumbnail"
+        job_context = "Upload SG Thumbnail"
         job_name = self.engine.sanitize_backburner_job_name(
             job_name=thumbnail_job.get("display_name"), job_suffix=" - %s" % job_context
         )
@@ -168,12 +168,12 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         :return: Backburner job ID created.
         """
         if self.engine.get_setting("bypass_server_transcoding"):
-            self.engine.log_debug("Bypass Shotgun transcoding setting ENABLED.")
+            self.engine.log_debug("Bypass SG transcoding setting ENABLED.")
             field_name = "sg_uploaded_movie_mp4"
         else:
             field_name = "sg_uploaded_movie"
 
-        job_context = "Upload Shotgun Preview"
+        job_context = "Upload SG Preview"
         job_name = self.engine.sanitize_backburner_job_name(
             job_name=preview_job.get("display_name"), job_suffix=" - %s" % job_context
         )

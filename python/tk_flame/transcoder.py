@@ -221,7 +221,9 @@ class Transcoder(object):
              </tracks>
             </clip>""".format(
                 **metadata
-            ).encode("utf-8"),
+            ).encode(
+                "utf-8"
+            ),
         )
         os.close(tmp_fd)
         return path
