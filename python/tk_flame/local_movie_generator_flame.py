@@ -40,10 +40,10 @@ class LocalMovieGeneratorFlame(LocalMovieGenerator):
     ):
         """
         Generate a local movie file from a Flame exported assets and link
-        it to a list of Shotgun entities in the Path to movie field.
+        it to a list of ShotGrid entities in the Path to movie field.
 
         :param src_path: Path to the media for which a local movie need to be
-            generated and linked to Shotgun.
+            generated and linked to ShotGrid.
         :param dst_path: Path to local movie file to generate.
         :param display_name: The display name of the item we are generating the
             movie for. This will usually be the based name of the path.
@@ -61,7 +61,7 @@ class LocalMovieGeneratorFlame(LocalMovieGenerator):
             dst_path=dst_path,
             extension=os.path.splitext(dst_path)[-1],
             display_name=display_name,
-            job_context="Create Shotgun Local Movie",
+            job_context="Create ShotGrid Local Movie",
             preset_path=self.engine.local_movies_preset_path,
             asset_info=asset_info,
             dependencies=dependencies,

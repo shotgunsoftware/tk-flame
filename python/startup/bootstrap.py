@@ -118,7 +118,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
 
     if major_ver < 2016:
         raise TankError(
-            "In order to run the Shotgun integration, you need at least Flame 2016!"
+            "In order to run the ShotGrid integration, you need at least Flame 2016!"
         )
 
     # first of all, check that the executable path to Flame exists
@@ -134,7 +134,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
 
     # ensure that we add the right location for the wiretap API.
     # on 2016 and above, we can use the one distributed with Flame
-    # in: /opt/Autodesk/flameassist_<version>/python
+    # in 2016: /usr/discreet/flameassist_2016.0.0.322/python
 
     wiretap_path = None
     install_root = None

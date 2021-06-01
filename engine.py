@@ -117,8 +117,6 @@ class FlameEngine(sgtk.platform.Engine):
         # the path to the associated python executable
         self._python_executable_path = None
 
-        self._log_file = None
-
         # version of Flame we are running
         try:
             import flame
@@ -197,7 +195,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # Assuming we're in a new enough version of Flame (2018.3+) we'll
         # be able to link the Flame project to our SG project. This will
-        # ensure that is a use launches Flame's plugin-based Shotgun
+        # ensure that is a use launches Flame's plugin-based ShotGrid
         # integration that they will be bootstrapped into the correct
         # project and won't be prompted to choose an SG project to link to.
         #
@@ -211,11 +209,11 @@ class FlameEngine(sgtk.platform.Engine):
             except Exception:
                 self.logger.debug(
                     "Was unable to import the flame Python module. As a result, "
-                    "the Flame project will not be linked to associated Shotgun "
+                    "the Flame project will not be linked to associated ShotGrid "
                     "project using the Flame Python API. This shouldn't cause "
                     "any problems in the current session, but it does mean "
                     "that the user might be prompted to link this project to a "
-                    "Shotgun project if they launch Flame using the Toolkit "
+                    "ShotGrid project if they launch Flame using the Toolkit "
                     "plugin and open this same Flame project."
                 )
             else:
@@ -230,13 +228,13 @@ class FlameEngine(sgtk.platform.Engine):
                         "shotgun_project_name property. This shouldn't cause "
                         "any problems in the current session, but it does mean "
                         "that the user might be prompted to link this project to a "
-                        "Shotgun project if they launch Flame using the Toolkit "
+                        "ShotGrid project if they launch Flame using the Toolkit "
                         "plugin and open this same Flame project."
                     )
                 else:
                     self.logger.debug(
                         "Successfully linked the Flame project to its associated "
-                        "Shotgun project."
+                        "ShotGrid project."
                     )
 
     def _initialize_logging(self, install_root):
@@ -250,24 +248,24 @@ class FlameEngine(sgtk.platform.Engine):
 
         # test if we can write to the default log file
         if os.access(os.path.dirname(std_log_file), os.W_OK):
-            self._log_file = std_log_file
+            log_file = std_log_file
             using_safe_log_file = False
         else:
             # cannot rotate file in this directory, write to tmp instead.
-            self._log_file = self.SGTK_LOG_FILE_SAFE
+            log_file = self.SGTK_LOG_FILE_SAFE
             using_safe_log_file = True
 
         # Set up a rotating logger with 4MiB max file size
         if using_safe_log_file:
             rotating = logging.handlers.RotatingFileHandler(
-                self._log_file, maxBytes=4 * 1024 * 1024, backupCount=10
+                log_file, maxBytes=4 * 1024 * 1024, backupCount=10
             )
         else:
             rotating = logging.handlers.RotatingFileHandler(
-                self._log_file, maxBytes=0, backupCount=50, delay=True
+                log_file, maxBytes=0, backupCount=50, delay=True
             )
             # Always rotate. Current user might not have the correct permission to open this file
-            if os.path.exists(self._log_file):
+            if os.path.exists(log_file):
                 rotating.doRollover()  # Will open file after roll over
 
         rotating.setFormatter(
@@ -295,11 +293,6 @@ class FlameEngine(sgtk.platform.Engine):
                 std_log_file,
                 log_file,
             )
-
-    @property
-    def log_file(self):
-        return self._log_file
-
 
     def set_python_executable(self, python_path):
         """
@@ -462,7 +455,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         Returns the python executable associated with this engine
 
-        :returns: path to python, e.g. '/opt/Autodesk/python/<flame version>/bin/python'
+        :returns: path to python, e.g. '/usr/discreet/python/2016.0.0.322/bin/python'
         """
         if self._python_executable_path is None:
             raise TankError(
@@ -588,7 +581,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         The location of the flame export preset to use to generate local movies.
 
-        Local movies are linked to assets in Shotgun thru the "Path to Movie"
+        Local movies are linked to assets in ShotGrid thru the "Path to Movie"
         field but are not uploaded on the server.
 
         :returns: Path as string
@@ -956,7 +949,7 @@ class FlameEngine(sgtk.platform.Engine):
             os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
 
         # see if we can launch into batch mode. We only do this when in a
-        # shot context and if there is a published batch file in Shotgun
+        # shot context and if there is a published batch file in ShotGrid
         #
         # For now, hard code the logic of how to detect which batch file to load up.
         # TODO: in the future, we may want to expose this in a hook - but it is arguably
@@ -1422,9 +1415,7 @@ class FlameEngine(sgtk.platform.Engine):
         )
 
         self._cmdjob_supports_plugin_name = False
-        for line in (
-            backburner_job_cmd_usage.communicate()[0].decode("utf-8").split("\n")
-        ):
+        for line in backburner_job_cmd_usage.communicate()[0].decode("utf-8").split("\n"):
             if "-pluginName:" in line:
                 self._cmdjob_supports_plugin_name = True
                 break
@@ -1718,7 +1709,7 @@ class FlameEngine(sgtk.platform.Engine):
                 return backburner_job_id
 
             else:
-                error = ["Shotgun backburner job could not be created."]
+                error = ["ShotGrid backburner job could not be created."]
                 if stderr:
                     error += ["Reason: " + stderr]
                 error += ["See backburner logs for details."]
@@ -1838,10 +1829,10 @@ def sgtk_exception_trap(ex_cls, ex, tb):
         traceback_str = "\n".join(traceback.format_tb(tb))
         if ex_cls == TankError:
             # for TankErrors, we don't show the whole stack trace
-            error_message = "A Shotgun error was reported:\n\n%s" % ex
+            error_message = "A ShotGrid error was reported:\n\n%s" % ex
         else:
             error_message = (
-                "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s"
+                "A ShotGrid error was reported:\n\n%s (%s)\n\nTraceback:\n%s"
                 % (ex, ex_cls, traceback_str)
             )
     except:
@@ -1853,7 +1844,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
 
         if QtCore.QCoreApplication.instance():
             # there is an application running - so pop up a message!
-            QtGui.QMessageBox.critical(None, "Shotgun General Error", error_message)
+            QtGui.QMessageBox.critical(None, "ShotGrid General Error", error_message)
     except:
         pass
 

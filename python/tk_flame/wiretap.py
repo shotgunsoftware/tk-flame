@@ -20,12 +20,12 @@ The wiretap options interface is best discovered by introspection.
 In order to for example find out what project options are available for
 a version of flame, you can do the following:
 
-> /opt/Autodesk/wiretap/tools/current/wiretap_print_tree -d 1 -n /projects/my_project -s XML
+> /usr/discreet/wiretap/tools/current/wiretap_print_tree -d 1 -n /projects/my_project -s XML
 
 This will dump the wiretap XML stream that is associated with the project
 node /projects/my_project.
 
-For more wiretap utilities, check out /opt/Autodesk/wiretap/tools/current
+For more wiretap utilities, check out /usr/discreet/wiretap/tools/current
 
 """
 
@@ -306,7 +306,7 @@ class WiretapHandler(object):
 
             xml += (
                 "<Description>%s</Description>"
-                % "Created by Shotgun Flame Integration %s"
+                % "Created by ShotGrid Flame Integration %s"
                 % self._engine.version
             )
 

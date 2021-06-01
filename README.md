@@ -2,11 +2,11 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## Documentation
-This repository is a part of the Shotgun Pipeline Toolkit.
+This repository is a part of the ShotGrid Pipeline Toolkit.
 
 - For more information about this app and for release notes, *see the wiki section*.
 - For general information and documentation, click here: https://support.shotgunsoftware.com/entries/95441257
-- For information about Shotgun in general, click here: http://www.shotgunsoftware.com/toolkit
+- For information about ShotGrid in general, click here: http://www.shotgridsoftware.com/toolkit
 
 ## Using this app in your Setup
 All the apps that are part of our standard app suite are pushed to our App Store.
@@ -15,7 +15,7 @@ working on. For an overview of all the Apps and Engines in the Toolkit App Store
 click here: https://support.shotgunsoftware.com/entries/95441247.
 
 ## Have a Question?
-Don't hesitate to contact us! You can find us on support@shotgunsoftware.com
+Don't hesitate to contact us! Please visit our web site https://support.shotgunsoftware.com for help.
 
 ## Flame Engine Logging
 The Flame engine logs information to `/opt/Autodesk/log/tk-flame.log`. This is helpful if you are trying
@@ -51,7 +51,7 @@ Flame is typically being launched:
 - The multi launch app now executes the re-written DCC path and thereby starts executing `python/startup/launch_app.py`.
   inside the python interpreter which comes bundled with Flame (and contains a known version of PySide). The engine starts
   up, hooks paths are registered by setting the `DL_PYTHON_HOOK_PATH` environment variable etc.
-  At this point, a check is carried out to see if a Flame project corresponding to the Shotgun project exists or not.
+  At this point, a check is carried out to see if a Flame project corresponding to the ShotGrid project exists or not.
   If it doesn't, a project setup UI is shown on screen where a user can configure a new Flame project.
 
 - Once a Project has been established, the Flame DCC is launched.

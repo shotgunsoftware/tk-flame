@@ -18,7 +18,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 
 class CreatePublishPlugin(HookBaseClass):
     """
-    Plugin for creating generic publishes in Shotgun
+    Plugin for creating generic publishes in ShotGrid
     """
 
     def __init__(self, *args, **kwrds):
@@ -50,7 +50,7 @@ class CreatePublishPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "Creates publish file in Shotgun for the given object"
+        return "Creates publish file in ShotGrid for the given object"
 
     @property
     def settings(self):

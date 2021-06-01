@@ -162,7 +162,7 @@ class FlameItemCollector(HookBaseClass):
             # Flame export last export info
             export_context = self.engine.export_info
 
-            # Shotgun queries constants
+            # ShotGrid queries constants
             shot_fields = [
                 "code",
                 "sg_cut_in",

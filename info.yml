@@ -37,7 +37,7 @@ configuration:
     flame_batch_publish_type:
         type: tank_type
         description: The publish type associated with Flame batch scripts. This parameter is used
-                     to help the Flare launch process auto-load a batch script from Shotgun at startup.
+                     to help the Flare launch process auto-load a batch script from ShotGrid at startup.
         default_value: "Flame Batch File"
 
     backburner_manager:
@@ -90,28 +90,28 @@ configuration:
     generate_thumbnails:
         type: bool
         default_value: True
-        description: Generate thumbnails for assets exported from Flame when submitting to Shotgun.
+        description: Generate thumbnails for assets exported from Flame when submitting to ShotGrid.
 
     thumbnails_preset_path:
         type: str
         default_value: "Generate Thumbnail.xml"
         description: Path to the preset to use to generate thumbnails. If a relative path
-                     is passed, the path to the application specific presets for Shotgun will
+                     is passed, the path to the application specific presets for ShotGrid will
                      be prepended (/opt/Autodesk/presets/<version>/export/presets/shotgun/file_sequence).
                      This setting only apply from Flame 2019.1 and above.
 
     generate_previews:
         type: bool
         default_value: True
-        description: Generate preview for assets exported from Flame when submitting to Shotgun.
-                     Not all Shotgun entities supports preview and the code will fallback on thumbnail
+        description: Generate preview for assets exported from Flame when submitting to ShotGrid.
+                     Not all ShotGrid entities supports preview and the code will fallback on thumbnail
                      for entities that do not support it.
 
     previews_preset_path:
         type: str
         default_value: "Generate Preview.xml"
         description: Path to the preset to use to generate previews. If a relative path
-                     is passed, the path to the application specific presets for Shotgun will
+                     is passed, the path to the application specific presets for ShotGrid will
                      be prepended (/opt/Autodesk/presets/<version>/export/presets/shotgun/movie_file).
                      This setting only apply from Flame 2019.1 and abve.
 
@@ -120,7 +120,7 @@ configuration:
         type: bool
         default_value: True
         description: Global switch to allow or not the generation an higher quality movies
-                     file that will not be uploaded to shotgun but can be used by client applications
+                     file that will not be uploaded to ShotGrid but can be used by client applications
                      that do not want or cannot read original exported media from Flame.
                      This is currently only used by tk-flame-export.
 
@@ -128,13 +128,13 @@ configuration:
         type: str
         default_value: "Generate Local Movie.xml"
         description: Path to the preset to use to generate local movies. If a relative path
-                     is passed, the path to the application specific presets for Shotgun will
+                     is passed, the path to the application specific presets for ShotGrid will
                      be prepended (/opt/Autodesk/presets/<version>/export/presets/shotgun/movie_file).
                      This setting only apply from Flame 2019.1 and above.
 
 
     bypass_server_transcoding:
-        description: Try to bypass the Shotgun server side transcoding for thumbnail generation if possible.
+        description: Try to bypass the ShotGrid server side transcoding for thumbnail generation if possible.
                      This will upload the preview quicktime as is and will not generate a webm,
                      meaning that playback will not be supported on all browsers.
                      This will also disable playable movie preview and film strip generation.
@@ -196,12 +196,12 @@ configuration:
                 app_instance: { type: str }
                #display_name: { type: str } (optional)
 
-# the Shotgun fields that this engine needs in order to operate correctly
+# the ShotGrid fields that this engine needs in order to operate correctly
 requires_shotgun_fields:
 
 # More verbose description of this item
-display_name: "Shotgun Engine for Flame"
-description: "Shotgun Integration in Flame"
+display_name: "ShotGrid Engine for Flame"
+description: "ShotGrid Integration in Flame"
 
 # Required minimum versions for this item to run
 requires_shotgun_version:

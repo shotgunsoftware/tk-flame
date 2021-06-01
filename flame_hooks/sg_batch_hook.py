@@ -40,7 +40,7 @@ def batchSetupLoaded(setupPath):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -58,7 +58,7 @@ def batchSetupSaved(setupPath):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -83,7 +83,7 @@ def batchRenderBegin(info, userData, *args, **kwargs):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -111,7 +111,7 @@ def batchRenderEnd(info, userData, *args, **kwargs):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -142,7 +142,7 @@ def batch_burn_begin(info, userData, *args, **kwargs):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -170,7 +170,7 @@ def batch_burn_end(info, userData, *args, **kwargs):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -226,7 +226,7 @@ def batchExportBegin(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -273,7 +273,7 @@ def batchExportEnd(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return

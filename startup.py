@@ -47,12 +47,12 @@ class FlameLauncher(SoftwareLauncher):
     # variable components of the path in one place
     COMPONENT_REGEX_LOOKUP = {
         "darwin": {
-            "version": r"\d.*",  # starts with a number followed by anything
-            "executable": r"[\w]+",  # word characters (a-z0-9)
+            "version": "\d.*",  # starts with a number followed by anything
+            "executable": "[\w]+",  # word characters (a-z0-9)
         },
         "linux2": {
-            "version": r"\d.*",  # starts with a number followed by anything
-            "executable": r"[\w]+",  # word characters (a-z0-9)
+            "version": "\d.*",  # starts with a number followed by anything
+            "executable": "[\w]+",  # word characters (a-z0-9)
         },
     }
 
@@ -65,6 +65,10 @@ class FlameLauncher(SoftwareLauncher):
             "/opt/Autodesk/{executable}_{version}/bin/startApplication",
         ],
         "linux2": [
+            # /usr/discreet/flame_2017.1/bin/startApplication
+            # /usr/discreet/flameassist_2017.1.pr70/bin/startApplication
+            # /usr/discreet/flare_2017.1/bin/startApplication
+            # /usr/discreet/flamepremium_2017.1/bin/startApplication
             "/usr/discreet/{executable}_{version}/bin/startApplication",
             "/opt/Autodesk/{executable}_{version}/bin/startApplication",
         ],
