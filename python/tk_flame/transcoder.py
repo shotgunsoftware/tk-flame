@@ -57,7 +57,7 @@ class Transcoder(object):
     def _build_python_hook_override(user_data_job_key):
         """
         Build a Flame's python hook override callback for export that will
-        prevent python hook to trigger a shotgun publish when generating the
+        prevent python hook to trigger a ShotGrid publish when generating the
         thumbnails from the Flame's export API.
 
         Also collect the background job create if any and flag that we want to
@@ -240,7 +240,7 @@ class Transcoder(object):
     ):
         """
         Generate a preview for a given media asset and link
-        it to a list of Shotgun entities. Multiple call to this method with
+        it to a list of ShotGrid entities. Multiple call to this method with
         same path but different target_entitie can be done to bundle jobs.
 
         :param src_path: Path to the media for which transcoding need to be done.

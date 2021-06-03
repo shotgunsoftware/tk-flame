@@ -197,7 +197,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # Assuming we're in a new enough version of Flame (2018.3+) we'll
         # be able to link the Flame project to our SG project. This will
-        # ensure that is a use launches Flame's plugin-based Shotgun
+        # ensure that is a use launches Flame's plugin-based ShotGrid
         # integration that they will be bootstrapped into the correct
         # project and won't be prompted to choose an SG project to link to.
         #
@@ -211,11 +211,11 @@ class FlameEngine(sgtk.platform.Engine):
             except Exception:
                 self.logger.debug(
                     "Was unable to import the flame Python module. As a result, "
-                    "the Flame project will not be linked to associated Shotgun "
+                    "the Flame project will not be linked to associated ShotGrid "
                     "project using the Flame Python API. This shouldn't cause "
                     "any problems in the current session, but it does mean "
                     "that the user might be prompted to link this project to a "
-                    "Shotgun project if they launch Flame using the Toolkit "
+                    "ShotGrid project if they launch Flame using the Toolkit "
                     "plugin and open this same Flame project."
                 )
             else:
@@ -230,13 +230,13 @@ class FlameEngine(sgtk.platform.Engine):
                         "shotgun_project_name property. This shouldn't cause "
                         "any problems in the current session, but it does mean "
                         "that the user might be prompted to link this project to a "
-                        "Shotgun project if they launch Flame using the Toolkit "
+                        "ShotGrid project if they launch Flame using the Toolkit "
                         "plugin and open this same Flame project."
                     )
                 else:
                     self.logger.debug(
                         "Successfully linked the Flame project to its associated "
-                        "Shotgun project."
+                        "ShotGrid project."
                     )
 
     def _initialize_logging(self, install_root):
@@ -588,7 +588,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         The location of the flame export preset to use to generate local movies.
 
-        Local movies are linked to assets in Shotgun thru the "Path to Movie"
+        Local movies are linked to assets in ShotGrid thru the "Path to Movie"
         field but are not uploaded on the server.
 
         :returns: Path as string
@@ -956,7 +956,7 @@ class FlameEngine(sgtk.platform.Engine):
             os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
 
         # see if we can launch into batch mode. We only do this when in a
-        # shot context and if there is a published batch file in Shotgun
+        # shot context and if there is a published batch file in ShotGrid
         #
         # For now, hard code the logic of how to detect which batch file to load up.
         # TODO: in the future, we may want to expose this in a hook - but it is arguably
@@ -1024,7 +1024,7 @@ class FlameEngine(sgtk.platform.Engine):
             # in both these states, no special QT init is necessary.
             # Defer to default implementation which looks for pyside and
             # gracefully fails in case that isn't found.
-            self.log_debug("Initializing default PySide for in-DCC / backburner use")
+            self.log_debug("Initializing default PySide for in-DCC / Backburner use")
             return super(FlameEngine, self)._define_qt_base()
 
         # we are running the engine outside of Flame.
@@ -1454,7 +1454,7 @@ class FlameEngine(sgtk.platform.Engine):
             completion,
         )
         if not completion_groups:
-            raise TankError("Invalid backburner completion setting: %s" % completion)
+            raise TankError("Invalid Backburner completion setting: %s" % completion)
 
         completion_handling, completion_handling_delay = completion_groups.groups()
         if completion_handling == "default":
@@ -1468,7 +1468,7 @@ class FlameEngine(sgtk.platform.Engine):
                 completion_handling_delay = int(completion_handling_delay)
             except ValueError as error:
                 raise TankError(
-                    "Invalid backburner completion delay setting: %s: %s"
+                    "Invalid Backburner completion delay setting: %s: %s"
                     % (completion, error)
                 )
         return (completion_handling, completion_handling_delay)
@@ -1631,7 +1631,7 @@ class FlameEngine(sgtk.platform.Engine):
             if temp_dir_is_local and (bb_server_group or bb_servers != localhost):
                 raise TankError(
                     "backburner_shared_tmp points to a local path (%s) and jobs can be ran "
-                    "on multiple BackBurner servers. Change backburner_shared_tmp, "
+                    "on multiple Backburner servers. Change backburner_shared_tmp, "
                     "backburner_server_group and/or backburner_servers settings in "
                     "the configuration files." % temp_dir
                 )
@@ -1692,9 +1692,9 @@ class FlameEngine(sgtk.platform.Engine):
             # Make sure that the session is not expired
             sgtk.get_authenticated_user().refresh_credentials()
         except sgtk.authentication.AuthenticationCancelled:
-            self.log_debug("User cancelled auth. No backburner job will be created.")
+            self.log_debug("User cancelled auth. No Backburner job will be created.")
         else:
-            self.log_debug("Starting backburner job '%s'" % job_name)
+            self.log_debug("Starting Backburner job '%s'" % job_name)
             self.log_debug("Command line: %s" % full_cmd)
             self.log_debug("App: %s" % instance)
             self.log_debug("Method: %s with args %s" % (method_name, args))
@@ -1718,10 +1718,10 @@ class FlameEngine(sgtk.platform.Engine):
                 return backburner_job_id
 
             else:
-                error = ["Shotgun backburner job could not be created."]
+                error = ["ShotGrid Backburner job could not be created."]
                 if stderr:
                     error += ["Reason: " + stderr]
-                error += ["See backburner logs for details."]
+                error += ["See Backburner logs for details."]
 
                 raise TankError("\n".join(error))
 
@@ -1838,10 +1838,10 @@ def sgtk_exception_trap(ex_cls, ex, tb):
         traceback_str = "\n".join(traceback.format_tb(tb))
         if ex_cls == TankError:
             # for TankErrors, we don't show the whole stack trace
-            error_message = "A Shotgun error was reported:\n\n%s" % ex
+            error_message = "A ShotGrid error was reported:\n\n%s" % ex
         else:
             error_message = (
-                "A Shotgun error was reported:\n\n%s (%s)\n\nTraceback:\n%s"
+                "A ShotGrid error was reported:\n\n%s (%s)\n\nTraceback:\n%s"
                 % (ex, ex_cls, traceback_str)
             )
     except:
@@ -1853,7 +1853,7 @@ def sgtk_exception_trap(ex_cls, ex, tb):
 
         if QtCore.QCoreApplication.instance():
             # there is an application running - so pop up a message!
-            QtGui.QMessageBox.critical(None, "Shotgun General Error", error_message)
+            QtGui.QMessageBox.critical(None, "ShotGrid General Error", error_message)
     except:
         pass
 

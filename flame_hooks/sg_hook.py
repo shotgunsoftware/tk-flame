@@ -17,7 +17,7 @@ def appExit(info):
 
     engine = sgtk.platform.current_engine()
 
-    # Nothing to do if no Shotgun engine has been initialized.
+    # Nothing to do if no ShotGrid engine has been initialized.
     if engine is not None:
         engine.destroy()
 
@@ -78,7 +78,7 @@ def getMainMenuCustomUIActions():
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return ()
@@ -108,9 +108,9 @@ def getMainMenuCustomUIActions():
     if not context_commands:
         return ()
 
-    # sorts the list to have Log out option always appear last, Shotgun Python Console prior, and the rest in same order
+    # sorts the list to have Log out option always appear last, ShotGrid Python Console prior, and the rest in same order
     context_commands.sort(
-        key=lambda el: ("Log Out" in el, "Shotgun Python Console..." in el, None)
+        key=lambda el: ("Log Out" in el, "ShotGrid Python Console..." in el, None)
     )
 
     # generate flame data structure
@@ -119,7 +119,7 @@ def getMainMenuCustomUIActions():
         for (command_name, display_name) in context_commands
     ]
 
-    return ({"name": "Shotgun", "actions": tuple(actions)},)
+    return ({"name": "ShotGrid", "actions": tuple(actions)},)
 
 
 def customUIAction(info, userData):
@@ -137,7 +137,7 @@ def customUIAction(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
