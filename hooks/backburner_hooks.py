@@ -24,7 +24,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 
 class BackburnerHooks(HookBaseClass):
     # constants
-    # default height for Shotgun uploads
+    # default height for ShotGrid uploads
     # see https://support.shotgunsoftware.com/entries/26303513-Transcoding
     SHOTGUN_QUICKTIME_TARGET_HEIGHT = 720
 
@@ -43,16 +43,16 @@ class BackburnerHooks(HookBaseClass):
         self, path, targets, field_name, display_name, files_to_delete
     ):
         """
-        Upload a file to Shotgun, link it to the targets and delete the file.
+        Upload a file to ShotGrid, link it to the targets and delete the file.
 
         :param path: Media file to upload.
-        :param targets: Shotgun entities to be linked to the file.
-        :param field_name: The internal Shotgun field name on the entity to
+        :param targets: ShotGrid entities to be linked to the file.
+        :param field_name: The internal ShotGrid field name on the entity to
             store the file in. This field must be "thumb_image" (if image) or
             "sg_uploaded_movie" (if movie).
         :param display_name: The display name to use for the file.
         :param files_to_delete: List of files to be deleted upon successful
-            upload to Shotgun.
+            upload to ShotGrid.
         """
         for target in targets:
             self.parent.shotgun.upload(
@@ -68,12 +68,12 @@ class BackburnerHooks(HookBaseClass):
 
     def update_path_to_movie(self, path, targets, files_to_delete):
         """
-        Update the path to the local movie in Shotgun
+        Update the path to the local movie in ShotGrid
 
         :param path: Local movie file
-        :param targets: Shotgun entities to be linked to the file.
+        :param targets: ShotGrid entities to be linked to the file.
         :param files_to_delete: List of files to be deleted upon successful
-            update to Shotgun.
+            update to ShotGrid.
         """
         batch_data = []
         for target in targets:
@@ -182,7 +182,7 @@ class BackburnerHooks(HookBaseClass):
                 return return_code
 
             if self.parent.get_setting("bypass_server_transcoding"):
-                self.parent.log_debug("Bypass Shotgun transcoding setting enabled.")
+                self.parent.log_debug("Bypass ShotGrid transcoding setting enabled.")
                 field_name = "sg_uploaded_movie_mp4"
             else:
                 field_name = "sg_uploaded_movie"

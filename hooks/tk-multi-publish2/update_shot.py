@@ -18,7 +18,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 
 class UpdateShotPlugin(HookBaseClass):
     """
-    Plugin for pushing Shot metadata in Shotgun
+    Plugin for pushing Shot metadata in ShotGrid
     """
 
     def __init__(self, *args, **kwrds):
@@ -49,7 +49,7 @@ class UpdateShotPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "Update shot in Shotgun for the given object"
+        return "Update shot in ShotGrid for the given object"
 
     @property
     def settings(self):
@@ -179,14 +179,14 @@ class UpdateShotPlugin(HookBaseClass):
             sequence = item.properties["context"]["Sequence"]
             target.append(sequence)
 
-        # Update the Shot on shotgun
+        # Update the Shot on ShotGrid
         self.sg.update("Shot", item.context.entity["id"], shot_data)
 
         # Create the Image thumbnail in background
         if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
             # Favor the file_path attribute if present since it will use the same
             # syntax as Flame for files sequences (ie file.[#-#].ext) instead of
-            # Shotgun syntax (ie file.%d.ext).
+            # ShotGrid syntax (ie file.%d.ext).
             path = item.properties.get("file_path", item.properties["path"])
             self.engine.thumbnail_generator.generate(
                 display_name=item.name,
@@ -211,7 +211,7 @@ class UpdateShotPlugin(HookBaseClass):
         if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
             # Favor the file_path attribute if present since it will use the same
             # syntax as Flame for files sequences (ie file.[#-#].ext) instead of
-            # Shotgun syntax (ie file.%d.ext).
+            # ShotGrid syntax (ie file.%d.ext).
             path = item.properties.get("file_path", item.properties["path"])
             self.engine.thumbnail_generator.finalize(path=path)
 

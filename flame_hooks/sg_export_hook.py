@@ -25,7 +25,7 @@ def getCustomExportProfiles(profiles):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -58,7 +58,7 @@ def preCustomExport(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -68,7 +68,7 @@ def preCustomExport(info, userData):
 
     # get the preset that the user selected from the menu
     current_preset = userData.get("sg_preset_title")
-    # We can get here with a client defined hook. Ignore it if it is not shotgun related.
+    # We can get here with a client defined hook. Ignore it if it is not ShotGrid related.
     if current_preset is None:
         return
 
@@ -103,7 +103,7 @@ def postCustomExport(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -136,7 +136,7 @@ def preExport(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -169,7 +169,7 @@ def postExport(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -220,7 +220,7 @@ def preExportSequence(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -254,7 +254,7 @@ def postExportSequence(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -310,7 +310,7 @@ def preExportAsset(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
@@ -369,7 +369,7 @@ def postExportAsset(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the Shotgun engine.
+    # We can't do anything without the ShotGrid engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return

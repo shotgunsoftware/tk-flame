@@ -37,11 +37,11 @@ class ProjectStartupActions(HookBaseClass):
     - The storage volume to store a new project on
     - The workspace to use when launching the project
 
-    It is possible to introspect Shotgun inside this hook, making it straight
-    forward to make this entire process driven from field values within Shotgun.
+    It is possible to introspect ShotGrid inside this hook, making it straight
+    forward to make this entire process driven from field values within ShotGrid.
 
     - The engine instance can be fetched via self.parent
-    - A Shotgun API handle is available via engine_obj.shotgun.
+    - A ShotGrid API handle is available via engine_obj.shotgun.
     - The project id can be retrieved via engine_obj.context.project["id"]
     """
 
@@ -123,13 +123,13 @@ class ProjectStartupActions(HookBaseClass):
         shotgun_user = sgtk.util.get_current_user(engine.sgtk)
 
         if shotgun_user is None:
-            user_name = "Shotgun Unknown"
+            user_name = "ShotGrid Unknown"
             engine.log_warning(
                 "Toolkit was not able to map your machine user name to a "
-                "user in Shotgun. Your Flame project will be associated with a "
+                "user in ShotGrid. Your Flame project will be associated with a "
                 "default 'unknown' user. In order to correctly connect your Flame "
-                "user with the current Shotgun user, check that the current operating system "
-                "user name matches the 'login' field of one of the users in Shotgun. "
+                "user with the current ShotGrid user, check that the current operating system "
+                "user name matches the 'login' field of one of the users in ShotGrid. "
                 "Alternatively, if would like a different naming convention, either "
                 "reconfigure the Flame project startup hook or the Toolkit Core user "
                 "resolve hook."
@@ -139,7 +139,7 @@ class ProjectStartupActions(HookBaseClass):
 
         # Note! Flame users are not compatible across DCC versions so there is a manual
         # process involved when upgrading. A common convention here is to generate one
-        # user per DCC version, so this is what the Shotgun integration will default to as well.
+        # user per DCC version, so this is what the ShotGrid integration will default to as well.
         full_user_name = "%s (v%s)" % (user_name, self.parent.flame_version)
 
         return full_user_name

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Submit to Shotgun</string>
+   <string>Submit to ShotGrid</string>
   </property>
   <property name="styleSheet">
    <string notr="true">/* this is to force the combo box dropdowns to show all items rather than displaying only a few items and a scroll bar */
@@ -77,7 +77,7 @@ height: 100px;
           </size>
          </property>
          <property name="toolTip">
-          <string>The &lt;b&gt;Flame project name&lt;/b&gt; is automatically generated based on your current Shotgun project. </string>
+          <string>The &lt;b&gt;Flame project name&lt;/b&gt; is automatically generated based on your current ShotGrid project. </string>
          </property>
          <property name="text">
           <string>xxx</string>
@@ -119,7 +119,7 @@ height: 100px;
        <item row="3" column="1">
         <widget class="QLabel" name="user_name">
          <property name="toolTip">
-          <string>The &lt;b&gt;User Name&lt;/b&gt; associated with your new Flame Project is based on the Shotgun user that matches your current login name.
+          <string>The &lt;b&gt;User Name&lt;/b&gt; associated with your new Flame Project is based on the ShotGrid user that matches your current login name.
 </string>
          </property>
          <property name="text">

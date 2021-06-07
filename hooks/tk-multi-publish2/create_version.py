@@ -19,7 +19,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 
 class CreateVersionPlugin(HookBaseClass):
     """
-    Plugin for creating generic publishes in Shotgun
+    Plugin for creating generic publishes in ShotGrid
     """
 
     def __init__(self, *args, **kwrds):
@@ -51,7 +51,7 @@ class CreateVersionPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "Creates version in Shotgun for the given object"
+        return "Creates version in ShotGrid for the given object"
 
     @property
     def settings(self):
@@ -164,7 +164,7 @@ class CreateVersionPlugin(HookBaseClass):
             ver_data["sg_movie_aspect_ratio"] = float(aspect_ratio)
 
         # For file sequences, we want the path as provided by flame.
-        # The property 'path' will be encoded the shotgun way file.%d.ext
+        # The property 'path' will be encoded the ShotGrid way file.%d.ext
         # while 'file_path' will be encoded the flame way file.[##-##].ext.
         file_path = item.properties.get("file_path", path)
 

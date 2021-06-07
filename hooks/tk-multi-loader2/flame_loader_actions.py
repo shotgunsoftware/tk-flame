@@ -77,7 +77,7 @@ class FlameLoaderActions(HookBaseClass):
         one object is returned for an action, use the params key to pass additional
         data into the run_action hook.
 
-        :param sg_publish_data: Shotgun data dictionary with all the standard publish fields.
+        :param sg_publish_data: ShotGrid data dictionary with all the standard publish fields.
         :param actions: List of action strings which have been defined in the app configuration.
         :param ui_area: String denoting the UI Area (see above).
         :returns List of dictionaries, each with keys name, params, caption and description
@@ -150,7 +150,7 @@ class FlameLoaderActions(HookBaseClass):
         Each entry will have the following values:
 
             name: Name of the action to execute
-            sg_publish_data: Publish information coming from Shotgun
+            sg_publish_data: Publish information coming from ShotGrid
             params: Parameters passed down from the generate_actions hook.
 
         .. note::
@@ -177,7 +177,7 @@ class FlameLoaderActions(HookBaseClass):
 
         :param name: Action name string representing one of the items returned by generate_actions.
         :param params: Params data, as specified by generate_actions.
-        :param sg_publish_data: Shotgun data dictionary with all the standard publish fields.
+        :param sg_publish_data: ShotGrid data dictionary with all the standard publish fields.
         :returns: No return value expected.
         """
 
@@ -228,7 +228,7 @@ class FlameLoaderActions(HookBaseClass):
 
         This function import the Batch setup into the current Batch Group.
 
-        :param dict sg_publish_data: Shotgun data dictionary with all the standard publish fields.
+        :param dict sg_publish_data: ShotGrid data dictionary with all the standard publish fields.
         """
 
         app = self.parent
@@ -253,7 +253,7 @@ class FlameLoaderActions(HookBaseClass):
         This function import the clip into self.import_location (Default: Schematic Reel 1)
         in the current Batch Group.
 
-        :param dict sg_publish_data: Shotgun data dictionary with all the standard publish fields.
+        :param dict sg_publish_data: ShotGrid data dictionary with all the standard publish fields.
         """
 
         app = self.parent
@@ -297,7 +297,7 @@ class FlameLoaderActions(HookBaseClass):
         create the batch group using the latest version of the batch file present in the Shot
         (Do nothing if no batch file is present).
 
-        :param dict sg_publish_data: Shotgun data dictionary with all the standard publish fields.
+        :param dict sg_publish_data: ShotGrid data dictionary with all the standard publish fields.
         :param bool build_new: Hint about if we should build a new batch group from the clip or
                                use the latest batch file
         """
@@ -308,7 +308,7 @@ class FlameLoaderActions(HookBaseClass):
         sg_info = self._get_batch_info_from_sg_publish_data(sg_publish_data)
         if sg_info is None:
             raise FlameLoaderActionError(
-                "Cannot load a Batch Group from Shotgun using this Shot"
+                "Cannot load a Batch Group from ShotGrid using this Shot"
             )
 
         self._go_to_batch_on_action()
@@ -748,7 +748,7 @@ class FlameLoaderActions(HookBaseClass):
         paths need to be custom formatted (ie frames), and others need to be ignored
         (for instance, Batch files)
 
-        :param [dict] sg_published_files: A list of Shotgun data dictionary with all the
+        :param [dict] sg_published_files: A list of ShotGrid data dictionary with all the
                                           standard publish fields.
         :returns: A list of published file information.
         :rtype: [dict]
@@ -819,7 +819,7 @@ class FlameLoaderActions(HookBaseClass):
         """
         Gets the Batch File from a published files dictionary
 
-        :param dict sg_info: A list of Shotgun data dictionary containing the published files.
+        :param dict sg_info: A list of ShotGrid data dictionary containing the published files.
         :returns: The path to the batch file.
         :rtype: str
         """
@@ -845,10 +845,10 @@ class FlameLoaderActions(HookBaseClass):
 
     def _get_batch_info_from_sg_publish_data(self, sg_publish_data):
         """
-        Gets the publish Batch file dictionnary from shotgun data dictionnary
+        Gets the publish Batch file dictionnary from ShotGrid data dictionnary
 
-        :param sg_publish_data: Shotgun data dictionary with all the standard publish fields.
-        :returns: A list of Shotgun data dictionary containing the published batch files.
+        :param sg_publish_data: ShotGrid data dictionary with all the standard publish fields.
+        :returns: A list of ShotGrid data dictionary containing the published batch files.
         """
 
         sg_filters = [["id", "is", sg_publish_data["id"]]]
@@ -871,9 +871,9 @@ class FlameLoaderActions(HookBaseClass):
 
     def _get_batch_path_from_sg_publish_data(self, sg_publish_data):
         """
-        Gets the current shot batch filefrom shotgun data dictionnary
+        Gets the current shot batch filefrom ShotGrid data dictionnary
 
-        :param sg_publish_data: Shotgun data dictionary with all the standard publish fields.
+        :param sg_publish_data: ShotGrid data dictionary with all the standard publish fields.
         :returns: The path to the batch file for the curent shot.
         """
         sg_info = self._get_batch_info_from_sg_publish_data(sg_publish_data)
@@ -884,7 +884,7 @@ class FlameLoaderActions(HookBaseClass):
         """
         Gets the clip files information from a published files dictionary
 
-        :param dict sg_info: A list of Shotgun data dictionary containing the published files.
+        :param dict sg_info: A list of ShotGrid data dictionary containing the published files.
         :returns: A list of supported published file data.
         :rtype: [dict]
         """
@@ -913,7 +913,7 @@ class FlameLoaderActions(HookBaseClass):
         """
         Find an Open Clip linked to the shot we want to output a version to.
 
-        :param dict sg_info: A list of Shotgun data dictionary containing the published files.
+        :param dict sg_info: A list of ShotGrid data dictionary containing the published files.
         :returns: The path to the Open Clip to append a version to.
         :rtype: [string]
         """
@@ -1192,7 +1192,7 @@ class FlameLoaderActions(HookBaseClass):
         Build a path from a template and from a clip information dictionary.
 
         :param TemplatePath template: Template to use to build the path
-        :param dict fields: Dictionary containing Shotgun Template keys and theirs values
+        :param dict fields: Dictionary containing ShotGrid Template keys and theirs values
         :return: Tuple containing the project root, the media path and the extension
         :rtype: ( str, str, str )
         """

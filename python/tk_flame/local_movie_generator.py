@@ -41,10 +41,10 @@ class LocalMovieGenerator(object):
     ):
         """
         Generate a local movie file from a Flame exported assets and link
-        it to a list of Shotgun entities in the Path to movie field.
+        it to a list of ShotGrid entities in the Path to movie field.
 
         :param src_path: Path to the media for which a local movie need to be
-            generated and linked to Shotgun.
+            generated and linked to ShotGrid.
         :param dst_path: Path to local movie file to generate.
         :param display_name: The display name of the item we are generating the
             movie for. This will usually be the based name of the path.
@@ -70,8 +70,8 @@ class LocalMovieGenerator(object):
         )
 
         self.engine.create_local_backburner_job(
-            job_name="%s - Updating Shotgun Path to movie" % display_name,
-            description="Uploading Shotgun Path to movie to %s" % dst_path,
+            job_name="%s - Updating ShotGrid Path to movie" % display_name,
+            description="Uploading ShotGrid Path to movie to %s" % dst_path,
             dependencies=job_id,
             instance="backburner_hooks",
             method_name="update_path_to_movie",

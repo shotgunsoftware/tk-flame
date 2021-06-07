@@ -32,11 +32,11 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
     ):
         """
         Generate a preview for a given media asset and link
-        it to a list of Shotgun entities. Multiple call to this method with
+        it to a list of ShotGrid entities. Multiple call to this method with
         same path but different target_entitie can be done to bundle jobs.
 
         :param path: Path to the media for which thumbnail or preview need to be
-            generated and uploaded to Shotgun.
+            generated and uploaded to ShotGrid.
         :param display_name: The display name of the item we are generating the
             thumbnail for. This will usually be the based name of the path.
         :param target_entities: Target entities to which the thumbnails need to
@@ -58,7 +58,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 dst_path=None,
                 extension=".mov",
                 display_name=display_name,
-                job_context="Create Shotgun Preview",
+                job_context="Create ShotGrid Preview",
                 preset_path=self.engine.previews_preset_path,
                 asset_info=asset_info,
                 dependencies=dependencies,
@@ -82,11 +82,11 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
     ):
         """
         Generate a thumbnail for a given media asset and link
-        it to a list of Shotgun entities. Multiple call to this method with
+        it to a list of ShotGrid entities. Multiple call to this method with
         same path but different target_entitie can be done to bundle jobs.
 
         :param path: Path to the media for which thumbnail or preview need to be
-            generated and uploaded to Shotgun.
+            generated and uploaded to ShotGrid.
         :param display_name: The display name of the item we are generating the
             thumbnail for. This will usually be the based name of the path.
         :param target_entities: Target entities to which the thumbnails need to
@@ -110,7 +110,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
                 dst_path=None,
                 extension=".jpg",
                 display_name=display_name,
-                job_context="Create Shotgun Thumbnail",
+                job_context="Create ShotGrid Thumbnail",
                 preset_path=self.engine.thumbnails_preset_path,
                 asset_info=asset_info,
                 dependencies=dependencies,
@@ -136,7 +136,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         :param thumbnail_job: Thumbnail generation job information.
         :return: Backburner job ID created.
         """
-        job_context = "Upload Shotgun Thumbnail"
+        job_context = "Upload ShotGrid Thumbnail"
         job_name = self.engine.sanitize_backburner_job_name(
             job_name=thumbnail_job.get("display_name"), job_suffix=" - %s" % job_context
         )
@@ -168,12 +168,12 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         :return: Backburner job ID created.
         """
         if self.engine.get_setting("bypass_server_transcoding"):
-            self.engine.log_debug("Bypass Shotgun transcoding setting ENABLED.")
+            self.engine.log_debug("Bypass ShotGrid transcoding setting ENABLED.")
             field_name = "sg_uploaded_movie_mp4"
         else:
             field_name = "sg_uploaded_movie"
 
-        job_context = "Upload Shotgun Preview"
+        job_context = "Upload ShotGrid Preview"
         job_name = self.engine.sanitize_backburner_job_name(
             job_name=preview_job.get("display_name"), job_suffix=" - %s" % job_context
         )
@@ -200,10 +200,10 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
     def finalize(self, path=None):
         """
         Ensure the generated thumbnail or preview have been uploaded to the
-        Shotgun Server if that was not done during the generate() pass.
+        ShotGrid Server if that was not done during the generate() pass.
 
         :param path: Path to the media for which thumbnail or/and preview need
-            to be uploaded to Shotgun. If None is pass, all jobs will be
+            to be uploaded to ShotGrid. If None is pass, all jobs will be
             finalized.
         :return: Backburner job IDs created.
         """
