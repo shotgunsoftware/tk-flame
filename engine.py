@@ -1662,7 +1662,7 @@ class FlameEngine(sgtk.platform.Engine):
         pickle.dump(data, fh)
         fh.close()
 
-        full_cmd = "%s %s %s %s %s" % (
+        full_cmd = '"%s" %s "%s" "%s" "%s"' % (
             backburner_job_cmd,
             " ".join(backburner_args),
             self.python_executable,
