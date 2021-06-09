@@ -1721,7 +1721,7 @@ class FlameEngine(sgtk.platform.Engine):
                 error = ["ShotGrid Backburner job could not be created."]
                 if stderr:
                     error += ["Reason: " + stderr]
-                error += ["See Backburner logs for details."]
+                error += ["See Backburner logs in /opt/Autodesk/backburner/Network/backburner.log for details."]
 
                 raise TankError("\n".join(error))
 
