@@ -108,9 +108,17 @@ def getMainMenuCustomUIActions():
     if not context_commands:
         return ()
 
+    version_major = int(os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION", 0))
+    version_minor = int(os.environ.get("SHOTGUN_FLAME_MINOR_VERSION", 0))
+    name = (
+        "Shotgun"
+        if version_major < 2022 or version_major == 2022 and version_minor <= 0
+        else "ShotGrid"
+    )
+
     # sorts the list to have Log out option always appear last, ShotGrid Python Console prior, and the rest in same order
     context_commands.sort(
-        key=lambda el: ("Log Out" in el, "ShotGrid Python Console..." in el, None)
+        key=lambda el: ("Log Out" in el, "%s Python Console..." % name in el, None)
     )
 
     # generate flame data structure
@@ -119,7 +127,7 @@ def getMainMenuCustomUIActions():
         for (command_name, display_name) in context_commands
     ]
 
-    return ({"name": "ShotGrid", "actions": tuple(actions)},)
+    return ({"name": name, "actions": tuple(actions)},)
 
 
 def customUIAction(info, userData):
