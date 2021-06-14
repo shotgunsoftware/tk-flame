@@ -23,7 +23,6 @@ import logging
 import logging.handlers
 import pprint
 import traceback
-import socket
 import subprocess
 import tempfile
 
@@ -1613,7 +1612,7 @@ class FlameEngine(sgtk.platform.Engine):
             "/var/tmp",
             "/usr/tmp",
         ]
-        localhost = socket.gethostname()
+        localhost = os.uname()[1].split(".")[0]
         if not bb_server_group and not bb_servers:
             # No servers/groups sepecified and local path.
             # Force the job to run on local server.
