@@ -24,7 +24,14 @@ def appExit(info):
 
 def getCustomUIActions():
 
-    version = [
+    try:
+        import flame
+
+        version = [flame.get_version_major()]
+    except:
+        version = []
+
+    version += [
         os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION"),
         os.environ.get("TOOLKIT_FLAME_MAJOR_VERSION"),
     ]
@@ -108,8 +115,15 @@ def getMainMenuCustomUIActions():
     if not context_commands:
         return ()
 
-    version_major = int(os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION", 0))
-    version_minor = int(os.environ.get("SHOTGUN_FLAME_MINOR_VERSION", 0))
+    try:
+        import flame
+
+        version_major = int(flame.get_version_major())
+        version_minor = int(flame.get_version_minor())
+    except:
+        version_major = int(os.environ.get("SHOTGUN_FLAME_MAJOR_VERSION", 0))
+        version_minor = int(os.environ.get("SHOTGUN_FLAME_MINOR_VERSION", 0))
+
     name = (
         "Shotgun"
         if version_major < 2022 or version_major == 2022 and version_minor <= 0
