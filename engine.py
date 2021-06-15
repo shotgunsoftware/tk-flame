@@ -1640,15 +1640,22 @@ class FlameEngine(sgtk.platform.Engine):
         else:
             # Possible remote server but local only path.
             # Fail the job creation with an explicit message.
-            if temp_dir_is_local and (
-                bb_server_group or not bb_servers.startswith(local_server)
-            ):
-                raise TankError(
-                    "backburner_shared_tmp points to a local path (%s) and jobs can be ran "
-                    "on multiple Backburner servers. Change backburner_shared_tmp, "
-                    "backburner_server_group and/or backburner_servers settings in "
-                    "the configuration files." % temp_dir
-                )
+            if temp_dir_is_local:
+                all_local_servers = not bb_server_group
+                if all_local_servers:
+                    for bb_server in bb_servers.split(","):
+                        all_local_servers = bb_servers.startswith(local_server)
+                        if not all_local_servers:
+                            break
+                if not all_local_servers:
+                    raise TankError(
+                        "backburner_shared_tmp points to a local path (%s) and jobs can be ran "
+                        "on multiple Backburner servers. Change backburner_shared_tmp, "
+                        "backburner_server_group and/or backburner_servers settings in "
+                        "the configuration files or define SHOTGUN_FLAME_BACKBURNER_SHARED_TMP "
+                        "environment variable to point to a path valid on all Backburenr servers."
+                        % temp_dir
+                    )
 
         # Set the backburner job dependencies
         if dependencies:
