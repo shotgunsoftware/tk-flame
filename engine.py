@@ -23,6 +23,7 @@ import logging
 import logging.handlers
 import pprint
 import traceback
+import socket
 import subprocess
 import tempfile
 
@@ -299,7 +300,6 @@ class FlameEngine(sgtk.platform.Engine):
     @property
     def log_file(self):
         return self._log_file
-
 
     def set_python_executable(self, python_path):
         """
@@ -1606,13 +1606,25 @@ class FlameEngine(sgtk.platform.Engine):
         # to detect bad situation or to limit the job server
         #
         temp_dir = self.get_backburner_tmp()
-        temp_dir_is_local = temp_dir in [
+        temp_dir_is_local = False
+        for local_temp_dir in [
             tempfile.gettempdir(),
             "/tmp",
             "/var/tmp",
             "/usr/tmp",
-        ]
-        localhost = os.uname()[1].split(".")[0]
+        ]:
+            temp_dir_is_local = temp_dir.startswith(local_temp_dir)
+            if temp_dir_is_local:
+                break
+
+        localhost = socket.gethostname()
+
+        # Only keep the domain if the domain is .local on mac
+        #
+        local_server, local_server_domain = localhost.split(".")[0:2]
+        if sgtk.util.is_macOS() and local_server_domain == "local":
+            local_server += ".local"
+
         if not bb_server_group and not bb_servers:
             # No servers/groups sepecified and local path.
             # Force the job to run on local server.
@@ -1621,14 +1633,16 @@ class FlameEngine(sgtk.platform.Engine):
                     [
                         "{}{}".format(a, b)
                         for b in ["", "-1", "-2", "-3", "-4", "-5", "-6", "-7"]
-                        for a in [localhost]
+                        for a in [local_server]
                     ]
                 )
                 backburner_args.append('-servers:"%s"' % local_servers)
         else:
             # Possible remote server but local only path.
             # Fail the job creation with an explicit message.
-            if temp_dir_is_local and (bb_server_group or bb_servers != localhost):
+            if temp_dir_is_local and (
+                bb_server_group or not bb_servers.startswith(local_server)
+            ):
                 raise TankError(
                     "backburner_shared_tmp points to a local path (%s) and jobs can be ran "
                     "on multiple Backburner servers. Change backburner_shared_tmp, "
@@ -1721,7 +1735,9 @@ class FlameEngine(sgtk.platform.Engine):
                 error = ["ShotGrid Backburner job could not be created."]
                 if stderr:
                     error += ["Reason: " + stderr]
-                error += ["See Backburner logs in /opt/Autodesk/backburner/Network/backburner.log for details."]
+                error += [
+                    "See Backburner logs in /opt/Autodesk/backburner/Network/backburner.log for details."
+                ]
 
                 raise TankError("\n".join(error))
 
