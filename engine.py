@@ -1615,7 +1615,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         if bb_servers:
             sanitized_bb_server_list = ""
-            for bb_server in bb_servers:
+            for bb_server in bb_servers.split(","):
                 sanitized_bb_server_list += self.get_backburner_server_name(bb_server)
             backburner_args.append('-servers:"%s"' % sanitized_bb_server_list)
 
