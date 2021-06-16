@@ -1511,10 +1511,15 @@ class FlameEngine(sgtk.platform.Engine):
     def get_backburner_server_name(hostname):
         # Only keep the domain if the domain is .local on mac
         #
-        server_name, server_domain = hostname.split(".")[0:2]
-        if sgtk.util.is_macos() and server_domain == "local":
-            server_name += ".local"
-        return server_name
+        splited_hostname = hostname.split(".")
+
+        if (
+            sgtk.util.is_macos()
+            and len(splited_hostname) == 2
+            and splited_hostname[1] == "local"
+        ):
+            return splited_hostname[0] + ".local"
+        return splited_hostname[0]
 
     def create_local_backburner_job(
         self,
