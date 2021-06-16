@@ -1611,7 +1611,7 @@ class FlameEngine(sgtk.platform.Engine):
         if bb_servers:
             sanitized_bb_server_list = ""
             for bb_server in bb_servers:
-                sanitized_bb_server_list += get_backburner_server_name(bb_server)
+                sanitized_bb_server_list += self.get_backburner_server_name(bb_server)
             backburner_args.append('-servers:"%s"' % sanitized_bb_server_list)
 
         # Check where the temporary data has/will be written. If the job is
@@ -1630,7 +1630,7 @@ class FlameEngine(sgtk.platform.Engine):
             if temp_dir_is_local:
                 break
 
-        local_server = get_backburner_server_name(socket.gethostname())
+        local_server = self.get_backburner_server_name(socket.gethostname())
 
         if not bb_server_group and not bb_servers:
             # No servers/groups sepecified and local path.
