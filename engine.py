@@ -1507,6 +1507,15 @@ class FlameEngine(sgtk.platform.Engine):
         #
         return re.sub(r"[^0-9a-zA-Z_\-,\. %]+", "_", sanitized_job_name)
 
+    @staticmethod
+    def get_backburner_server_name(hostname):
+        # Only keep the domain if the domain is .local on mac
+        #
+        server_name, server_domain = hostname.split(".")[0:2]
+        if sgtk.util.is_macos() and server_domain == "local":
+            server_name += ".local"
+        return server_name
+
     def create_local_backburner_job(
         self,
         job_name,
@@ -1598,8 +1607,12 @@ class FlameEngine(sgtk.platform.Engine):
         if not bb_servers:
             # Otherwise, fallback to the global backburner servers setting
             bb_servers = self.get_setting("backburner_servers")
+
         if bb_servers:
-            backburner_args.append('-servers:"%s"' % bb_servers)
+            sanitized_bb_server_list = ""
+            for bb_server in bb_servers:
+                sanitized_bb_server_list += get_backburner_server_name(bb_server)
+            backburner_args.append('-servers:"%s"' % sanitized_bb_server_list)
 
         # Check where the temporary data has/will be written. If the job is
         # allow on remote host, it must be on a shared location. Do our best
@@ -1617,13 +1630,7 @@ class FlameEngine(sgtk.platform.Engine):
             if temp_dir_is_local:
                 break
 
-        localhost = socket.gethostname()
-
-        # Only keep the domain if the domain is .local on mac
-        #
-        local_server, local_server_domain = localhost.split(".")[0:2]
-        if sgtk.util.is_macOS() and local_server_domain == "local":
-            local_server += ".local"
+        local_server = get_backburner_server_name(socket.gethostname())
 
         if not bb_server_group and not bb_servers:
             # No servers/groups sepecified and local path.
@@ -1745,6 +1752,8 @@ class FlameEngine(sgtk.platform.Engine):
                 error += [
                     "See Backburner logs in /opt/Autodesk/backburner/Network/backburner.log for details."
                 ]
+                self.log_error("%s failed" % full_cmd)
+                self.log_error("%s" % stderr)
 
                 raise TankError("\n".join(error))
 
@@ -1793,7 +1802,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         :return: Path to the Wiretap Central binaries folder
         """
-        if sgtk.util.is_macOS():
+        if sgtk.util.is_macos():
             return "/Library/WebServer/Documents/WiretapCentral/cgi-bin"
         elif sgtk.util.is_linux():
             return "/var/www/html/WiretapCentral/cgi-bin"
@@ -1807,7 +1816,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         :return: Path to the legacy Wiretap Central binaries folder
         """
-        if sgtk.util.is_macOS():
+        if sgtk.util.is_macos():
             return "/Library/WebServer/CGI-Executables/WiretapCentral"
         elif sgtk.util.is_linux():
             return "/var/www/cgi-bin/WiretapCentral"
