@@ -1723,7 +1723,8 @@ class FlameEngine(sgtk.platform.Engine):
 
         try:
             # Make sure that the session is not expired
-            sgtk.get_authenticated_user().refresh_credentials()
+            if sgtk.get_authenticated_user().are_credentials_expired():
+                sgtk.get_authenticated_user().refresh_credentials()
         except sgtk.authentication.AuthenticationCancelled:
             self.log_debug("User cancelled auth. No Backburner job will be created.")
         else:
