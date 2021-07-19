@@ -17,7 +17,6 @@ from sgtk import TankError
 from functools import partial
 from tempfile import mkstemp
 import os
-import subprocess
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -111,9 +110,9 @@ class BackburnerHooks(HookBaseClass):
         try:
             full_cmd = "%s > %s" % (input_cmd, jpg_path)
 
-            jpg_job = subprocess.Popen([full_cmd], stdout=subprocess.PIPE, shell=True)
-            _, stderr = jpg_job.communicate()
-            return_code = jpg_job.returncode
+            return_code, _, stderr = sgtk.platform.current_engine().execute_command(
+                [full_cmd], shell=True
+            )
 
             if return_code:
                 self.parent.log_warning(
@@ -170,9 +169,9 @@ class BackburnerHooks(HookBaseClass):
                 mov_path,
             )
 
-            mov_job = subprocess.Popen([full_cmd], stdout=subprocess.PIPE, shell=True)
-            _, stderr = mov_job.communicate()
-            return_code = mov_job.returncode
+            return_code, _, stderr = sgtk.platform.current_engine().execute_command(
+                [full_cmd], shell=True
+            )
 
             if return_code:
                 self.parent.log_warning(
