@@ -1849,11 +1849,39 @@ class FlameEngine(sgtk.platform.Engine):
             # exec(). This can be costly especially for a process like Flame.
             #
             # Note: Environment variables will not be forwarded to the command
-            # executed.
+            # executed automatically, use /usr/bin/env if we have any env var
+            # of interest.
             #
             if "execute_command" in dir(flame):
+
+                def is_env_var_forwaded(env_var):
+                    forwarded_env_vars = ["SSL_CERT_FILE", "SSL_CERT_DIR"]
+                    if env_var in forwarded_env_vars:
+                        return True
+
+                    forwarded_env_var_prefixes = ["SHOTGUN_", "TK_", "SGTK_", "TANK_"]
+                    for prefix in forwarded_env_var_prefixes:
+                        if env_var.startswith(prefix):
+                            return True
+
+                    return False
+
+                env_vars = []
+                for env_var in os.environ.items():
+                    if is_env_var_forwaded(env_var[0]):
+                        env_vars.append("=".join(env_var))
+
+                if isinstance(command, list):
+                    command = " ".join(command)
+                if env_vars:
+                    command = "/usr/bin/env " + " ".join(env_vars) + " " + command
+
+                print(command)
+                import pdb
+                pdb.set_trace()
+
                 return flame.execute_command(
-                    command=" ".join(command) if isinstance(command, list) else command,
+                    command=command,
                     blocking=True,
                     shell=shell,
                     capture_stdout=True,
