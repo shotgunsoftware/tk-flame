@@ -1876,10 +1876,6 @@ class FlameEngine(sgtk.platform.Engine):
                 if env_vars:
                     command = "/usr/bin/env " + " ".join(env_vars) + " " + command
 
-                print(command)
-                import pdb
-                pdb.set_trace()
-
                 return flame.execute_command(
                     command=command,
                     blocking=True,
