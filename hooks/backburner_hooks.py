@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Shotgun Software Inc.
+# Copyright (c) 2021 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -110,8 +110,11 @@ class BackburnerHooks(HookBaseClass):
         try:
             full_cmd = "%s > %s" % (input_cmd, jpg_path)
 
-            return_code, _, stderr = sgtk.platform.current_engine().execute_command(
-                [full_cmd], shell=True
+            return_code, _, stderr = sgtk.platform.current_engine().execute_hook_method(
+                "execute_command_hooks",
+                "execute_command",
+                command=[full_cmd],
+                shell=True,
             )
 
             if return_code:
@@ -169,8 +172,11 @@ class BackburnerHooks(HookBaseClass):
                 mov_path,
             )
 
-            return_code, _, stderr = sgtk.platform.current_engine().execute_command(
-                [full_cmd], shell=True
+            return_code, _, stderr = sgtk.platform.current_engine().execute_hook_method(
+                "execute_command_hooks",
+                "execute_command",
+                command=[full_cmd],
+                shell=True,
             )
 
             if return_code:

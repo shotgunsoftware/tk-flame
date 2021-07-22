@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Shotgun Software Inc.
+# Copyright (c) 2021 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -1416,8 +1416,9 @@ class FlameEngine(sgtk.platform.Engine):
             return self._cmdjob_supports_plugin_name
 
         backburner_job_cmd = os.path.join(self._install_root, "backburner", "cmdjob")
-        _, backburner_job_cmd_usage, _ = self.execute_command([backburner_job_cmd])
-
+        _, backburner_job_cmd_usage, _ = self.execute_hook_method(
+            "execute_command_hooks", "execute_command", command=[backburner_job_cmd]
+        )
         self._cmdjob_supports_plugin_name = False
         for line in backburner_job_cmd_usage.split("\n"):
             if "-pluginName:" in line:
@@ -1589,8 +1590,10 @@ class FlameEngine(sgtk.platform.Engine):
                 backburner_server_cmd = os.path.join(
                     self._install_root, "backburner", "backburnerServer"
                 )
-                _, bb_manager, _ = self.execute_command(
-                    [backburner_server_cmd, "-q", "MANAGER"]
+                _, bb_manager, _ = self.execute_hook_method(
+                    "execute_command_hooks",
+                    "execute_command",
+                    command=[backburner_server_cmd, "-q", "MANAGER"],
                 )
                 bb_manager = bb_manager.strip("\n")
 
@@ -1729,7 +1732,12 @@ class FlameEngine(sgtk.platform.Engine):
             self.log_debug("Method: %s with args %s" % (method_name, args))
 
             # kick it off
-            return_code, stdout, stderr = self.execute_command([full_cmd], shell=True)
+            return_code, stdout, stderr = self.execute_hook_method(
+                "execute_command_hooks",
+                "execute_command",
+                command=[full_cmd],
+                shell=True,
+            )
             self.log_debug(stdout)
 
             job_id_regex = re.compile(r"(?<=Successfully submitted job )(\d+)")
@@ -1835,68 +1843,6 @@ class FlameEngine(sgtk.platform.Engine):
         :returns: Absolute path as a string
         """
         return self.__get_wiretap_central_binary("read_frame")
-
-    @staticmethod
-    def execute_command(command, shell=False):
-        try:
-            import flame
-
-            # Newer version of Flame provides a way to run a command line
-            # through the Autodesk Flame Multi-Purpose Daemon. This way of
-            # starting new processes is better since any native python
-            # subprocess command (os.system, subprocess, Popen, etc) will call
-            # fork() which will duplicate the process resources before calling
-            # exec(). This can be costly especially for a process like Flame.
-            #
-            # Note: Environment variables will not be forwarded to the command
-            # executed automatically, use /usr/bin/env if we have any env var
-            # of interest.
-            #
-            if "execute_command" in dir(flame):
-
-                def is_env_var_forwaded(env_var):
-                    forwarded_env_vars = ["SSL_CERT_FILE", "SSL_CERT_DIR"]
-                    if env_var in forwarded_env_vars:
-                        return True
-
-                    forwarded_env_var_prefixes = ["SHOTGUN_", "TK_", "SGTK_", "TANK_"]
-                    for prefix in forwarded_env_var_prefixes:
-                        if env_var.startswith(prefix):
-                            return True
-
-                    return False
-
-                env_vars = []
-                for env_var in os.environ.items():
-                    if is_env_var_forwaded(env_var[0]):
-                        env_vars.append("=".join(env_var))
-
-                if isinstance(command, list):
-                    command = " ".join(command)
-                if env_vars:
-                    command = "/usr/bin/env " + " ".join(env_vars) + " " + command
-
-                return flame.execute_command(
-                    command=command,
-                    blocking=True,
-                    shell=shell,
-                    capture_stdout=True,
-                    capture_stderr=True,
-                )
-        except ImportError:
-            pass
-        import subprocess
-
-        process = subprocess.Popen(
-            command if isinstance(command, list) else command.split(" "),
-            stdout=subprocess.PIPE,
-            shell=shell,
-        )
-        stdout, stderr = process.communicate()
-        stdout = stdout.decode("utf-8") if stdout else None
-        stderr = stderr.decode("utf-8") if stderr else None
-        rc = process.returncode
-        return rc, stdout, stderr
 
 
 def sgtk_exception_trap(ex_cls, ex, tb):

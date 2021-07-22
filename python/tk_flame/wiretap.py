@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Shotgun Software Inc.
+# Copyright (c) 2021 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -286,7 +286,9 @@ class WiretapHandler(object):
                 project_create_cmd.append("-g")
                 project_create_cmd.append(group_name)
 
-            self._engine.execute_command(project_create_cmd)
+            self._engine.execute_hook_method(
+                "execute_command_hooks", "execute_command", command=project_create_cmd
+            )
 
             # create project settings
 
