@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Shotgun Software Inc.
+# Copyright (c) 2021 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -24,7 +24,6 @@ import logging.handlers
 import pprint
 import traceback
 import socket
-import subprocess
 import tempfile
 
 import sgtk
@@ -1417,14 +1416,11 @@ class FlameEngine(sgtk.platform.Engine):
             return self._cmdjob_supports_plugin_name
 
         backburner_job_cmd = os.path.join(self._install_root, "backburner", "cmdjob")
-        backburner_job_cmd_usage = subprocess.Popen(
-            [backburner_job_cmd], stdout=subprocess.PIPE, shell=False
+        _, backburner_job_cmd_usage, _ = self.execute_hook_method(
+            "execute_command_hooks", "execute_command", command=[backburner_job_cmd]
         )
-
         self._cmdjob_supports_plugin_name = False
-        for line in (
-            backburner_job_cmd_usage.communicate()[0].decode("utf-8").split("\n")
-        ):
+        for line in backburner_job_cmd_usage.split("\n"):
             if "-pluginName:" in line:
                 self._cmdjob_supports_plugin_name = True
                 break
@@ -1594,10 +1590,12 @@ class FlameEngine(sgtk.platform.Engine):
                 backburner_server_cmd = os.path.join(
                     self._install_root, "backburner", "backburnerServer"
                 )
-                bb_manager = subprocess.check_output(
-                    [backburner_server_cmd, "-q", "MANAGER"]
+                _, bb_manager, _ = self.execute_hook_method(
+                    "execute_command_hooks",
+                    "execute_command",
+                    command=[backburner_server_cmd, "-q", "MANAGER"],
                 )
-                bb_manager = bb_manager.decode("utf-8").strip("\n")
+                bb_manager = bb_manager.strip("\n")
 
             if bb_manager:
                 backburner_args.append('-manager:"%s"' % bb_manager)
@@ -1734,17 +1732,16 @@ class FlameEngine(sgtk.platform.Engine):
             self.log_debug("Method: %s with args %s" % (method_name, args))
 
             # kick it off
-            backburner_job_submission = subprocess.Popen(
-                [full_cmd], stdout=subprocess.PIPE, shell=True
+            return_code, stdout, stderr = self.execute_hook_method(
+                "execute_command_hooks",
+                "execute_command",
+                command=[full_cmd],
+                shell=True,
             )
-            stdout, stderr = backburner_job_submission.communicate()
-            stdout = stdout.decode("utf-8") if stdout else None
-            stderr = stderr.decode("utf-8") if stderr else None
-
             self.log_debug(stdout)
 
             job_id_regex = re.compile(r"(?<=Successfully submitted job )(\d+)")
-            match = job_id_regex.search(stdout)
+            match = job_id_regex.search(stdout) if return_code == 0 else None
 
             if match:
                 backburner_job_id = match.group(0)
@@ -1752,7 +1749,10 @@ class FlameEngine(sgtk.platform.Engine):
                 return backburner_job_id
 
             else:
-                error = ["ShotGrid Backburner job could not be created."]
+                error = [
+                    "ShotGrid Backburner job could not be created.\n Return code: %d"
+                    % return_code
+                ]
                 if stderr:
                     error += ["Reason: " + stderr]
                 error += [

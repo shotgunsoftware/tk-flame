@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Shotgun Software Inc.
+# Copyright (c) 2021 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -33,6 +33,11 @@ configuration:
         type: hook
         default_value: "{self}/backburner_hooks.py"
         description: Contains the Backburner background job logic
+
+    execute_command_hooks:
+        type: hook
+        default_value: "{self}/execute_command.py"
+        description: Contains the logic for starting command line subprocess withing Flame process.
 
     flame_batch_publish_type:
         type: tank_type
