@@ -82,6 +82,12 @@ configuration:
                      Possible values are default, leaveInQueue, delete[:days], archive[:days].
                      Default will use the manager or application default for the action.
 
+    backburner_cmd_job_priority:
+        type: int
+        default_value: 50
+        description: Priority of command line jobs sent to Backburner.
+                     (0 is highest, 100 is lowest)
+
     backburner_cmd_job_type:
         type: str
         default_value: "ShotgunCmdjob"

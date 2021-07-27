@@ -1617,6 +1617,13 @@ class FlameEngine(sgtk.platform.Engine):
                 sanitized_bb_server_list += self.get_backburner_server_name(bb_server)
             backburner_args.append('-servers:"%s"' % sanitized_bb_server_list)
 
+        bb_cmd_job_priority = os.environ.get(
+            "SHOTGUN_FLAME_CMD_JOB_PRIORITY",
+            self.get_setting("backburner_cmd_job_priority"),
+        )
+        if bb_cmd_job_priority:
+            backburner_args.append('-priority:"%s"' % bb_cmd_job_priority)
+
         # Check where the temporary data has/will be written. If the job is
         # allow on remote host, it must be on a shared location. Do our best
         # to detect bad situation or to limit the job server
