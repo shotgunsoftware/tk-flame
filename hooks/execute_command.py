@@ -23,12 +23,12 @@ HookBaseClass = sgtk.get_hook_baseclass()
 class ExecuteCommandHooks(HookBaseClass):
     def use_flame_execute_command(self):
         """
-        Newer version of Flame provides a way to run a command line
-        through the Autodesk Flame Multi-Purpose Daemon. This way of
-        starting new processes is better since any native python
-        subprocess command (os.system, subprocess, Popen, etc) will call
-        fork() which will duplicate the process resources before calling
-        exec(). This can be costly especially for a process like Flame.
+        Flame 2022.2+ provides a way to run a command line through the
+        Autodesk Flame Multi-Purpose Daemon. This way of starting new processes
+        is better since any native python subprocess command (os.system,
+        subprocess, Popen, etc) will call fork() which will duplicate the
+        process resources before calling exec(). This can be costly especially
+        for a process like Flame.
 
         Note: Environment variables will not be forwarded to the command
         executed automatically, use /usr/bin/env if we have any env var
