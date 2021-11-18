@@ -24,7 +24,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 class BackburnerHooks(HookBaseClass):
     # constants
     # default height for ShotGrid uploads
-    # see https://support.shotgunsoftware.com/entries/26303513-Transcoding
+    # see https://knowledge.autodesk.com/support/shotgrid/learn-explore/caas/CloudHelp/cloudhelp/ENU/SG-Supervisor-Artist/files/sa-review-approval/SG-Supervisor-Artist-sa-review-approval-sa-transcoding-html-html.html
     SHOTGUN_QUICKTIME_TARGET_HEIGHT = 720
 
     # default height for thumbs
