@@ -11,27 +11,39 @@
 try:
     from tank.platform.qt.QtCore import *
 except ImportError:
-    from PySide2.QtCore import *
+    try:
+        from PySide2.QtCore import *
+    except ImportError:
+        from PySide.QtCore import *
 try:
     from tank.platform.qt.QtGui import *
 except ImportError:
-    from PySide2.QtGui import *
+    try:
+        from PySide2.QtGui import *
+    except ImportError:
+        from PySide.QtGui import *
 try:
     from tank.platform.qt.QtWidgets import *
 except ImportError:
-    from PySide2.QtWidgets import *
+    try:
+        from PySide2.QtWidgets import *
+    except ImportError:
+        pass
 
-from  . import resources_rc
+from . import resources_rc
+
 
 class Ui_ProjectCreateDialog(object):
     def setupUi(self, ProjectCreateDialog):
         if not ProjectCreateDialog.objectName():
             ProjectCreateDialog.setObjectName("ProjectCreateDialog")
         ProjectCreateDialog.resize(450, 514)
-        ProjectCreateDialog.setStyleSheet("/* this is to force the combo box dropdowns to show all items rather than displaying only a few items and a scroll bar */\n"
-"QComboBox QListView {\n"
-"height: 100px;\n"
-"}")
+        ProjectCreateDialog.setStyleSheet(
+            "/* this is to force the combo box dropdowns to show all items rather than displaying only a few items and a scroll bar */\n"
+            "QComboBox QListView {\n"
+            "height: 100px;\n"
+            "}"
+        )
         self.verticalLayout = QVBoxLayout(ProjectCreateDialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.label_9 = QLabel(ProjectCreateDialog)
@@ -42,7 +54,7 @@ class Ui_ProjectCreateDialog(object):
         sizePolicy.setHeightForWidth(self.label_9.sizePolicy().hasHeightForWidth())
         self.label_9.setSizePolicy(sizePolicy)
         self.label_9.setPixmap(QPixmap(":/tk-flame/icon.png"))
-        self.label_9.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
+        self.label_9.setAlignment(Qt.AlignLeading | Qt.AlignLeft | Qt.AlignTop)
 
         self.verticalLayout.addWidget(self.label_9)
 
@@ -64,7 +76,9 @@ class Ui_ProjectCreateDialog(object):
         sizePolicy1 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.project_name.sizePolicy().hasHeightForWidth())
+        sizePolicy1.setHeightForWidth(
+            self.project_name.sizePolicy().hasHeightForWidth()
+        )
         self.project_name.setSizePolicy(sizePolicy1)
         self.project_name.setMinimumSize(QSize(200, 0))
         self.project_name.setWordWrap(False)
@@ -183,7 +197,6 @@ class Ui_ProjectCreateDialog(object):
         self.height.setMaximumSize(QSize(50, 16777215))
 
         self.horizontalLayout.addWidget(self.height)
-
 
         self.formLayout_2.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout)
 
@@ -316,7 +329,9 @@ class Ui_ProjectCreateDialog(object):
         sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.proxy_width_hint.sizePolicy().hasHeightForWidth())
+        sizePolicy4.setHeightForWidth(
+            self.proxy_width_hint.sizePolicy().hasHeightForWidth()
+        )
         self.proxy_width_hint.setSizePolicy(sizePolicy4)
         self.proxy_width_hint.setMinimumSize(QSize(100, 0))
         self.proxy_width_hint.setMinimum(24)
@@ -334,24 +349,29 @@ class Ui_ProjectCreateDialog(object):
         sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         sizePolicy5.setHorizontalStretch(0)
         sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.proxy_width_hint_preview.sizePolicy().hasHeightForWidth())
+        sizePolicy5.setHeightForWidth(
+            self.proxy_width_hint_preview.sizePolicy().hasHeightForWidth()
+        )
         self.proxy_width_hint_preview.setSizePolicy(sizePolicy5)
 
         self.horizontalLayout_6.addWidget(self.proxy_width_hint_preview)
-
 
         self.formLayout.setLayout(3, QFormLayout.FieldRole, self.horizontalLayout_6)
 
         self.proxy_min_frame_size_label = QLabel(self.old_proxy_tab)
         self.proxy_min_frame_size_label.setObjectName("proxy_min_frame_size_label")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.proxy_min_frame_size_label)
+        self.formLayout.setWidget(
+            4, QFormLayout.LabelRole, self.proxy_min_frame_size_label
+        )
 
         self.horizontalLayout_7 = QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.proxy_min_frame_size = QSlider(self.old_proxy_tab)
         self.proxy_min_frame_size.setObjectName("proxy_min_frame_size")
-        sizePolicy4.setHeightForWidth(self.proxy_min_frame_size.sizePolicy().hasHeightForWidth())
+        sizePolicy4.setHeightForWidth(
+            self.proxy_min_frame_size.sizePolicy().hasHeightForWidth()
+        )
         self.proxy_min_frame_size.setSizePolicy(sizePolicy4)
         self.proxy_min_frame_size.setMinimumSize(QSize(100, 0))
         self.proxy_min_frame_size.setMinimum(24)
@@ -366,7 +386,9 @@ class Ui_ProjectCreateDialog(object):
 
         self.proxy_min_frame_size_preview = QLabel(self.old_proxy_tab)
         self.proxy_min_frame_size_preview.setObjectName("proxy_min_frame_size_preview")
-        sizePolicy5.setHeightForWidth(self.proxy_min_frame_size_preview.sizePolicy().hasHeightForWidth())
+        sizePolicy5.setHeightForWidth(
+            self.proxy_min_frame_size_preview.sizePolicy().hasHeightForWidth()
+        )
         self.proxy_min_frame_size_preview.setSizePolicy(sizePolicy5)
 
         self.horizontalLayout_7.addWidget(self.proxy_min_frame_size_preview)
@@ -375,7 +397,6 @@ class Ui_ProjectCreateDialog(object):
         self.proxy_above_8_bits.setObjectName("proxy_above_8_bits")
 
         self.horizontalLayout_7.addWidget(self.proxy_above_8_bits)
-
 
         self.formLayout.setLayout(4, QFormLayout.FieldRole, self.horizontalLayout_7)
 
@@ -401,7 +422,9 @@ class Ui_ProjectCreateDialog(object):
         self.proxy_quality_label_2 = QLabel(self.new_proxy_tab)
         self.proxy_quality_label_2.setObjectName("proxy_quality_label_2")
 
-        self.formLayout_4.setWidget(2, QFormLayout.LabelRole, self.proxy_quality_label_2)
+        self.formLayout_4.setWidget(
+            2, QFormLayout.LabelRole, self.proxy_quality_label_2
+        )
 
         self.new_proxy_quality = QComboBox(self.new_proxy_tab)
         self.new_proxy_quality.addItem("")
@@ -421,7 +444,9 @@ class Ui_ProjectCreateDialog(object):
         self.proxy_min_frame_size_label_2 = QLabel(self.new_proxy_tab)
         self.proxy_min_frame_size_label_2.setObjectName("proxy_min_frame_size_label_2")
 
-        self.formLayout_4.setWidget(4, QFormLayout.LabelRole, self.proxy_min_frame_size_label_2)
+        self.formLayout_4.setWidget(
+            4, QFormLayout.LabelRole, self.proxy_min_frame_size_label_2
+        )
 
         self.horizontalLayout_8 = QHBoxLayout()
         self.horizontalLayout_8.setObjectName("horizontalLayout_8")
@@ -437,11 +462,12 @@ class Ui_ProjectCreateDialog(object):
         sizePolicy6 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         sizePolicy6.setHorizontalStretch(0)
         sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.new_proxy_width_label.sizePolicy().hasHeightForWidth())
+        sizePolicy6.setHeightForWidth(
+            self.new_proxy_width_label.sizePolicy().hasHeightForWidth()
+        )
         self.new_proxy_width_label.setSizePolicy(sizePolicy6)
 
         self.horizontalLayout_8.addWidget(self.new_proxy_width_label)
-
 
         self.formLayout_4.setLayout(4, QFormLayout.FieldRole, self.horizontalLayout_8)
 
@@ -474,119 +500,323 @@ class Ui_ProjectCreateDialog(object):
 
         self.horizontalLayout_2.addWidget(self.create_project)
 
-
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-
 
         self.retranslateUi(ProjectCreateDialog)
 
         self.tabWidget.setCurrentIndex(0)
 
-
         QMetaObject.connectSlotsByName(ProjectCreateDialog)
+
     # setupUi
 
     def retranslateUi(self, ProjectCreateDialog):
-        ProjectCreateDialog.setWindowTitle(QCoreApplication.translate("ProjectCreateDialog", "Submit to ShotGrid", None))
+        ProjectCreateDialog.setWindowTitle(
+            QCoreApplication.translate(
+                "ProjectCreateDialog", "Submit to ShotGrid", None
+            )
+        )
         self.label_9.setText("")
-        self.label_5.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Project Name</b>", None))
-#if QT_CONFIG(tooltip)
-        self.project_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>Flame project name</b> is automatically generated based on your current ShotGrid project. ", None))
-#endif // QT_CONFIG(tooltip)
-        self.project_name.setText(QCoreApplication.translate("ProjectCreateDialog", "xxx", None))
-        self.label_7.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Storage Volume</b>", None))
-        self.label_6.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>User</b>", None))
-#if QT_CONFIG(tooltip)
-        self.user_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>User Name</b> associated with your new Flame Project is based on the ShotGrid user that matches your current login name.\n"
-"", None))
-#endif // QT_CONFIG(tooltip)
-        self.user_name.setText(QCoreApplication.translate("ProjectCreateDialog", "xxx", None))
-        self.label_19.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Host</b>", None))
-        self.host_name.setText(QCoreApplication.translate("ProjectCreateDialog", "xxx", None))
-        self.label_4.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Setup Directory</b>", None))
-        self.label_17.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Workspace</b>", None))
-        self.workspace_name.setText(QCoreApplication.translate("ProjectCreateDialog", "xxx", None))
-        self.group_name_label.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Group</b>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.project_overview_tab), QCoreApplication.translate("ProjectCreateDialog", "Project Overview", None))
-        self.label.setText(QCoreApplication.translate("ProjectCreateDialog", "Resolution", None))
-        self.width.setPlaceholderText(QCoreApplication.translate("ProjectCreateDialog", "width", None))
-        self.label_2.setText(QCoreApplication.translate("ProjectCreateDialog", "x", None))
-        self.height.setPlaceholderText(QCoreApplication.translate("ProjectCreateDialog", "height", None))
-        self.label_26.setText(QCoreApplication.translate("ProjectCreateDialog", "Aspect Ratio", None))
-        self.aspect_ratio.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "4:3", None))
-        self.aspect_ratio.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "16:9", None))
-        self.aspect_ratio.setItemText(2, QCoreApplication.translate("ProjectCreateDialog", "Based on width/height", None))
+        self.label_5.setText(
+            QCoreApplication.translate(
+                "ProjectCreateDialog", "<b>Project Name</b>", None
+            )
+        )
+        # if QT_CONFIG(tooltip)
+        self.project_name.setToolTip(
+            QCoreApplication.translate(
+                "ProjectCreateDialog",
+                "The <b>Flame project name</b> is automatically generated based on your current ShotGrid project. ",
+                None,
+            )
+        )
+        # endif // QT_CONFIG(tooltip)
+        self.project_name.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "xxx", None)
+        )
+        self.label_7.setText(
+            QCoreApplication.translate(
+                "ProjectCreateDialog", "<b>Storage Volume</b>", None
+            )
+        )
+        self.label_6.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "<b>User</b>", None)
+        )
+        # if QT_CONFIG(tooltip)
+        self.user_name.setToolTip(
+            QCoreApplication.translate(
+                "ProjectCreateDialog",
+                "The <b>User Name</b> associated with your new Flame Project is based on the ShotGrid user that matches your current login name.\n"
+                "",
+                None,
+            )
+        )
+        # endif // QT_CONFIG(tooltip)
+        self.user_name.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "xxx", None)
+        )
+        self.label_19.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "<b>Host</b>", None)
+        )
+        self.host_name.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "xxx", None)
+        )
+        self.label_4.setText(
+            QCoreApplication.translate(
+                "ProjectCreateDialog", "<b>Setup Directory</b>", None
+            )
+        )
+        self.label_17.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "<b>Workspace</b>", None)
+        )
+        self.workspace_name.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "xxx", None)
+        )
+        self.group_name_label.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "<b>Group</b>", None)
+        )
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.project_overview_tab),
+            QCoreApplication.translate("ProjectCreateDialog", "Project Overview", None),
+        )
+        self.label.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Resolution", None)
+        )
+        self.width.setPlaceholderText(
+            QCoreApplication.translate("ProjectCreateDialog", "width", None)
+        )
+        self.label_2.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "x", None)
+        )
+        self.height.setPlaceholderText(
+            QCoreApplication.translate("ProjectCreateDialog", "height", None)
+        )
+        self.label_26.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Aspect Ratio", None)
+        )
+        self.aspect_ratio.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "4:3", None)
+        )
+        self.aspect_ratio.setItemText(
+            1, QCoreApplication.translate("ProjectCreateDialog", "16:9", None)
+        )
+        self.aspect_ratio.setItemText(
+            2,
+            QCoreApplication.translate(
+                "ProjectCreateDialog", "Based on width/height", None
+            ),
+        )
 
-        self.label_27.setText(QCoreApplication.translate("ProjectCreateDialog", "Frame Rate", None))
-        self.frame_rate.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "23.976 fps", None))
-        self.frame_rate.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "24 fps", None))
-        self.frame_rate.setItemText(2, QCoreApplication.translate("ProjectCreateDialog", "25 fps", None))
-        self.frame_rate.setItemText(3, QCoreApplication.translate("ProjectCreateDialog", "29.97 fps DF", None))
-        self.frame_rate.setItemText(4, QCoreApplication.translate("ProjectCreateDialog", "29.97 fps NDF", None))
-        self.frame_rate.setItemText(5, QCoreApplication.translate("ProjectCreateDialog", "30 fps", None))
-        self.frame_rate.setItemText(6, QCoreApplication.translate("ProjectCreateDialog", "50 fps", None))
-        self.frame_rate.setItemText(7, QCoreApplication.translate("ProjectCreateDialog", "59.94 fps DF", None))
-        self.frame_rate.setItemText(8, QCoreApplication.translate("ProjectCreateDialog", "59.94 fps NDF", None))
-        self.frame_rate.setItemText(9, QCoreApplication.translate("ProjectCreateDialog", "60 fps", None))
+        self.label_27.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Frame Rate", None)
+        )
+        self.frame_rate.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "23.976 fps", None)
+        )
+        self.frame_rate.setItemText(
+            1, QCoreApplication.translate("ProjectCreateDialog", "24 fps", None)
+        )
+        self.frame_rate.setItemText(
+            2, QCoreApplication.translate("ProjectCreateDialog", "25 fps", None)
+        )
+        self.frame_rate.setItemText(
+            3, QCoreApplication.translate("ProjectCreateDialog", "29.97 fps DF", None)
+        )
+        self.frame_rate.setItemText(
+            4, QCoreApplication.translate("ProjectCreateDialog", "29.97 fps NDF", None)
+        )
+        self.frame_rate.setItemText(
+            5, QCoreApplication.translate("ProjectCreateDialog", "30 fps", None)
+        )
+        self.frame_rate.setItemText(
+            6, QCoreApplication.translate("ProjectCreateDialog", "50 fps", None)
+        )
+        self.frame_rate.setItemText(
+            7, QCoreApplication.translate("ProjectCreateDialog", "59.94 fps DF", None)
+        )
+        self.frame_rate.setItemText(
+            8, QCoreApplication.translate("ProjectCreateDialog", "59.94 fps NDF", None)
+        )
+        self.frame_rate.setItemText(
+            9, QCoreApplication.translate("ProjectCreateDialog", "60 fps", None)
+        )
 
-        self.label_3.setText(QCoreApplication.translate("ProjectCreateDialog", "Depth", None))
-        self.depth.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "32-bit fp", None))
-        self.depth.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "16-bit fp", None))
-        self.depth.setItemText(2, QCoreApplication.translate("ProjectCreateDialog", "12-bit", None))
-        self.depth.setItemText(3, QCoreApplication.translate("ProjectCreateDialog", "12-bit ", None))
-        self.depth.setItemText(4, QCoreApplication.translate("ProjectCreateDialog", "10-bit", None))
-        self.depth.setItemText(5, QCoreApplication.translate("ProjectCreateDialog", "8-bit", None))
+        self.label_3.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Depth", None)
+        )
+        self.depth.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "32-bit fp", None)
+        )
+        self.depth.setItemText(
+            1, QCoreApplication.translate("ProjectCreateDialog", "16-bit fp", None)
+        )
+        self.depth.setItemText(
+            2, QCoreApplication.translate("ProjectCreateDialog", "12-bit", None)
+        )
+        self.depth.setItemText(
+            3, QCoreApplication.translate("ProjectCreateDialog", "12-bit ", None)
+        )
+        self.depth.setItemText(
+            4, QCoreApplication.translate("ProjectCreateDialog", "10-bit", None)
+        )
+        self.depth.setItemText(
+            5, QCoreApplication.translate("ProjectCreateDialog", "8-bit", None)
+        )
 
-        self.label_10.setText(QCoreApplication.translate("ProjectCreateDialog", "Field Dominance", None))
-        self.field_dominance.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "PROGRESSIVE", None))
-        self.field_dominance.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "FIELD_1", None))
-        self.field_dominance.setItemText(2, QCoreApplication.translate("ProjectCreateDialog", "FIELD_2", None))
+        self.label_10.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Field Dominance", None)
+        )
+        self.field_dominance.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "PROGRESSIVE", None)
+        )
+        self.field_dominance.setItemText(
+            1, QCoreApplication.translate("ProjectCreateDialog", "FIELD_1", None)
+        )
+        self.field_dominance.setItemText(
+            2, QCoreApplication.translate("ProjectCreateDialog", "FIELD_2", None)
+        )
 
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.resolution_tab), QCoreApplication.translate("ProjectCreateDialog", "Resolution", None))
-        self.proxy_depth_label_2.setText(QCoreApplication.translate("ProjectCreateDialog", "Mode", None))
-        self.proxy_mode.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "Proxies Off", None))
-        self.proxy_mode.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "Proxies Conditional", None))
-        self.proxy_mode.setItemText(2, QCoreApplication.translate("ProjectCreateDialog", "Proxies On", None))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.resolution_tab),
+            QCoreApplication.translate("ProjectCreateDialog", "Resolution", None),
+        )
+        self.proxy_depth_label_2.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Mode", None)
+        )
+        self.proxy_mode.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "Proxies Off", None)
+        )
+        self.proxy_mode.setItemText(
+            1,
+            QCoreApplication.translate(
+                "ProjectCreateDialog", "Proxies Conditional", None
+            ),
+        )
+        self.proxy_mode.setItemText(
+            2, QCoreApplication.translate("ProjectCreateDialog", "Proxies On", None)
+        )
 
-        self.proxy_depth_label.setText(QCoreApplication.translate("ProjectCreateDialog", "Depth", None))
-        self.proxy_depth.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "8-bit", None))
-        self.proxy_depth.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "SAME AS HIRES", None))
+        self.proxy_depth_label.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Depth", None)
+        )
+        self.proxy_depth.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "8-bit", None)
+        )
+        self.proxy_depth.setItemText(
+            1, QCoreApplication.translate("ProjectCreateDialog", "SAME AS HIRES", None)
+        )
 
-        self.proxy_quality_label.setText(QCoreApplication.translate("ProjectCreateDialog", "Quality", None))
-        self.proxy_quality.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "draft", None))
-        self.proxy_quality.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "coarse", None))
-        self.proxy_quality.setItemText(2, QCoreApplication.translate("ProjectCreateDialog", "medium", None))
-        self.proxy_quality.setItemText(3, QCoreApplication.translate("ProjectCreateDialog", "quality", None))
-        self.proxy_quality.setItemText(4, QCoreApplication.translate("ProjectCreateDialog", "bicubic", None))
+        self.proxy_quality_label.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Quality", None)
+        )
+        self.proxy_quality.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "draft", None)
+        )
+        self.proxy_quality.setItemText(
+            1, QCoreApplication.translate("ProjectCreateDialog", "coarse", None)
+        )
+        self.proxy_quality.setItemText(
+            2, QCoreApplication.translate("ProjectCreateDialog", "medium", None)
+        )
+        self.proxy_quality.setItemText(
+            3, QCoreApplication.translate("ProjectCreateDialog", "quality", None)
+        )
+        self.proxy_quality.setItemText(
+            4, QCoreApplication.translate("ProjectCreateDialog", "bicubic", None)
+        )
 
-        self.proxy_width_hint_label.setText(QCoreApplication.translate("ProjectCreateDialog", "Width", None))
-        self.proxy_width_hint_preview.setText(QCoreApplication.translate("ProjectCreateDialog", "720px", None))
-        self.proxy_min_frame_size_label.setText(QCoreApplication.translate("ProjectCreateDialog", "Width >", None))
-        self.proxy_min_frame_size_preview.setText(QCoreApplication.translate("ProjectCreateDialog", "720px", None))
-        self.proxy_above_8_bits.setText(QCoreApplication.translate("ProjectCreateDialog", ">8 bits", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.old_proxy_tab), QCoreApplication.translate("ProjectCreateDialog", "Proxy", None))
-        self.proxy_depth_label_3.setText(QCoreApplication.translate("ProjectCreateDialog", "Ratio", None))
-        self.new_proxy_mode.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "Proxy 1/2", None))
-        self.new_proxy_mode.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "Proxy 1/4", None))
-        self.new_proxy_mode.setItemText(2, QCoreApplication.translate("ProjectCreateDialog", "Proxy 1/8", None))
+        self.proxy_width_hint_label.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Width", None)
+        )
+        self.proxy_width_hint_preview.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "720px", None)
+        )
+        self.proxy_min_frame_size_label.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Width >", None)
+        )
+        self.proxy_min_frame_size_preview.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "720px", None)
+        )
+        self.proxy_above_8_bits.setText(
+            QCoreApplication.translate("ProjectCreateDialog", ">8 bits", None)
+        )
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.old_proxy_tab),
+            QCoreApplication.translate("ProjectCreateDialog", "Proxy", None),
+        )
+        self.proxy_depth_label_3.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Ratio", None)
+        )
+        self.new_proxy_mode.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "Proxy 1/2", None)
+        )
+        self.new_proxy_mode.setItemText(
+            1, QCoreApplication.translate("ProjectCreateDialog", "Proxy 1/4", None)
+        )
+        self.new_proxy_mode.setItemText(
+            2, QCoreApplication.translate("ProjectCreateDialog", "Proxy 1/8", None)
+        )
 
-        self.proxy_quality_label_2.setText(QCoreApplication.translate("ProjectCreateDialog", "Quality", None))
-        self.new_proxy_quality.setItemText(0, QCoreApplication.translate("ProjectCreateDialog", "lanczos", None))
-        self.new_proxy_quality.setItemText(1, QCoreApplication.translate("ProjectCreateDialog", "shannon", None))
-        self.new_proxy_quality.setItemText(2, QCoreApplication.translate("ProjectCreateDialog", "gaussian", None))
-        self.new_proxy_quality.setItemText(3, QCoreApplication.translate("ProjectCreateDialog", "quadratic", None))
-        self.new_proxy_quality.setItemText(4, QCoreApplication.translate("ProjectCreateDialog", "bicubic", None))
-        self.new_proxy_quality.setItemText(5, QCoreApplication.translate("ProjectCreateDialog", "mitchell", None))
-        self.new_proxy_quality.setItemText(6, QCoreApplication.translate("ProjectCreateDialog", "triangle", None))
-        self.new_proxy_quality.setItemText(7, QCoreApplication.translate("ProjectCreateDialog", "impulse", None))
-        self.new_proxy_quality.setItemText(8, QCoreApplication.translate("ProjectCreateDialog", "draft", None))
+        self.proxy_quality_label_2.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Quality", None)
+        )
+        self.new_proxy_quality.setItemText(
+            0, QCoreApplication.translate("ProjectCreateDialog", "lanczos", None)
+        )
+        self.new_proxy_quality.setItemText(
+            1, QCoreApplication.translate("ProjectCreateDialog", "shannon", None)
+        )
+        self.new_proxy_quality.setItemText(
+            2, QCoreApplication.translate("ProjectCreateDialog", "gaussian", None)
+        )
+        self.new_proxy_quality.setItemText(
+            3, QCoreApplication.translate("ProjectCreateDialog", "quadratic", None)
+        )
+        self.new_proxy_quality.setItemText(
+            4, QCoreApplication.translate("ProjectCreateDialog", "bicubic", None)
+        )
+        self.new_proxy_quality.setItemText(
+            5, QCoreApplication.translate("ProjectCreateDialog", "mitchell", None)
+        )
+        self.new_proxy_quality.setItemText(
+            6, QCoreApplication.translate("ProjectCreateDialog", "triangle", None)
+        )
+        self.new_proxy_quality.setItemText(
+            7, QCoreApplication.translate("ProjectCreateDialog", "impulse", None)
+        )
+        self.new_proxy_quality.setItemText(
+            8, QCoreApplication.translate("ProjectCreateDialog", "draft", None)
+        )
 
-        self.proxy_min_frame_size_label_2.setText(QCoreApplication.translate("ProjectCreateDialog", "Conditional Width >", None))
-        self.new_proxy_width_label.setText(QCoreApplication.translate("ProjectCreateDialog", "px", None))
-        self.new_generate_proxies.setText(QCoreApplication.translate("ProjectCreateDialog", "Generate Proxies By Default", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.new_proxy_tab), QCoreApplication.translate("ProjectCreateDialog", "Proxy", None))
-        self.help_link.setText(QCoreApplication.translate("ProjectCreateDialog", "<small><a style='color: #30A7E3;' href='{DOC}'>How do I customize Project creation?</a></small>", None))
-        self.abort.setText(QCoreApplication.translate("ProjectCreateDialog", "Abort", None))
-        self.create_project.setText(QCoreApplication.translate("ProjectCreateDialog", "Create Project", None))
+        self.proxy_min_frame_size_label_2.setText(
+            QCoreApplication.translate(
+                "ProjectCreateDialog", "Conditional Width >", None
+            )
+        )
+        self.new_proxy_width_label.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "px", None)
+        )
+        self.new_generate_proxies.setText(
+            QCoreApplication.translate(
+                "ProjectCreateDialog", "Generate Proxies By Default", None
+            )
+        )
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.new_proxy_tab),
+            QCoreApplication.translate("ProjectCreateDialog", "Proxy", None),
+        )
+        self.help_link.setText(
+            QCoreApplication.translate(
+                "ProjectCreateDialog",
+                "<small><a style='color: #30A7E3;' href='{DOC}'>How do I customize Project creation?</a></small>",
+                None,
+            )
+        )
+        self.abort.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Abort", None)
+        )
+        self.create_project.setText(
+            QCoreApplication.translate("ProjectCreateDialog", "Create Project", None)
+        )
+
     # retranslateUi
-
