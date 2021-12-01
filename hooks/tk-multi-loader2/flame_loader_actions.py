@@ -206,9 +206,7 @@ class FlameLoaderActions(HookBaseClass):
             # A FlameActionError reaching here means that something major have
             # stopped the current action
             QtGui.QMessageBox.critical(
-                None,
-                "Error",
-                str(error),
+                None, "Error", str(error),
             )
             app.log_error(error)
 
