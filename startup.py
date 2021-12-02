@@ -132,12 +132,6 @@ class FlameLauncher(SoftwareLauncher):
             if exec_path.endswith(".app"):
                 if os.path.islink(exec_path):
                     exec_path = os.readlink(exec_path)
-                else:
-                    for product in EXECUTABLE_TO_PRODUCT.keys():
-                        product_path = os.path.join(exec_path, "Contents", "MacOS", product)
-                        if os.path.exists(product_path):
-                            exec_path = os.readlink(product_path)
-                            break
 
             self.logger.debug(
                 "Parsing Flame (%s) to determine Flame version...", exec_path
