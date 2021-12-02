@@ -78,6 +78,47 @@ class FlameLauncher(SoftwareLauncher):
         # 2018 was the first version of flame that shipped with taap included.
         return "2018"
 
+    def resolve_a_symlink(self, exec_path):
+        """
+        Resolve the first symlink, starting from the end of the path unless
+        no part of the path is a symlink.
+
+        :param str exec_path: Path to DCC executable to launch
+        :returns: :str: or :None: exec_path with one of the path component
+                                  that is a symlink resolved to the actual path.
+        """
+
+        exec_path = os.path.normpath(os.path.abspath(exec_path)).lstrip(os.path.sep)
+        nb_parts = exec_path.count(os.path.sep)
+        part_ids = range(nb_parts)
+        part_ids.reverse()
+        for part_id in part_ids:
+            try:
+                parts = exec_path.split(os.path.sep, part_id)
+                resolved = os.path.readlink(os.path.join(parts[0:-1]))
+                return os.path.join(resolved, parts[-1])
+            except OSError:
+                pass
+        return None
+
+    def find_real_path(self, exec_path):
+        """
+        Resolve all symlinks starting from the end of the path until a path
+        in an Autodesk folder is found.
+
+        :param str exec_path: Path to DCC executable to launch
+        :returns: :str: an equivalent path in an Autodesk folder
+        """
+
+        real_path = exec_path
+        while not real_path.startswith("/opt/Autodesk") or real_path.startswith(
+            "/usr/discreet"
+        ):
+            real_path = self.resolve_a_symlink(exec_path)
+            if real_path == None:
+                raise TankError("%s is not a valid application path" % exec_path)
+        return real_path
+
     def prepare_launch(self, exec_path, args, file_to_open=None):
         """
         Prepares the given software for launch
@@ -127,26 +168,25 @@ class FlameLauncher(SoftwareLauncher):
             # version components from. Examples of what this path can be and
             # how it's parsed can be found in the docstring of _get_flame_version
             # method.
-            self.logger.debug("Flame app executable: %s", exec_path)
-            if exec_path.endswith(".app"):
-                # The flame executable contained withing the .app will be a
-                # symlink to the startApplication path we're interested in.
-                flame_path = os.path.join(exec_path, "Contents", "MacOS", "flame")
-                app_path = os.path.realpath(flame_path)
-            else:
-                app_path = os.path.realpath(exec_path)
+            self.logger.debug("Flame app executable specified: %s", exec_path)
 
-            if app_path != exec_path:
-                self.logger.debug(
-                    "Flame app executable has been flattened. The flattened "
-                    "path that will be parsed and used at launch time is: %s",
-                    app_path,
-                )
+            # The executable contained withing the .app will be a
+            # symlink to the startApplication path we're interested in if this
+            # is a folder.
+            if exec_path.endswith(".app") and not os.path.islink(exec_path):
+                for product in EXECUTABLE_TO_PRODUCT.keys():
+                    product_path = os.path.join(exec_path, "Contents", "MacOS", product)
+                    if os.path.exists(product_path):
+                        exec_path = product_path
+                        break
+
+            exec_path = self.find_real_path(exec_path)
+            self.logger.debug("Flame app executable resolved: %s", exec_path)
 
             self.logger.debug(
-                "Parsing Flame (%s) to determine Flame version...", app_path
+                "Parsing Flame (%s) to determine Flame version...", exec_path
             )
-            major, minor, patch, version_str = self._get_flame_version(app_path)
+            major, minor, patch, version_str = self._get_flame_version(exec_path)
             self.logger.debug("Found Flame version: %s", version_str)
 
             env.update(
@@ -162,7 +202,7 @@ class FlameLauncher(SoftwareLauncher):
             # script, which registers it with the engine after bootstrapping.
             # The path is used by the engine when submitting render jobs
             # to Backburner.
-            match = re.search("(^.*)/(fla[mr]e[^_]*_[^/]+)/bin", app_path)
+            match = re.search("(^.*)/(fla[mr]e[^_]*_[^/]+)/bin", exec_path)
             if match:
                 env["TOOLKIT_FLAME_INSTALL_ROOT"] = match.group(1)
                 app_folder = match.group(2)
@@ -177,7 +217,7 @@ class FlameLauncher(SoftwareLauncher):
                 sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
             else:
                 raise TankError(
-                    "Cannot extract install root from the path: %s" % app_path
+                    "Cannot extract install root from the path: %s" % exec_path
                 )
 
             # The Python executable bundled with Flame is used by the engine
@@ -201,10 +241,10 @@ class FlameLauncher(SoftwareLauncher):
                 "startup",
                 "app_launcher.py",
             )
-            exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
-            args = "'%s' %s %s" % (launch_script, app_path, args)
+            python_exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
+            args = "'%s' %s %s" % (launch_script, exec_path, args)
 
-        return LaunchInformation(exec_path, args, env)
+        return LaunchInformation(python_exec_path, args, env)
 
     def scan_software(self):
         """
@@ -321,7 +361,7 @@ class FlameLauncher(SoftwareLauncher):
         """
 
         # do a quick check to ensure that we are running 2015.2 or later
-        re_match = re.search("/fla[mr]e[^_]*_([^/]+)/bin", flame_path)
+        re_match = re.search(r"/\.*fla[mr]e[^_]*_([^/]+)/bin", flame_path)
         if not re_match:
             raise TankError(
                 "Cannot extract Flame version number from the path '%s'!" % flame_path
