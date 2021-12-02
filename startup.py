@@ -121,12 +121,24 @@ class FlameLauncher(SoftwareLauncher):
             # and the engine then logs metrics about what version of Flame
             # has been launched.
             #
-            # The exec_path is likely a path to the .app that will be launched.
+            # If defined manually in the Software Entity list, the exec_path is
+            # can also be a path to the .app that will be launched.
             # What we need instead of is the fully-qualified path to the Flame
             # startApplication executable, which is what we'll extract the
             # version components from. Examples of what this path can be and
             # how it's parsed can be found in the docstring of _get_flame_version
             # method.
+            self.logger.debug("Flame app executable: %s", exec_path)
+            if exec_path.endswith(".app"):
+                if os.path.islink(exec_path):
+                    exec_path = os.readlink(exec_path)
+                else:
+                    for product in EXECUTABLE_TO_PRODUCT.keys():
+                        product_path = os.path.join(exec_path, "Contents", "MacOS", product)
+                        if os.path.exists(product_path):
+                            exec_path = os.readlink(product_path)
+                            break
+
             self.logger.debug(
                 "Parsing Flame (%s) to determine Flame version...", exec_path
             )
