@@ -119,7 +119,8 @@ class FlameLauncher(SoftwareLauncher):
             # and the engine then logs metrics about what version of Flame
             # has been launched.
             #
-            # The exec_path is likely a path to the .app that will be launched.
+            # If defined manually in the Software Entity list, the exec_path is
+            # can also be a path to the .app that will be launched.
             # What we need instead of is the fully-qualified path to the Flame
             # startApplication executable, which is what we'll extract the
             # version components from. Examples of what this path can be and
@@ -127,24 +128,13 @@ class FlameLauncher(SoftwareLauncher):
             # method.
             self.logger.debug("Flame app executable: %s", exec_path)
             if exec_path.endswith(".app"):
-                # The flame executable contained withing the .app will be a
-                # symlink to the startApplication path we're interested in.
-                flame_path = os.path.join(exec_path, "Contents", "MacOS", "flame")
-                app_path = os.path.realpath(flame_path)
-            else:
-                app_path = os.path.realpath(exec_path)
-
-            if app_path != exec_path:
-                self.logger.debug(
-                    "Flame app executable has been flattened. The flattened "
-                    "path that will be parsed and used at launch time is: %s",
-                    app_path,
-                )
+                if os.path.islink(exec_path):
+                    exec_path = os.readlink(exec_path)
 
             self.logger.debug(
-                "Parsing Flame (%s) to determine Flame version...", app_path
+                "Parsing Flame (%s) to determine Flame version...", exec_path
             )
-            major, minor, patch, version_str = self._get_flame_version(app_path)
+            major, minor, patch, version_str = self._get_flame_version(exec_path)
             self.logger.debug("Found Flame version: %s", version_str)
 
             env.update(
@@ -160,7 +150,7 @@ class FlameLauncher(SoftwareLauncher):
             # script, which registers it with the engine after bootstrapping.
             # The path is used by the engine when submitting render jobs
             # to Backburner.
-            match = re.search("(^.*)/(fla[mr]e[^_]*_[^/]+)/bin", app_path)
+            match = re.search("(^.*)/(fla[mr]e[^_]*_[^/]+)/bin", exec_path)
             if match:
                 env["TOOLKIT_FLAME_INSTALL_ROOT"] = match.group(1)
                 app_folder = match.group(2)
@@ -173,7 +163,7 @@ class FlameLauncher(SoftwareLauncher):
                 sgtk.util.prepend_path_to_env_var("PYTHONPATH", wiretap_path)
             else:
                 raise TankError(
-                    "Cannot extract install root from the path: %s" % app_path
+                    "Cannot extract install root from the path: %s" % exec_path
                 )
 
             # The Python executable bundled with Flame is used by the engine
@@ -194,10 +184,10 @@ class FlameLauncher(SoftwareLauncher):
             launch_script = os.path.join(
                 os.path.dirname(__file__), "python", "startup", "app_launcher.py",
             )
-            exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
-            args = "'%s' %s %s" % (launch_script, app_path, args)
+            python_exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
+            args = "'%s' %s %s" % (launch_script, exec_path, args)
 
-        return LaunchInformation(exec_path, args, env)
+        return LaunchInformation(python_exec_path, args, env)
 
     def scan_software(self):
         """
@@ -314,7 +304,7 @@ class FlameLauncher(SoftwareLauncher):
         """
 
         # do a quick check to ensure that we are running 2015.2 or later
-        re_match = re.search("/fla[mr]e[^_]*_([^/]+)/bin", flame_path)
+        re_match = re.search(r"/fla[mr]e[^_]*_([^/]+)/bin", flame_path)
         if not re_match:
             raise TankError(
                 "Cannot extract Flame version number from the path '%s'!" % flame_path
