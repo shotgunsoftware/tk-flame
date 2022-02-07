@@ -212,9 +212,15 @@ class FlameLauncher(SoftwareLauncher):
 
     def _find_software(self):
 
+        # Support Python 3.3+.
+        # Platform value for linux changed from "linux2" to "linux".
+        platform = sys.platform
+        if platform == 'linux':
+            platform = 'linux2'
+
         # all the executable templates for the current OS
-        executable_templates = self.EXECUTABLE_TEMPLATES.get(sys.platform, [])
-        executable_regexp = self.COMPONENT_REGEX_LOOKUP.get(sys.platform, [])
+        executable_templates = self.EXECUTABLE_TEMPLATES.get(platform, [])
+        executable_regexp = self.COMPONENT_REGEX_LOOKUP.get(platform, [])
 
         # all the discovered executables
         sw_versions = []
