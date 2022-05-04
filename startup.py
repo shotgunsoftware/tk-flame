@@ -10,7 +10,7 @@
 
 from __future__ import absolute_import
 import os
-import sys
+import platform
 import re
 
 import sgtk
@@ -46,11 +46,11 @@ class FlameLauncher(SoftwareLauncher):
     # strings, these allow us to alter the regex matching for any of the
     # variable components of the path in one place
     COMPONENT_REGEX_LOOKUP = {
-        "darwin": {
+        "Darwin": {
             "version": r"\d.*",  # starts with a number followed by anything
             "executable": r"[\w]+",  # word characters (a-z0-9)
         },
-        "linux2": {
+        "Linux": {
             "version": r"\d.*",  # starts with a number followed by anything
             "executable": r"[\w]+",  # word characters (a-z0-9)
         },
@@ -61,8 +61,10 @@ class FlameLauncher(SoftwareLauncher):
     # globbing and regex matches by replacing the named format placeholders
     # with an appropriate glob or regex string.
     EXECUTABLE_TEMPLATES = {
-        "darwin": ["/opt/Autodesk/{executable}_{version}/bin/startApplication",],
-        "linux2": [
+        "Darwin": [
+            "/opt/Autodesk/{executable}_{version}/bin/startApplication",
+        ],
+        "Linux": [
             "/usr/discreet/{executable}_{version}/bin/startApplication",
             "/opt/Autodesk/{executable}_{version}/bin/startApplication",
         ],
@@ -155,7 +157,9 @@ class FlameLauncher(SoftwareLauncher):
                 env["TOOLKIT_FLAME_INSTALL_ROOT"] = match.group(1)
                 app_folder = match.group(2)
                 wiretap_path = os.path.join(
-                    env["TOOLKIT_FLAME_INSTALL_ROOT"], app_folder, "python",
+                    env["TOOLKIT_FLAME_INSTALL_ROOT"],
+                    app_folder,
+                    "python",
                 )
                 self.logger.debug(
                     "Adding wiretap root path to PYTHONPATH: %s", wiretap_path
@@ -182,7 +186,10 @@ class FlameLauncher(SoftwareLauncher):
             # <flame python> <tk-flame>/python/startup/app_launcher.py dcc_path dcc_args
             #
             launch_script = os.path.join(
-                os.path.dirname(__file__), "python", "startup", "app_launcher.py",
+                os.path.dirname(__file__),
+                "python",
+                "startup",
+                "app_launcher.py",
             )
             python_exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
             args = "'%s' %s %s" % (launch_script, exec_path, args)
@@ -213,8 +220,9 @@ class FlameLauncher(SoftwareLauncher):
     def _find_software(self):
 
         # all the executable templates for the current OS
-        executable_templates = self.EXECUTABLE_TEMPLATES.get(sys.platform, [])
-        executable_regexp = self.COMPONENT_REGEX_LOOKUP.get(sys.platform, [])
+        os_name = platform.system()
+        executable_templates = self.EXECUTABLE_TEMPLATES.get(os_name, [])
+        executable_regexp = self.COMPONENT_REGEX_LOOKUP.get(os_name, [])
 
         # all the discovered executables
         sw_versions = []
