@@ -364,12 +364,14 @@ class FlameItemCollector(HookBaseClass):
                         # Set the context based on the most precise entity available
                         if shot:
                             self.cache_entities(parent_item, [shot])
-                            item.context = self.publisher.sgtk.context_from_entity_dictionary(
-                                shot
+                            item.context = (
+                                self.publisher.sgtk.context_from_entity_dictionary(shot)
                             )
                         else:
-                            item.context = self.publisher.sgtk.context_from_entity_dictionary(
-                                project
+                            item.context = (
+                                self.publisher.sgtk.context_from_entity_dictionary(
+                                    project
+                                )
                             )
 
                         # This item cannot have another context than this one

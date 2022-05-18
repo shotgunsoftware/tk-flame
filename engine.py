@@ -221,8 +221,8 @@ class FlameEngine(sgtk.platform.Engine):
             else:
                 try:
                     current_flame_project = flame.project.current_project
-                    current_flame_project.shotgun_project_name = self.context.project.get(
-                        "name"
+                    current_flame_project.shotgun_project_name = (
+                        self.context.project.get("name")
                     )
                 except Exception:
                     self.logger.debug(
