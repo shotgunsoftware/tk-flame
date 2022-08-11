@@ -191,10 +191,10 @@ class FlameLauncher(SoftwareLauncher):
                 "startup",
                 "app_launcher.py",
             )
-            python_exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
             args = "'%s' %s %s" % (launch_script, exec_path, args)
+            exec_path = env["TOOLKIT_FLAME_PYTHON_BINARY"]
 
-        return LaunchInformation(python_exec_path, args, env)
+        return LaunchInformation(exec_path, args, env)
 
     def scan_software(self):
         """
