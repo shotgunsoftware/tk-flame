@@ -769,9 +769,6 @@ class FlameEngine(sgtk.platform.Engine):
             | QtCore.Qt.WindowStaysOnTopHint & ~QtCore.Qt.WindowCloseButtonHint
         )
 
-        if not dialog.testAttribute(QtCore.Qt.WA_DeleteOnClose):
-            self.created_qt_dialogs.append(dialog)
-
         # show the dialog
         dialog.show()
 
@@ -860,9 +857,6 @@ class FlameEngine(sgtk.platform.Engine):
             dialog.windowFlags()
             | QtCore.Qt.WindowStaysOnTopHint & ~QtCore.Qt.WindowCloseButtonHint
         )
-
-        if not dialog.testAttribute(QtCore.Qt.WA_DeleteOnClose):
-            self.created_qt_dialogs.append(dialog)
 
         # show the dialog
         dialog.show()
