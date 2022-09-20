@@ -703,7 +703,6 @@ class FlameLoaderActions(HookBaseClass):
                 " or use template by setting env var SHOTGUN_FLAME_USE_TEMPLATE."
             )
 
-
         # Create a .batch file
         if self.use_template and self.setup_path_template:
             _, setup_path, _ = self._build_path_from_template(
@@ -747,7 +746,9 @@ class FlameLoaderActions(HookBaseClass):
                 else:
                     self.parent.log_warning("Unknown attribute: %s" % attribute)
             except Exception as e:
-                self.parent.log_warning("Could not set attribute %s to %s: %s" % (attribute, value, e))
+                self.parent.log_warning(
+                    "Could not set attribute %s to %s: %s" % (attribute, value, e)
+                )
 
         # Connect the Write File node to the node
         flame.batch.connect_nodes(node, "Default", write_node, "Front")
