@@ -769,8 +769,6 @@ class FlameEngine(sgtk.platform.Engine):
             | QtCore.Qt.WindowStaysOnTopHint & ~QtCore.Qt.WindowCloseButtonHint
         )
 
-        self.created_qt_dialogs.append(dialog)
-
         # show the dialog
         dialog.show()
 
@@ -859,8 +857,6 @@ class FlameEngine(sgtk.platform.Engine):
             dialog.windowFlags()
             | QtCore.Qt.WindowStaysOnTopHint & ~QtCore.Qt.WindowCloseButtonHint
         )
-
-        self.created_qt_dialogs.append(dialog)
 
         # show the dialog
         dialog.show()
