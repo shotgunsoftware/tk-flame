@@ -696,6 +696,12 @@ class FlameLoaderActions(HookBaseClass):
                     if sgtk.platform.current_engine().is_version_less_than("2019.2"):
                         self.parent.log_warning("Absolute Open Clip Path not supported")
                         write_file_info["create_clip"] = False
+        else:
+            self.parent.log_warning(
+                "Media Path not defined. Either set in the config"
+                " media_path_root attribute, set env var SHOTGUN_FLAME_MEDIA_PATH_ROOT"
+                " or use template by setting env var SHOTGUN_FLAME_USE_TEMPLATE."
+            )
 
         # Create a .batch file
         if self.use_template and self.setup_path_template:
@@ -733,11 +739,16 @@ class FlameLoaderActions(HookBaseClass):
 
         # Param is a OrderedDict so the attributes are set in the right order
         for attribute, value in param.items():
-            if hasattr(write_node, attribute):
-                app.log_debug("Write File %s = %s" % (attribute, value))
-                setattr(write_node, attribute, value)
-            else:
-                self.parent.log_warning("Unknown attribute: %s" % attribute)
+            try:
+                if hasattr(write_node, attribute):
+                    app.log_debug("Write File %s = %s" % (attribute, value))
+                    setattr(write_node, attribute, value)
+                else:
+                    self.parent.log_warning("Unknown attribute: %s" % attribute)
+            except Exception as e:
+                self.parent.log_warning(
+                    "Could not set attribute %s to %s: %s" % (attribute, value, e)
+                )
 
         # Connect the Write File node to the node
         flame.batch.connect_nodes(node, "Default", write_node, "Front")
