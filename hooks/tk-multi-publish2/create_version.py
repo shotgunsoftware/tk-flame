@@ -173,8 +173,17 @@ class CreateVersionPlugin(HookBaseClass):
             ver_data["frame_range"] = re_match.group(1)[1:-1]
 
         if "sourceIn" in asset_info and "sourceOut" in asset_info:
-            ver_data["sg_first_frame"] = asset_info["sourceIn"]
-            ver_data["sg_last_frame"] = asset_info["sourceOut"] - 1
+            if "startFrame" in asset_info:
+                ver_data["sg_first_frame"] = int(asset_info["startFrame"])
+                ver_data["sg_last_frame"] = (
+                    int(asset_info["sourceOut"])
+                    - int(asset_info["sourceIn"])
+                    + int(asset_info["startFrame"])
+                    - 1
+                )
+            else:
+                ver_data["sg_first_frame"] = asset_info["sourceIn"]
+                ver_data["sg_last_frame"] = asset_info["sourceOut"] - 1
             ver_data["frame_count"] = (
                 int(ver_data["sg_last_frame"]) - int(ver_data["sg_first_frame"]) + 1
             )
