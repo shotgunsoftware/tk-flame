@@ -330,8 +330,11 @@ class CreateCutPlugin(HookBaseClass):
         if "startFrame" in asset_info:
             cut_item_in = asset_info["startFrame"] + asset_info["handleIn"]
             cut_item_out = (
-                asset_info["sourceOut"] - asset_info["sourceIn"] +
-                asset_info["startFrame"] - 1 - asset_info["handleOut"]
+                asset_info["sourceOut"]
+                - asset_info["sourceIn"]
+                + asset_info["startFrame"]
+                - 1
+                - asset_info["handleOut"]
             )
         else:
             cut_item_in = asset_info["sourceIn"] + asset_info["handleIn"]

@@ -176,8 +176,10 @@ class CreateVersionPlugin(HookBaseClass):
             if "startFrame" in asset_info:
                 ver_data["sg_first_frame"] = int(asset_info["startFrame"])
                 ver_data["sg_last_frame"] = (
-                   int(asset_info["sourceOut"]) - int(asset_info["sourceIn"]) +
-                   int(asset_info["startFrame"]) - 1
+                    int(asset_info["sourceOut"])
+                    - int(asset_info["sourceIn"])
+                    + int(asset_info["startFrame"])
+                    - 1
                 )
             else:
                 ver_data["sg_first_frame"] = asset_info["sourceIn"]
