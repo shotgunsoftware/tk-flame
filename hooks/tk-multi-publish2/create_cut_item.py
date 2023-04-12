@@ -327,10 +327,19 @@ class CreateCutPlugin(HookBaseClass):
         :return: CutItem metadata dictionary
         """
         asset_info = item.properties["assetInfo"]
+        if "startFrame" in asset_info:
+            cut_item_in = asset_info["startFrame"] + asset_info["handleIn"]
+            cut_item_out = (
+                asset_info["sourceOut"] - asset_info["sourceIn"] +
+                asset_info["startFrame"] - 1 - asset_info["handleOut"]
+            )
+        else:
+            cut_item_in = asset_info["sourceIn"] + asset_info["handleIn"]
+            cut_item_out = asset_info["sourceOut"] - asset_info["handleOut"] - 1
 
         cutitem_data = {
-            "cut_item_in": asset_info["sourceIn"] + asset_info["handleIn"],
-            "cut_item_out": asset_info["sourceOut"] - asset_info["handleOut"] - 1,
+            "cut_item_in": cut_item_in,
+            "cut_item_out": cut_item_out,
             "edit_in": asset_info["recordIn"],
             "edit_out": asset_info["recordOut"] - 1,
             "project": item.context.project,
