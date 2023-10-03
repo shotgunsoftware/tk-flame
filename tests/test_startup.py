@@ -42,6 +42,9 @@ class TestStartup(TankTestBase):
         """
         super(TestStartup, self).setUp()
 
+        if sys.platform == "win32":
+            self.skipTest("Windows tests are not supported")
+
         # Add an environment variable that will allow the Toolkit environment to pick up the
         # engine's code.
         patch = mock.patch.dict("os.environ", {"TK_FLAME_REPO_ROOT": repo_root})
