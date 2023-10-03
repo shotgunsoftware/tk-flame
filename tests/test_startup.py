@@ -40,10 +40,9 @@ class TestStartup(TankTestBase):
         """
         Prepares the environment for unit tests.
         """
-        super(TestStartup, self).setUp()
-
         if sys.platform == "win32":
             self.skipTest("Windows tests are not supported")
+        super(TestStartup, self).setUp()
 
         # Add an environment variable that will allow the Toolkit environment to pick up the
         # engine's code.
