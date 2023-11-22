@@ -22,13 +22,24 @@ function build_qt {
     echo "$1 $2 > $UI_PYTHON_PATH/$3.py"
     $1 $2 > $UI_PYTHON_PATH/$3.py
 
-    # replace PySide2 imports with tank.platform.qt and remove line containing Created by date
-    sed -i"" -E "s/^(from PySide2)(.*)$/try:\n    from tank.platform.qt\2\nexcept ImportError:\n    \1\2/g" $UI_PYTHON_PATH/$3.py
+    # replace PySide imports with sgtk.platform.qt and remove line containing Created by date
+    sed -i"" -E "s/^(from PySide.\.QtWidgets)(.*)$//g" $UI_PYTHON_PATH/$3.py
+    sed -i"" -E "s/^(from PySide.\.)(\w*)(.*)$/from sgtk.platform.qt import \2\nfor name, cls in \2.__dict__.items():\n    if isinstance(cls, type): globals()[name] = cls\n/g" $UI_PYTHON_PATH/$3.py
+    sed -i"" -E "s/^(from PySide. import)(.*)$/from sgtk.platform.qt import\2/g" $UI_PYTHON_PATH/$3.py
+
     sed -i"" -E 's/u\"/\"/g' $UI_PYTHON_PATH/$3.py
 }
 
 function build_ui {
-    build_qt "$1 -g python --from-imports" "$2.ui" "$2"
+    ver=$($1 --version | cut -d' ' -f2 | cut -d. -f1)
+    gt6=$(echo "$ver >= 6" | /usr/bin/bc)
+    if [ "1" -eq "$gt6" ] ; then
+        # running > Qt6
+        build_qt "$1 -g python --from-imports --star-imports" "$2.ui" "$2"
+    else
+        # running < Qt6
+        build_qt "$1 -g python --from-imports" "$2.ui" "$2"
+    fi
 }
 
 function build_res {
