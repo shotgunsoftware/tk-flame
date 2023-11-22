@@ -3,10 +3,7 @@
 # Created by: The Resource Compiler for Qt version 5.15.2
 # WARNING! All changes made in this file will be lost!
 
-try:
-    from tank.platform.qt import QtCore
-except ImportError:
-    from PySide2 import QtCore
+from sgtk.platform.qt import QtCore
 
 qt_resource_data = b"\
 \x00\x005\xe7\
