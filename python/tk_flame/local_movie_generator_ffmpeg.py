@@ -36,10 +36,10 @@ class LocalMovieGeneratorFFmpeg(LocalMovieGenerator):
     ):
         """
         Generate a thumbnail or a preview for a given media asset and link
-        it to a list of ShotGrid entities. Multiple call to this method with
+        it to a list of Flow Production Tracking entities. Multiple call to this method with
         same path but different target_entitie can be done to bundle jobs.
 
-        :param src_path: Path to the media for which a local movie need to be generated and linked to ShotGrid.
+        :param src_path: Path to the media for which a local movie need to be generated and linked to Flow Production Tracking.
         :param dst_path: Path to local movie file to generate.
         :param display_name: The display name of the item we are generating the
             movie for. This will usually be the based name of the path.

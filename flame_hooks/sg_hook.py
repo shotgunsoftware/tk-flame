@@ -17,7 +17,7 @@ def appExit(info):
 
     engine = sgtk.platform.current_engine()
 
-    # Nothing to do if no ShotGrid engine has been initialized.
+    # Nothing to do if no Flow Production Tracking engine has been initialized.
     if engine is not None:
         engine.destroy()
 
@@ -85,7 +85,7 @@ def getMainMenuCustomUIActions():
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the ShotGrid engine.
+    # We can't do anything without the Flow Production Tracking engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return ()
@@ -130,7 +130,7 @@ def getMainMenuCustomUIActions():
         else "ShotGrid"
     )
 
-    # sorts the list to have Log out option always appear last, ShotGrid Python Console prior, and the rest in same order
+    # sorts the list to have Log out option always appear last, Flow Production Tracking Python Console prior, and the rest in same order
     context_commands.sort(
         key=lambda el: ("Log Out" in el, "%s Python Console..." % name in el, None)
     )
@@ -159,7 +159,7 @@ def customUIAction(info, userData):
 
     engine = sgtk.platform.current_engine()
 
-    # We can't do anything without the ShotGrid engine.
+    # We can't do anything without the Flow Production Tracking engine.
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return

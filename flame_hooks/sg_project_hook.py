@@ -47,7 +47,7 @@ def appInitialized(projectName):
         # certain that it's entirely safe.
         #
         # We only care to alert the user if the change in Flame project
-        # is going to send us to a different ShotGrid project. If we're
+        # is going to send us to a different Flow Production Tracking project. If we're
         # not crossing project boundaries, there are no concerns about
         # hooks, paths (for classic projects), and the like.
         project_is_changing = True
@@ -58,7 +58,7 @@ def appInitialized(projectName):
             engine.logger.debug(
                 "Was unable to import the flame Python module. As such, "
                 "it must be assumed that the Flame project change is "
-                "resulting in a change in ShotGrid project. This means "
+                "resulting in a change in Flow Production Tracking project. This means "
                 "that the user will see a QMessageBox warning if the "
                 "tk-flame engine's project_switching setting is false. "
                 "The API to allow this was introduced in 2018.2."
@@ -85,8 +85,8 @@ def appInitialized(projectName):
             QtGui.QMessageBox.warning(
                 None,
                 "No project switching!",
-                "The ShotGrid integration does not currently support project switching.\n"
-                "Even if you switch projects, any ShotGrid-specific configuration will\n"
+                "The Flow Production Tracking integration does not currently support project switching.\n"
+                "Even if you switch projects, any Flow Production Tracking -specific configuration will\n"
                 "remain connected to the initially loaded project.",
             )
 

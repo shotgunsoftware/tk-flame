@@ -45,11 +45,11 @@ class ThumbnailGenerator(object):
     ):
         """
         Generate a thumbnail or a preview for a given media asset and link
-        it to a list of ShotGrid entities. Multiple call to this method with
+        it to a list of Flow Production Tracking entities. Multiple call to this method with
         same path but different target_entitie can be done to bundle jobs.
 
         :param path: Path to the media for which thumbnail or preview need to be
-            generated and uploaded to ShotGrid.
+            generated and uploaded to Flow Production Tracking.
         :param display_name: The display name of the item we are generating the
             thumbnail for. This will usually be the based name of the path.
         :param target_entities: Target entities to which the thumbnails need to
@@ -69,7 +69,9 @@ class ThumbnailGenerator(object):
         # a thumbnail
         bypass_server_transcoding = self.engine.get_setting("bypass_server_transcoding")
         if bypass_server_transcoding:
-            self.engine.log_debug("Bypass ShotGrid transcoding setting ENABLED.")
+            self.engine.log_debug(
+                "Bypass Flow Production Tracking transcoding setting ENABLED."
+            )
 
         generate_previews = favor_preview and self.engine.get_setting(
             "generate_previews"
@@ -117,11 +119,11 @@ class ThumbnailGenerator(object):
     ):
         """
         Generate a preview for a given media asset and link
-        it to a list of ShotGrid entities. Multiple call to this method with
+        it to a list of Flow Production Tracking entities. Multiple call to this method with
         same path but different target_entitie can be done to bundle jobs.
 
         :param path: Path to the media for which thumbnail or preview need to be
-            generated and uploaded to ShotGrid.
+            generated and uploaded to Flow Production Tracking.
         :param display_name: The display name of the item we are generating the
             thumbnail for. This will usually be the based name of the path.
         :param target_entities: Target entities to which the thumbnails need to
@@ -140,11 +142,11 @@ class ThumbnailGenerator(object):
     ):
         """
         Generate a thumbnail for a given media asset and link
-        it to a list of ShotGrid entities. Multiple call to this method with
+        it to a list of Flow Production Tracking entities. Multiple call to this method with
         same path but different target_entitie can be done to bundle jobs.
 
         :param path: Path to the media for which thumbnail or preview need to be
-            generated and uploaded to ShotGrid.
+            generated and uploaded to Flow Production Tracking.
         :param display_name: The display name of the item we are generating the
             thumbnail for. This will usually be the based name of the path.
         :param target_entities: Target entities to which the thumbnails need to
@@ -161,10 +163,10 @@ class ThumbnailGenerator(object):
     def finalize(self, path=None):
         """
         Ensure the generated thumbnail or preview have been uploaded to the
-        ShotGrid Server if that was not done during the generate() pass.
+        Flow Production Tracking Server if that was not done during the generate() pass.
 
         :param path: Path to the media for which thumbnail or/and preview need
-            to be uploaded to ShotGrid. If None is pass, all jobs will be
+            to be uploaded to Flow Production Tracking. If None is pass, all jobs will be
             finalized.
         :return: Backburner job IDs created.
         """

@@ -197,7 +197,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # Assuming we're in a new enough version of Flame (2018.3+) we'll
         # be able to link the Flame project to our SG project. This will
-        # ensure that is a use launches Flame's plugin-based ShotGrid
+        # ensure that is a use launches Flame's plugin-based Flow Production Tracking
         # integration that they will be bootstrapped into the correct
         # project and won't be prompted to choose an SG project to link to.
         #
@@ -211,11 +211,11 @@ class FlameEngine(sgtk.platform.Engine):
             except Exception:
                 self.logger.debug(
                     "Was unable to import the flame Python module. As a result, "
-                    "the Flame project will not be linked to associated ShotGrid "
+                    "the Flame project will not be linked to associated Flow Production Tracking "
                     "project using the Flame Python API. This shouldn't cause "
                     "any problems in the current session, but it does mean "
                     "that the user might be prompted to link this project to a "
-                    "ShotGrid project if they launch Flame using the Toolkit "
+                    "Flow Production Tracking project if they launch Flame using the Toolkit "
                     "plugin and open this same Flame project."
                 )
             else:
@@ -230,13 +230,13 @@ class FlameEngine(sgtk.platform.Engine):
                         "shotgun_project_name property. This shouldn't cause "
                         "any problems in the current session, but it does mean "
                         "that the user might be prompted to link this project to a "
-                        "ShotGrid project if they launch Flame using the Toolkit "
+                        "Flow Production Tracking project if they launch Flame using the Toolkit "
                         "plugin and open this same Flame project."
                     )
                 else:
                     self.logger.debug(
                         "Successfully linked the Flame project to its associated "
-                        "ShotGrid project."
+                        "Flow Production Tracking project."
                     )
 
     def _initialize_logging(self, install_root):
@@ -587,7 +587,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         The location of the flame export preset to use to generate local movies.
 
-        Local movies are linked to assets in ShotGrid thru the "Path to Movie"
+        Local movies are linked to assets in Flow Production Tracking thru the "Path to Movie"
         field but are not uploaded on the server.
 
         :returns: Path as string
@@ -951,7 +951,7 @@ class FlameEngine(sgtk.platform.Engine):
             os.environ["DL_DEBUG_PYTHON_HOOKS"] = "1"
 
         # see if we can launch into batch mode. We only do this when in a
-        # shot context and if there is a published batch file in ShotGrid
+        # shot context and if there is a published batch file in Flow Production Tracking
         #
         # For now, hard code the logic of how to detect which batch file to load up.
         # TODO: in the future, we may want to expose this in a hook - but it is arguably
@@ -1753,7 +1753,7 @@ class FlameEngine(sgtk.platform.Engine):
 
             else:
                 error = [
-                    "ShotGrid Backburner job could not be created.\n Return code: %d"
+                    "Flow Production Tracking Backburner job could not be created.\n Return code: %d"
                     % return_code
                 ]
                 if stderr:
@@ -1879,10 +1879,10 @@ def sgtk_exception_trap(ex_cls, ex, tb):
         traceback_str = "\n".join(traceback.format_tb(tb))
         if ex_cls == TankError:
             # for TankErrors, we don't show the whole stack trace
-            error_message = "A ShotGrid error was reported:\n\n%s" % ex
+            error_message = "A Flow Production Tracking error was reported:\n\n%s" % ex
         else:
             error_message = (
-                "A ShotGrid error was reported:\n\n%s (%s)\n\nTraceback:\n%s"
+                "A Flow Production Tracking error was reported:\n\n%s (%s)\n\nTraceback:\n%s"
                 % (ex, ex_cls, traceback_str)
             )
     except:
@@ -1894,7 +1894,9 @@ def sgtk_exception_trap(ex_cls, ex, tb):
 
         if QtCore.QCoreApplication.instance():
             # there is an application running - so pop up a message!
-            QtGui.QMessageBox.critical(None, "ShotGrid General Error", error_message)
+            QtGui.QMessageBox.critical(
+                None, "Flow Production Tracking General Error", error_message
+            )
     except:
         pass
 
