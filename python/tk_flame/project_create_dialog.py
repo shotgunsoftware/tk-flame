@@ -69,7 +69,10 @@ class ProjectCreateDialog(QtGui.QWidget):
         # populate fixed fields (the first tab)
         self.ui.project_name.setText(project_name)
         self.ui.setup_dir.setPlaceholderText("<default>")
-        self.ui.user_name.setText(user_name)
+        if user_name:
+            self.ui.user_name.setText(user_name)
+        else:
+            self.ui.user_name.setText("N/A")
         if workspace_name:
             self.ui.workspace_name.setText(workspace_name)
         else:
