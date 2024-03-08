@@ -91,7 +91,8 @@ class WiretapHandler(object):
         host_name = self._engine.execute_hook_method(
             "project_startup_hook", "get_server_hostname"
         )
-        self._server = WireTapServerHandle("%s:IFFFS" % host_name)
+        self._server_id = "%s:IFFFS" % host_name
+        self._server = WireTapServerHandle(self._server_id)
         self._engine.log_debug("Connected to wiretap host '%s'..." % host_name)
 
     def close(self):
@@ -102,6 +103,7 @@ class WiretapHandler(object):
         # exception, otherwise wiretap server will refuse all the
         # following connections.
         self._server = None
+        self._server_id = None
         WireTapClientUninit()
         self._engine.log_debug("Uninitialized wiretap...")
 
@@ -120,27 +122,31 @@ class WiretapHandler(object):
         )
 
         self._ensure_project_exists(project_name, user_name, workspace_name)
-        self._ensure_user_exists(user_name)
+
+        app_args = ["--start-project='%s'" % project_name]
 
         if workspace_name is None:
             # use Flame's default workspace
             self._engine.log_debug("Using the Flame default workspace")
-            app_args = "--start-project='%s' --start-user='%s' --create-workspace" % (
-                project_name,
-                user_name,
-            )
-
+            app_args.append("--create-workspace")
         else:
             self._engine.log_debug("Using a custom workspace '%s'" % workspace_name)
             # an explicit workspace is used. Ensure it exists
             self._ensure_workspace_exists(project_name, workspace_name)
-            # and pass it to the startup
-            app_args = (
-                "--start-project='%s' --start-user='%s' --create-workspace --start-workspace='%s'"
-                % (project_name, user_name, workspace_name)
-            )
+            app_args.append("--start-workspace='%s'" % workspace_name)
 
-        return app_args
+        if user_name is not None:
+            if not self._ensure_user_exists(user_name):
+                self._engine.log_debug("Using a user '%s'" % user_name)
+                app_args.append("--start-user='%s'" % user_name)
+
+        host_name = self._engine.execute_hook_method(
+            "project_startup_hook", "get_server_hostname"
+        )
+        if host_name != "locahost":
+            app_args.append(" --remote-host-name=" + host_name)
+
+        return " ".join(app_args)
 
     #########################################################################################################
     # internals
@@ -152,6 +158,8 @@ class WiretapHandler(object):
         :param user_name: Name of the user to look for
         """
 
+        if not self._child_node_exists("/", "users", "USERS"):
+            return False
         if not self._child_node_exists("/users", user_name, "USER"):
             # Create the new user
             users = WireTapNodeHandle(self._server, "/users")
@@ -163,6 +171,7 @@ class WiretapHandler(object):
                 )
 
             self._engine.log_debug("User %s successfully created" % user_name)
+        return True
 
     def _ensure_workspace_exists(self, project_name, workspace_name):
         """
