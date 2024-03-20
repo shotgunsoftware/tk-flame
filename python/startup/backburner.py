@@ -19,8 +19,8 @@
 # typically, the following sort of command line is generated in create_local_backburner_job():
 # /opt/Autodesk/backburner/cmdjob
 # -userRights
-# -jobName:"Sequence 'aa002' - Uploading media to ShotGrid"
-# -description:"Creates a new version record in ShotGrid and uploads the associated Quicktime."
+# -jobName:"Sequence 'aa002' - Uploading media to Flow Production Tracking"
+# -description:"Creates a new version record in Flow Production Tracking and uploads the associated Quicktime."
 # -servers:Mannes-MacBook-Pro-2.local
 # -dependencies:1587902041
 # /opt/Autodesk/python/<flame version>/bin/python

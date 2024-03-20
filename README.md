@@ -3,11 +3,11 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## Documentation
-This repository is a part of the ShotGrid Pipeline Toolkit.
+This repository is a part of the Flow Production Tracking Toolkit.
 
 - For more information about this app and for release notes, *see the wiki section*.
 - For general information and documentation, click here: https://help.autodesk.com/view/SGDEV/ENU/?contextId=SA_INTEGRATIONS_USER_GUIDE
-- For information about ShotGrid in general, click here: https://www.autodesk.com/products/shotgrid/overview
+- For information about Flow Production Tracking in general, click here: https://www.autodesk.com/products/shotgrid/overview
 
 ## Using this app in your Setup
 All the apps that are part of our standard app suite are pushed to our App Store.
@@ -52,7 +52,7 @@ Flame is typically being launched:
 - The multi launch app now executes the re-written DCC path and thereby starts executing `python/startup/launch_app.py`.
   inside the python interpreter which comes bundled with Flame (and contains a known version of PySide). The engine starts
   up, hooks paths are registered by setting the `DL_PYTHON_HOOK_PATH` environment variable etc.
-  At this point, a check is carried out to see if a Flame project corresponding to the ShotGrid project exists or not.
+  At this point, a check is carried out to see if a Flame project corresponding to the Flow Production Tracking project exists or not.
   If it doesn't, a project setup UI is shown on screen where a user can configure a new Flame project.
 
 - Once a Project has been established, the Flame DCC is launched.

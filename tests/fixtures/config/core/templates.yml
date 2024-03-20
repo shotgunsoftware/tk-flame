@@ -180,14 +180,14 @@ paths:
 
 strings:
 
-    # when a publish record is created in ShotGrid, populate the name with the following
+    # when a publish record is created in Flow Production Tracking, populate the name with the following
     houdini_shot_publish_name: "Houdini Scene {name}, v{version}"
 
-    # when a publish record is created in ShotGrid, populate the name with the following
+    # when a publish record is created in Flow Production Tracking, populate the name with the following
     maya_publish_name: "Maya Scene {name}, v{version}"
 
-    # when a publish record is created in ShotGrid, populate the name with the following
+    # when a publish record is created in Flow Production Tracking, populate the name with the following
     nuke_publish_name: "Nuke Script {name_alpha}, v{version}"
 
-    # when a publish record is created in ShotGrid, populate the name with the following
+    # when a publish record is created in Flow Production Tracking, populate the name with the following
     houdini_asset_publish_name: "Houdini Scene {name_alpha}, v{version}"

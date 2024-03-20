@@ -23,7 +23,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 
 class BackburnerHooks(HookBaseClass):
     # constants
-    # default height for ShotGrid uploads
+    # default height for Flow Production Tracking uploads
     # see https://knowledge.autodesk.com/support/shotgrid/learn-explore/caas/CloudHelp/cloudhelp/ENU/SG-Supervisor-Artist/files/sa-review-approval/SG-Supervisor-Artist-sa-review-approval-sa-transcoding-html-html.html
     SHOTGUN_QUICKTIME_TARGET_HEIGHT = 720
 
@@ -42,16 +42,16 @@ class BackburnerHooks(HookBaseClass):
         self, path, targets, field_name, display_name, files_to_delete
     ):
         """
-        Upload a file to ShotGrid, link it to the targets and delete the file.
+        Upload a file to Flow Production Tracking, link it to the targets and delete the file.
 
         :param path: Media file to upload.
-        :param targets: ShotGrid entities to be linked to the file.
-        :param field_name: The internal ShotGrid field name on the entity to
+        :param targets: Flow Production Tracking entities to be linked to the file.
+        :param field_name: The internal Flow Production Tracking field name on the entity to
             store the file in. This field must be "thumb_image" (if image) or
             "sg_uploaded_movie" (if movie).
         :param display_name: The display name to use for the file.
         :param files_to_delete: List of files to be deleted upon successful
-            upload to ShotGrid.
+            upload to Flow Production Tracking.
         """
         for target in targets:
             self.parent.shotgun.upload(
@@ -67,12 +67,12 @@ class BackburnerHooks(HookBaseClass):
 
     def update_path_to_movie(self, path, targets, files_to_delete):
         """
-        Update the path to the local movie in ShotGrid
+        Update the path to the local movie in Flow Production Tracking
 
         :param path: Local movie file
-        :param targets: ShotGrid entities to be linked to the file.
+        :param targets: Flow Production Tracking entities to be linked to the file.
         :param files_to_delete: List of files to be deleted upon successful
-            update to ShotGrid.
+            update to Flow Production Tracking.
         """
         batch_data = []
         for target in targets:
@@ -187,7 +187,9 @@ class BackburnerHooks(HookBaseClass):
                 return return_code
 
             if self.parent.get_setting("bypass_server_transcoding"):
-                self.parent.log_debug("Bypass ShotGrid transcoding setting enabled.")
+                self.parent.log_debug(
+                    "Bypass Flow Production Tracking transcoding setting enabled."
+                )
                 field_name = "sg_uploaded_movie_mp4"
             else:
                 field_name = "sg_uploaded_movie"

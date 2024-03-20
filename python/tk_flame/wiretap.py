@@ -317,7 +317,7 @@ class WiretapHandler(object):
 
             xml += (
                 "<Description>%s</Description>"
-                % "Created by ShotGrid Flame Integration %s"
+                % "Created by Flow Production Tracking Flame Integration %s"
                 % self._engine.version
             )
 

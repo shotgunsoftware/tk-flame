@@ -484,17 +484,17 @@ class Ui_ProjectCreateDialog(object):
     # setupUi
 
     def retranslateUi(self, ProjectCreateDialog):
-        ProjectCreateDialog.setWindowTitle(QCoreApplication.translate("ProjectCreateDialog", "Submit to ShotGrid", None))
+        ProjectCreateDialog.setWindowTitle(QCoreApplication.translate("ProjectCreateDialog", "Submit to Flow Production Tracking", None))
         self.label_9.setText("")
         self.label_5.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Project Name</b>", None))
 #if QT_CONFIG(tooltip)
-        self.project_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>Flame project name</b> is automatically generated based on your current ShotGrid project. ", None))
+        self.project_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>Flame project name</b> is automatically generated based on your current Flow Production Tracking project. ", None))
 #endif // QT_CONFIG(tooltip)
         self.project_name.setText(QCoreApplication.translate("ProjectCreateDialog", "xxx", None))
         self.label_7.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>Storage Volume</b>", None))
         self.label_6.setText(QCoreApplication.translate("ProjectCreateDialog", "<b>User</b>", None))
 #if QT_CONFIG(tooltip)
-        self.user_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>User Name</b> associated with your new Flame Project is based on the ShotGrid user that matches your current login name.\n"
+        self.user_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", "The <b>User Name</b> associated with your new Flame Project is based on the Flow Production Tracking user that matches your current login name.\n"
 "", None))
 #endif // QT_CONFIG(tooltip)
         self.user_name.setText(QCoreApplication.translate("ProjectCreateDialog", "xxx", None))

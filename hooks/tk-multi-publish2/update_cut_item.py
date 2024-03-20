@@ -18,7 +18,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 
 class UpdateCutPlugin(HookBaseClass):
     """
-    Plugin for creating generic publishes in ShotGrid
+    Plugin for creating generic publishes in Flow Production Tracking
     """
 
     def __init__(self, *args, **kwrds):
@@ -50,7 +50,7 @@ class UpdateCutPlugin(HookBaseClass):
         Verbose, multi-line description of what the plugin does. This can
         contain simple html for formatting.
         """
-        return "Update cut items in ShotGrid for the given object"
+        return "Update cut items in Flow Production Tracking for the given object"
 
     @property
     def settings(self):
@@ -109,7 +109,7 @@ class UpdateCutPlugin(HookBaseClass):
 
         :returns: dictionary with boolean keys accepted, required and enabled
         """
-        # Make sure that the ShotGrid backend support Cuts
+        # Make sure that the Flow Production Tracking backend support Cuts
         cut_supported = self.sg.server_caps.version >= (7, 0, 0)
 
         # Only available on Shot context
@@ -179,7 +179,7 @@ class UpdateCutPlugin(HookBaseClass):
         if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
             # Favor the file_path attribute if present since it will use the same
             # syntax as Flame for files sequences (ie file.[#-#].ext) instead of
-            # ShotGrid syntax (ie file.%d.ext).
+            # Flow Production Tracking syntax (ie file.%d.ext).
             path = item.properties.get("file_path", item.properties["path"])
             self.engine.thumbnail_generator.generate(
                 display_name=item.name,
@@ -205,6 +205,6 @@ class UpdateCutPlugin(HookBaseClass):
         if self.engine.is_thumbnail_supported_for_asset_type(asset_info["assetType"]):
             # Favor the file_path attribute if present since it will use the same
             # syntax as Flame for files sequences (ie file.[#-#].ext) instead of
-            # ShotGrid syntax (ie file.%d.ext).
+            # Flow Production Tracking syntax (ie file.%d.ext).
             path = item.properties.get("file_path", item.properties["path"])
             self.engine.thumbnail_generator.finalize(path=path)

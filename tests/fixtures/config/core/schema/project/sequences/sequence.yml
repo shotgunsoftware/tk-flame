@@ -11,15 +11,15 @@
 # the type of dynamic content
 type: "shotgun_entity"
 
-# the ShotGrid field to use for the folder name
+# the Flow Production Tracking field to use for the folder name
 name: "code"
 
-# the ShotGrid entity type to connect to
+# the Flow Production Tracking entity type to connect to
 entity_type: "Sequence"
 
-# ShotGrid filters to apply when getting the list of items
+# Flow Production Tracking filters to apply when getting the list of items
 # this should be a list of dicts, each dict containing
 # three fields: path, relation and values
-# (this is std ShotGrid API syntax)
+# (this is std Flow Production Tracking API syntax)
 # any values starting with $ are resolved into path objects
 filters: [ { "path": "project", "relation": "is", "values": [ "$project" ] } ]
