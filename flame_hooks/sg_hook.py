@@ -23,7 +23,6 @@ def appExit(info):
 
 
 def getCustomUIActions():
-
     try:
         import flame
 
@@ -96,7 +95,7 @@ def getMainMenuCustomUIActions():
 
     # Commands are uniquely identified by command name and by display name so build a list of them
     context_commands = []
-    for (instance_name, display_name, command_name, callback) in commands:
+    for instance_name, display_name, command_name, callback in commands:
         context_commands.append((command_name, display_name))
 
     # now add any 'normal' registered commands not already in the actions dict
@@ -127,7 +126,8 @@ def getMainMenuCustomUIActions():
     name = (
         "Shotgun"
         if version_major < 2022 or version_major == 2022 and version_minor <= 0
-        else "ShotGrid" if version_major < 2025
+        else "ShotGrid"
+        if version_major < 2025
         else "Flow Production Tracking"
     )
 
