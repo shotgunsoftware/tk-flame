@@ -31,6 +31,10 @@ def start_qt_app_and_show_modal(title, engine, widget_class, *args, **kwargs):
 
     t = QtTask(title, engine, widget_class, args, kwargs)
 
+    # TODO? Enable High DPI support in Qt5 (default enabled in Qt6)
+    if QtCore.qVersion()[0] == "5":
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+
     # start up our QApp now
     qt_application = QtGui.QApplication([])
     qt_application.setWindowIcon(QtGui.QIcon(engine.icon_256))
