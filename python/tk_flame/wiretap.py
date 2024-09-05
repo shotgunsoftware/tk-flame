@@ -314,13 +314,6 @@ class WiretapHandler(object):
             # when making modifications.
 
             xml = "<Project>"
-
-            xml += (
-                "<Description>%s</Description>"
-                % "Created by Flow Production Tracking Flame Integration %s"
-                % self._engine.version
-            )
-
             xml += self._append_setting_to_xml(project_settings, "SetupDir")
             xml += self._append_setting_to_xml(project_settings, "FrameWidth")
             xml += self._append_setting_to_xml(project_settings, "FrameHeight")
