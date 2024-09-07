@@ -3,7 +3,7 @@
 # Created by: The Resource Compiler for Qt version 5.15.2
 # WARNING! All changes made in this file will be lost!
 
-from sgtk.platform.qt import QtCore
+from tank.platform.qt import QtCore
 
 qt_resource_data = b"\
 \x00\x00B\x88\
@@ -1092,7 +1092,7 @@ qt_resource_struct = b"\
 \x00\x00\x00\x00\x00\x02\x00\x00\x00\x01\x00\x00\x00\x02\
 \x00\x00\x00\x00\x00\x00\x00\x00\
 \x00\x00\x00\x16\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\
-\x00\x00\x01\x8d\xfc\x8e\xf58\
+\x00\x00\x01\x91\x09\x7f)k\
 "
 
 def qInitResources():
