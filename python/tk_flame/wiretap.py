@@ -75,7 +75,7 @@ class WiretapHandler(object):
     Wiretap functionality
     """
 
-    #########################################################################################################
+    ################################################################################################
     # public methods
 
     def __init__(self):
@@ -136,7 +136,7 @@ class WiretapHandler(object):
             app_args.append("--start-workspace='%s'" % workspace_name)
 
         if user_name is not None:
-            if not self._ensure_user_exists(user_name):
+            if self._ensure_user_exists(user_name):
                 self._engine.log_debug("Using a user '%s'" % user_name)
                 app_args.append("--start-user='%s'" % user_name)
 
@@ -148,7 +148,7 @@ class WiretapHandler(object):
 
         return " ".join(app_args)
 
-    #########################################################################################################
+    ################################################################################################
     # internals
 
     def _ensure_user_exists(self, user_name):
@@ -158,19 +158,40 @@ class WiretapHandler(object):
         :param user_name: Name of the user to look for
         """
 
-        if not self._child_node_exists("/", "users", "USERS"):
+        # Using the command line tool here instead of the python API because we want to use the
+        # version matching the application version intended instead of the current  which point to
+        # the latest.
+        import os
+
+        if not self._engine.is_version_less_than("2025"):
             return False
-        if not self._child_node_exists("/users", user_name, "USER"):
-            # Create the new user
-            users = WireTapNodeHandle(self._server, "/users")
 
-            user_node = WireTapNodeHandle()
-            if not users.createNode(user_name, "USER", user_node):
-                raise WiretapError(
-                    "Unable to create user %s: %s" % (user_name, users.lastError())
-                )
+        user_check_cmd = [
+            os.path.join(self._engine.wiretap_tools_root, "wiretap_get_node_type"),
+            "-n",
+            os.path.join("/users", user_name),
+        ]
 
-            self._engine.log_debug("User %s successfully created" % user_name)
+        _, user_type, _ = self._engine.execute_hook_method(
+            "execute_command_hooks", "execute_command", command=user_check_cmd
+        )
+
+        if not user_type or user_type.split("\n")[0] != "USER":
+            user_create_cmd = [
+                os.path.join(self._engine.wiretap_tools_root, "wiretap_create_node"),
+                "-n",
+                "/users",
+                "-d",
+                user_name,
+            ]
+            rc, _, _ = self._engine.execute_hook_method(
+                "execute_command_hooks", "execute_command", command=user_create_cmd
+            )
+
+            if rc == 0:
+                self._engine.log_debug("User %s successfully created" % user_name)
+            else:
+                self._engine.log_warning("User %s could not be created" % user_name)
         return True
 
     def _ensure_workspace_exists(self, project_name, workspace_name):
@@ -202,7 +223,8 @@ class WiretapHandler(object):
 
         :param project_name: Project name to look for
         :param user_name: User name to use when starting up
-        :param workspace_name: Workspace to use when starting up - if none, then default ws will be used.
+        :param workspace_name: Workspace to use when starting up - if none, then default ws will be
+                               used.
         """
         from sgtk.platform.qt import QtGui, QtCore
 
@@ -280,7 +302,10 @@ class WiretapHandler(object):
 
             else:
                 self._engine.log_debug("Project settings ui will be bypassed.")
-            # create the project : Using the command line tool here instead of the python API because we need root privileges to set the group id.
+
+            # Using the command line tool here instead of the python API because we need root
+            # privileges to set the group id and we want to use the version matching the application
+            # version intended instead of the current which point to the latest.
             import os
 
             project_create_cmd = [
