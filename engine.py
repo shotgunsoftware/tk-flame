@@ -372,7 +372,7 @@ class FlameEngine(sgtk.platform.Engine):
         """
         # return a dictionary grouping all the commands by instance name
         commands_by_instance = {}
-        for (name, value) in self.commands.items():
+        for name, value in self.commands.items():
             app_instance = value["properties"].get("app")
             if app_instance:
                 instance_name = app_instance.instance_name
@@ -398,7 +398,7 @@ class FlameEngine(sgtk.platform.Engine):
             if instance_commands is None:
                 continue
 
-            for (name, callback) in instance_commands:
+            for name, callback in instance_commands:
                 # add the command if the name from the settings is '' or the name matches
                 if not command_name or (command_name == name):
                     ret_value.append((instance_name, display_name, name, callback))
@@ -417,7 +417,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # run any commands registered via run_at_startup
         commands_to_start = self._get_commands_matching_setting("run_at_startup")
-        for (instance_name, command_name, callback) in commands_to_start:
+        for instance_name, command_name, callback in commands_to_start:
             self.log_debug(
                 "Running at startup: (%s, %s)" % (instance_name, command_name)
             )

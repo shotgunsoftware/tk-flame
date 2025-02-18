@@ -125,9 +125,7 @@ def getMainMenuCustomUIActions():
     name = (
         "Shotgun"
         if version_major < 2022 or version_major == 2022 and version_minor <= 0
-        else "ShotGrid"
-        if version_major < 2025
-        else "Flow Production Tracking"
+        else "ShotGrid" if version_major < 2025 else "Flow Production Tracking"
     )
 
     # sorts the list to have Log out option always appear last, Flow Production Tracking Python Console prior, and the rest in same order

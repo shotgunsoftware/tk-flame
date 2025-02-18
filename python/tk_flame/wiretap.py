@@ -33,6 +33,7 @@ import sgtk
 import xml.dom.minidom as minidom
 from sgtk import TankError
 
+
 # helper exception class to trap all the C style errors
 # that are potentially coming from the wiretap API.
 class WiretapError(TankError):
@@ -293,7 +294,7 @@ class WiretapHandler(object):
                     )
 
                 # read updated settings back from the UI and update our settings dict with these
-                for (k, v) in widget.get_settings().items():
+                for k, v in widget.get_settings().items():
                     project_settings[k] = v
 
                 volume_name = widget.get_volume_name()
@@ -327,7 +328,7 @@ class WiretapHandler(object):
 
             self._engine.log_debug("A new project '%s' will be created." % project_name)
             self._engine.log_debug("The following settings will be used:")
-            for (k, v) in project_settings.items():
+            for k, v in project_settings.items():
                 self._engine.log_debug("%s: %s" % (k, v))
 
             # create xml structure

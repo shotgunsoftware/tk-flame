@@ -731,7 +731,7 @@ class FlameItemCollector(HookBaseClass):
 
         file_items = []
 
-        for (image_seq_path, img_seq_files) in img_sequences:
+        for image_seq_path, img_seq_files in img_sequences:
             # get info for the extension
             item_info = self._get_item_info(image_seq_path)
             item_type = item_info["item_type"]
