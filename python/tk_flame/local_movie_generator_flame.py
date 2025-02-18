@@ -12,7 +12,6 @@
 Local movie generator of Flame's exported assets based on Flame export API.
 """
 
-from __future__ import absolute_import
 
 __all__ = ["LocalMovieGeneratorFlame"]
 
@@ -27,7 +26,7 @@ class LocalMovieGeneratorFlame(LocalMovieGenerator):
     """
 
     def __init__(self, engine):
-        super(LocalMovieGeneratorFlame, self).__init__(engine)
+        super().__init__(engine)
 
     def _generate(
         self,

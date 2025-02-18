@@ -8,9 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from __future__ import with_statement
-from __future__ import print_function
-from __future__ import absolute_import
 import os
 import sys
 
@@ -42,7 +39,7 @@ class TestStartup(TankTestBase):
         """
         if sys.platform == "win32":
             self.skipTest("Windows tests are not supported")
-        super(TestStartup, self).setUp()
+        super().setUp()
 
         # Add an environment variable that will allow the Toolkit environment to pick up the
         # engine's code.

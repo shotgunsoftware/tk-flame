@@ -23,7 +23,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
     """
 
     def __init__(self, engine):
-        super(ThumbnailGeneratorFlame, self).__init__(engine)
+        super().__init__(engine)
         self._preview_jobs = {}
         self._thumbnail_jobs = {}
 

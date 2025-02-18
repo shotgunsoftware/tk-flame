@@ -23,7 +23,7 @@ class LocalMovieGeneratorFFmpeg(LocalMovieGenerator):
     """
 
     def __init__(self, engine):
-        super(LocalMovieGeneratorFFmpeg, self).__init__(engine)
+        super().__init__(engine)
 
     def _generate(
         self,
