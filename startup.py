@@ -236,7 +236,7 @@ class FlameLauncher(SoftwareLauncher):
             )
 
             # Extract all products from that executable.
-            for (executable_path, key_dict) in executable_matches:
+            for executable_path, key_dict in executable_matches:
 
                 # extract the matched keys form the key_dict (default to None if
                 # not included)

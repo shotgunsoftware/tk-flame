@@ -35,7 +35,6 @@ class ProjectCreateDialog(QtGui.QWidget):
         group_names,
         project_settings,
     ):
-
         """
         Constructor
 
