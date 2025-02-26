@@ -34,7 +34,8 @@ repos:
     - id: requirements-txt-fixer
     # Removes trailing whitespaces.
     - id: trailing-whitespace
-
+    # Validate yml files
+    - id: check-yaml
   # Leave black at the bottom so all touchups are done before it is run.
   - repo: https://github.com/psf/black
     rev: 25.1.0
