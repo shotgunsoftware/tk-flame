@@ -10,7 +10,6 @@
 
 from __future__ import absolute_import
 import sgtk
-from sgtk import TankError
 from sgtk.platform.qt import QtCore, QtGui
 from .ui.project_create_dialog import Ui_ProjectCreateDialog
 
@@ -40,7 +39,8 @@ class ProjectCreateDialog(QtGui.QWidget):
 
         :param project_name: Name of the project as string
         :param user_name: Name of the user as string
-        :param workspace_name: Name of the workspace as string, None if default workspace should be used
+        :param workspace_name: Name of the workspace as string,
+                               None if default workspace should be used
         :param default_volume_name: The default volume name, as string
         :param volume_names: All available volumes, list of strings
         :param host_name: The host name to create the project on (str)
@@ -162,9 +162,9 @@ class ProjectCreateDialog(QtGui.QWidget):
         # first reset the combo to trigger the change events later
         self.ui.proxy_mode.setCurrentIndex(-1)
 
-        if enable_proxy == False and proxy_min_frame_size == 0:
+        if not enable_proxy and proxy_min_frame_size == 0:
             self.ui.proxy_mode.setCurrentIndex(0)  # off
-        elif enable_proxy == False and proxy_min_frame_size > 0:
+        elif not enable_proxy and proxy_min_frame_size > 0:
             self.ui.proxy_mode.setCurrentIndex(1)  # conditionally
         else:
             self.ui.proxy_mode.setCurrentIndex(2)  # on
