@@ -12,7 +12,6 @@
 A Toolkit engine for Flame
 """
 
-from __future__ import absolute_import
 import os
 import pwd
 import re
@@ -166,7 +165,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         self._cmdjob_supports_plugin_name = None
 
-        super(FlameEngine, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def pre_app_init(self):
         """
@@ -786,7 +785,7 @@ class FlameEngine(sgtk.platform.Engine):
         :return: QT Parent window (:class:`PySide.QtGui.QWidget`)
         """
         w = self.flame_main_window
-        return w if w else super(FlameEngine, self)._get_dialog_parent()
+        return w if w else super()._get_dialog_parent()
 
     def show_dialog(self, title, bundle, widget_class, *args, **kwargs):
         """
@@ -1020,7 +1019,7 @@ class FlameEngine(sgtk.platform.Engine):
             # Defer to default implementation which looks for pyside and
             # gracefully fails in case that isn't found.
             self.log_debug("Initializing default PySide for in-DCC / Backburner use")
-            return super(FlameEngine, self)._define_qt_base()
+            return super()._define_qt_base()
 
         # we are running the engine outside of Flame.
         # This is special - no QApplication is running at this point -

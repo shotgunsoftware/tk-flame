@@ -8,7 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from __future__ import absolute_import
 import os
 import re
 
@@ -23,7 +22,7 @@ class CreateVersionPlugin(HookBaseClass):
     """
 
     def __init__(self, *args, **kwrds):
-        super(CreateVersionPlugin, self).__init__(*args, **kwrds)
+        super().__init__(*args, **kwrds)
 
         self.publisher = self.parent
         self.engine = self.publisher.engine

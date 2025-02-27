@@ -29,7 +29,6 @@ For more wiretap utilities, check out /opt/Autodesk/wiretap/tools/current
 
 """
 
-from __future__ import absolute_import
 import sgtk
 import xml.dom.minidom as minidom
 from sgtk import TankError

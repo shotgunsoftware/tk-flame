@@ -12,7 +12,6 @@
 """
 Hook that loads defines all the available actions, broken down by publish type.
 """
-from __future__ import absolute_import
 import collections
 import os
 import re
