@@ -54,7 +54,7 @@ class ProjectCreateDialog(QtGui.QWidget):
 
         # now load in the UI that was created in the UI designer
         self.ui = Ui_ProjectCreateDialog()
-        self.ui.setupUi(self)
+        self.ui.setupUi(self, bool(volume_names))
 
         # with the tk dialogs, we need to hook up our modal
         # dialog signals in a special way
@@ -79,10 +79,13 @@ class ProjectCreateDialog(QtGui.QWidget):
         self.ui.host_name.setText(host_name)
 
         # populate storage volume dropdown
-        self.ui.volume.addItems(volume_names)
-        # now select the default value in combo box
-        idx = self.ui.volume.findText(default_volume_name)
-        self.ui.volume.setCurrentIndex(idx)
+        if volume_names:
+            self.ui.volume.addItems(volume_names)
+            # now select the default value in combo box
+            idx = self.ui.volume.findText(default_volume_name)
+            self.ui.volume.setCurrentIndex(idx)
+        else:
+            self.ui.volume = None
 
         self.ui.group_name.addItems(group_names)
         idx = self.ui.group_name.findText(default_group_name)
@@ -243,7 +246,7 @@ class ProjectCreateDialog(QtGui.QWidget):
 
         :returns: volume as string
         """
-        return str(self.ui.volume.currentText())
+        return str(self.ui.volume.currentText()) if self.ui.volume else ""
 
     def get_group_name(self):
         """

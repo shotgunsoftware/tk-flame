@@ -233,27 +233,31 @@ class WiretapHandler(object):
 
             # we need to create a new project!
 
-            # first decide which volume to create the project on.
-            # get a list of volumes and pass it to a hook which will
-            # return the volume to use
-            volumes = self._get_volumes()
+            if self._engine.is_version_less_than("2025.99.999"):
+                # first decide which volume to create the project on.
+                # get a list of volumes and pass it to a hook which will
+                # return the volume to use
+                volumes = self._get_volumes()
 
-            if len(volumes) == 0:
-                raise TankError(
-                    "Cannot create new project! There are no volumes defined for this Flame!"
+                if len(volumes) == 0:
+                    raise TankError(
+                        "Cannot create new project! There are no volumes defined for this Flame!"
+                    )
+
+                # call out to the hook to determine which volume to use
+                volume_name = self._engine.execute_hook_method(
+                    "project_startup_hook", "get_volume", volumes=volumes
                 )
 
-            # call out to the hook to determine which volume to use
-            volume_name = self._engine.execute_hook_method(
-                "project_startup_hook", "get_volume", volumes=volumes
-            )
-
-            # sanity check :)
-            if volume_name not in volumes:
-                raise TankError(
-                    "Volume '%s' specified in hook does not exist in "
-                    "list of current volumes '%s'" % (volume_name, volumes)
-                )
+                # sanity check :)
+                if volume_name not in volumes:
+                    raise TankError(
+                        "Volume '%s' specified in hook does not exist in "
+                        "list of current volumes '%s'" % (volume_name, volumes)
+                    )
+            else:
+                volumes = None
+                volume_name = None
 
             host_name = self._engine.execute_hook_method(
                 "project_startup_hook", "get_server_hostname"
@@ -312,18 +316,23 @@ class WiretapHandler(object):
             project_create_cmd = [
                 os.path.join(self._engine.wiretap_tools_root, "wiretap_create_node"),
                 "-n",
-                os.path.join("/volumes", volume_name),
+                os.path.join("/volumes", volume_name) if volume_name else "/projects",
                 "-d",
                 project_name,
+                "-t",
+                "PROJECT",
             ]
 
             if not self._engine.is_version_less_than("2018.1"):
                 project_create_cmd.append("-g")
                 project_create_cmd.append(group_name)
 
-            self._engine.execute_hook_method(
+            self._engine.log_debug("Creating project: %s" % project_create_cmd)
+            return_code, stdout, stderr = self._engine.execute_hook_method(
                 "execute_command_hooks", "execute_command", command=project_create_cmd
             )
+            if return_code != 0:
+                raise WiretapError(f"Could not create project {project_name}")
 
             # create project settings
 
