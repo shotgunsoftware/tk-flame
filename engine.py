@@ -293,7 +293,7 @@ class FlameEngine(sgtk.platform.Engine):
                 "the filesystem permissions. As a fallback, logs will be "
                 "written to %s instead.",
                 std_log_file,
-                log_file,
+                self._log_file,
             )
 
     @property
