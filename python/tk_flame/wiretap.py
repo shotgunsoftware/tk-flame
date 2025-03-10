@@ -332,6 +332,8 @@ class WiretapHandler(object):
                 "execute_command_hooks", "execute_command", command=project_create_cmd
             )
             if return_code != 0:
+                self._engine.log_debug(stdout)
+                self._engine.log_warning(stderr)
                 raise WiretapError(f"Could not create project {project_name}")
 
             # create project settings
