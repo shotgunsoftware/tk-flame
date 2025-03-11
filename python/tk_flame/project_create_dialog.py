@@ -9,7 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
-from sgtk import TankError
 from sgtk.platform.qt import QtCore, QtGui
 from .ui.project_create_dialog import Ui_ProjectCreateDialog
 
@@ -39,7 +38,8 @@ class ProjectCreateDialog(QtGui.QWidget):
 
         :param project_name: Name of the project as string
         :param user_name: Name of the user as string
-        :param workspace_name: Name of the workspace as string, None if default workspace should be used
+        :param workspace_name: Name of the workspace as string,
+                               None if default workspace should be used
         :param default_volume_name: The default volume name, as string
         :param volume_names: All available volumes, list of strings
         :param host_name: The host name to create the project on (str)
@@ -53,7 +53,7 @@ class ProjectCreateDialog(QtGui.QWidget):
 
         # now load in the UI that was created in the UI designer
         self.ui = Ui_ProjectCreateDialog()
-        self.ui.setupUi(self)
+        self.ui.setupUi(self, bool(volume_names))
 
         # with the tk dialogs, we need to hook up our modal
         # dialog signals in a special way
@@ -78,10 +78,13 @@ class ProjectCreateDialog(QtGui.QWidget):
         self.ui.host_name.setText(host_name)
 
         # populate storage volume dropdown
-        self.ui.volume.addItems(volume_names)
-        # now select the default value in combo box
-        idx = self.ui.volume.findText(default_volume_name)
-        self.ui.volume.setCurrentIndex(idx)
+        if volume_names:
+            self.ui.volume.addItems(volume_names)
+            # now select the default value in combo box
+            idx = self.ui.volume.findText(default_volume_name)
+            self.ui.volume.setCurrentIndex(idx)
+        else:
+            self.ui.volume = None
 
         self.ui.group_name.addItems(group_names)
         idx = self.ui.group_name.findText(default_group_name)
@@ -161,9 +164,9 @@ class ProjectCreateDialog(QtGui.QWidget):
         # first reset the combo to trigger the change events later
         self.ui.proxy_mode.setCurrentIndex(-1)
 
-        if enable_proxy == False and proxy_min_frame_size == 0:
+        if not enable_proxy and proxy_min_frame_size == 0:
             self.ui.proxy_mode.setCurrentIndex(0)  # off
-        elif enable_proxy == False and proxy_min_frame_size > 0:
+        elif not enable_proxy and proxy_min_frame_size > 0:
             self.ui.proxy_mode.setCurrentIndex(1)  # conditionally
         else:
             self.ui.proxy_mode.setCurrentIndex(2)  # on
@@ -242,7 +245,7 @@ class ProjectCreateDialog(QtGui.QWidget):
 
         :returns: volume as string
         """
-        return str(self.ui.volume.currentText())
+        return str(self.ui.volume.currentText()) if self.ui.volume else ""
 
     def get_group_name(self):
         """

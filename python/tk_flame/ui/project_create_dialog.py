@@ -20,7 +20,7 @@ for name, cls in QtGui.__dict__.items():
 from  . import resources_rc
 
 class Ui_ProjectCreateDialog(object):
-    def setupUi(self, ProjectCreateDialog):
+    def setupUi(self, ProjectCreateDialog, has_volume):
         if not ProjectCreateDialog.objectName():
             ProjectCreateDialog.setObjectName(u"ProjectCreateDialog")
         ProjectCreateDialog.resize(450, 514)
@@ -67,17 +67,21 @@ class Ui_ProjectCreateDialog(object):
 
         self.formLayout_3.setWidget(0, QFormLayout.FieldRole, self.project_name)
 
-        self.label_7 = QLabel(self.project_overview_tab)
-        self.label_7.setObjectName(u"label_7")
-        sizePolicy.setHeightForWidth(self.label_7.sizePolicy().hasHeightForWidth())
-        self.label_7.setSizePolicy(sizePolicy)
+        if has_volume:
+            self.label_7 = QLabel(self.project_overview_tab)
+            self.label_7.setObjectName(u"label_7")
+            sizePolicy.setHeightForWidth(self.label_7.sizePolicy().hasHeightForWidth())
+            self.label_7.setSizePolicy(sizePolicy)
 
-        self.formLayout_3.setWidget(1, QFormLayout.LabelRole, self.label_7)
+            self.formLayout_3.setWidget(1, QFormLayout.LabelRole, self.label_7)
 
-        self.volume = QComboBox(self.project_overview_tab)
-        self.volume.setObjectName(u"volume")
+            self.volume = QComboBox(self.project_overview_tab)
+            self.volume.setObjectName(u"volume")
 
-        self.formLayout_3.setWidget(1, QFormLayout.FieldRole, self.volume)
+            self.formLayout_3.setWidget(1, QFormLayout.FieldRole, self.volume)
+        else:
+            self.label_7 = None
+            self.volume = None
 
         self.label_6 = QLabel(self.project_overview_tab)
         self.label_6.setObjectName(u"label_6")
@@ -483,7 +487,8 @@ class Ui_ProjectCreateDialog(object):
         self.project_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", u"The <b>Flame project name</b> is automatically generated based on your current Flow Production Tracking project. ", None))
 #endif // QT_CONFIG(tooltip)
         self.project_name.setText(QCoreApplication.translate("ProjectCreateDialog", u"xxx", None))
-        self.label_7.setText(QCoreApplication.translate("ProjectCreateDialog", u"<b>Storage Volume</b>", None))
+        if self.label_7:
+            self.label_7.setText(QCoreApplication.translate("ProjectCreateDialog", u"<b>Storage Volume</b>", None))
         self.label_6.setText(QCoreApplication.translate("ProjectCreateDialog", u"<b>User</b>", None))
 #if QT_CONFIG(tooltip)
         self.user_name.setToolTip(QCoreApplication.translate("ProjectCreateDialog", u"The <b>User Name</b> associated with your new Flame Project is based on the Flow Production Tracking user that matches your current login name.\n"

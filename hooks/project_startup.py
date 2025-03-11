@@ -96,7 +96,7 @@ class ProjectStartupActions(HookBaseClass):
         :param volumes: List of existing volumes (list of string)
         :returns: One of the volumes in the list (str)
         """
-        return volumes[0]
+        return volumes[0] if volumes else None
 
     def get_workspace(self):
         """
