@@ -9,7 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # Note! This file implements the exportHook interface from Flame 2015.2
-from __future__ import absolute_import
 import os
 
 

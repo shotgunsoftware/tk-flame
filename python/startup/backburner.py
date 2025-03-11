@@ -30,7 +30,6 @@
 # this script will unpack the pickle parameters file, add sgtk to the pythonpath,
 # start an engine and finally run an app or engine hook method.
 
-from __future__ import absolute_import
 import os
 import sys
 

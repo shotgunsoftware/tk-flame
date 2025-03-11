@@ -23,7 +23,7 @@ class ThumbnailGeneratorFFmpeg(ThumbnailGenerator):
     """
 
     def __init__(self, engine):
-        super(ThumbnailGeneratorFFmpeg, self).__init__(engine)
+        super().__init__(engine)
         self._job_ids = []
 
     def _generate_preview(

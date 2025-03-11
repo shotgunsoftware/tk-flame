@@ -12,7 +12,6 @@
 Hook that handles excutement command line from within the Flame process.
 """
 
-from __future__ import absolute_import
 import sgtk
 
 import os

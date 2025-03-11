@@ -8,7 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Ccollect_current_sceneode License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from __future__ import absolute_import
 import mimetypes
 import os
 import re
@@ -85,7 +84,7 @@ class FlameItemCollector(HookBaseClass):
     """
 
     def __init__(self, *args, **kwrds):
-        super(FlameItemCollector, self).__init__(*args, **kwrds)
+        super().__init__(*args, **kwrds)
 
         self.publisher = self.parent
         self.engine = self.publisher.engine
