@@ -10,15 +10,11 @@
 
 import os
 import sys
-
-from tank_test.tank_test_base import TankTestBase
-from tank_test.tank_test_base import setUpModule  # noqa
+from unittest import mock
 
 import sgtk
-
-import unittest.mock
-import contextlib
-
+from tank_test.tank_test_base import setUpModule  # noqa
+from tank_test.tank_test_base import TankTestBase
 
 repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 print("tk-flame repository root found at %s." % repo_root)
