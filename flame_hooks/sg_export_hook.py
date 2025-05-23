@@ -358,6 +358,7 @@ def postExportAsset(info, userData):
        segmentIndex:    Asset index (1 based) in the track.
        versionName:     Current version name of export (Empty if unversioned).
        versionNumber:   Current version number of export (0 if unversioned).
+       isSnapshot:      True if the export has been initiated by a snapshot.
 
     :param userData: Object that could have been populated by previous export hooks and that
                      will be carried over into the subsequent export hooks.
@@ -372,6 +373,11 @@ def postExportAsset(info, userData):
     # The engine is None when the user decides to not use the plugin for the project.
     if engine is None:
         return
+
+    is_snapshot = info.get("isSnapshot", False)
+    if is_snapshot:
+        return
+
     engine.cache_export_asset(info)
 
     # check if there is a toolkit export session currently
