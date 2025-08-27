@@ -135,8 +135,8 @@ def getMainMenuCustomUIActions():
 
     # generate flame data structure
     actions = [
-        {"name": command_name, "caption": display_name}
-        for (command_name, display_name) in context_commands
+        {"name": command_name, "caption": display_name, "order": command_order}
+        for command_order, (command_name, display_name) in enumerate(context_commands)
     ]
 
     return ({"name": name, "actions": tuple(actions)},)
