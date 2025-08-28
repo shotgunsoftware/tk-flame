@@ -232,7 +232,7 @@ class WiretapHandler:
 
             # we need to create a new project!
 
-            if self._engine.is_version_less_than("2025.99.999"):
+            if self._engine.is_version_less_than("2026"):
                 # first decide which volume to create the project on.
                 # get a list of volumes and pass it to a hook which will
                 # return the volume to use
