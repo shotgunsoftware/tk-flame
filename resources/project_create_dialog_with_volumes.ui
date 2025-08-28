@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ProjectCreateDialog</class>
- <widget class="QDialog" name="ProjectCreateDialog">
+ <class>ProjectCreateDialogWithVolumes</class>
+ <widget class="QDialog" name="ProjectCreateDialogWithVolumes">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -88,16 +88,22 @@ height: 100px;
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="label_7">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
-          <string>&lt;b&gt;Setup Directory&lt;/b&gt;</string>
+          <string>&lt;b&gt;Storage Volume&lt;/b&gt;</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="setup_dir"/>
+        <widget class="QComboBox" name="volume"/>
        </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_6">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -110,7 +116,7 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="1">
         <widget class="QLabel" name="user_name">
          <property name="toolTip">
           <string>The &lt;b&gt;User Name&lt;/b&gt; associated with your new Flame Project is based on the Flow Production Tracking user that matches your current login name.
@@ -124,7 +130,7 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="label_19">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -137,7 +143,7 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="4" column="1">
         <widget class="QLabel" name="host_name">
          <property name="text">
           <string>xxx</string>
@@ -147,7 +153,14 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>&lt;b&gt;Setup Directory&lt;/b&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
         <widget class="QLabel" name="label_17">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -160,7 +173,7 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="5" column="1">
         <widget class="QLabel" name="workspace_name">
          <property name="text">
           <string>xxx</string>
@@ -170,15 +183,18 @@ height: 100px;
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="group_name_label">
          <property name="text">
           <string>&lt;b&gt;Group&lt;/b&gt;</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="1">
+       <item row="6" column="1">
         <widget class="QComboBox" name="group_name"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="setup_dir"/>
        </item>
       </layout>
      </widget>
