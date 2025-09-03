@@ -11,6 +11,7 @@
 import sgtk
 from sgtk.platform.qt import QtCore, QtGui
 from .ui.project_create_dialog import Ui_ProjectCreateDialog
+from .ui.project_create_dialog_with_volumes import Ui_ProjectCreateDialogWithVolumes
 
 
 class ProjectCreateDialog(QtGui.QWidget):
@@ -52,8 +53,11 @@ class ProjectCreateDialog(QtGui.QWidget):
         self._engine = sgtk.platform.current_bundle()
 
         # now load in the UI that was created in the UI designer
-        self.ui = Ui_ProjectCreateDialog()
-        self.ui.setupUi(self, bool(volume_names))
+        if volume_names:
+            self.ui = Ui_ProjectCreateDialogWithVolumes()
+        else:
+            self.ui = Ui_ProjectCreateDialog()
+        self.ui.setupUi(self)
 
         # with the tk dialogs, we need to hook up our modal
         # dialog signals in a special way

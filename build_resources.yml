@@ -6,6 +6,7 @@
 - ui_src: resources
   ui_files:
     - project_create_dialog
+    - project_create_dialog_with_volumes
   res_files:
     - resources
   py_dest: python/tk_flame/ui
