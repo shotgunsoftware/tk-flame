@@ -16,7 +16,7 @@ working on. For an overview of all the Apps and Engines in the Toolkit App Store
 click here: https://help.autodesk.com/view/SGDEV/ENU/?contextId=PC_TOOLKIT_APPS
 
 ## Have a Question?
-Don't hesitate to contact us at https://www.autodesk.com/support/contact-support for help.
+Don't hesitate to contact us at https://www.autodesk.com/support for help.
 
 ## Flame Engine Logging
 The Flame engine logs information to `/opt/Autodesk/log/tk-flame.log`. This is helpful if you are trying
