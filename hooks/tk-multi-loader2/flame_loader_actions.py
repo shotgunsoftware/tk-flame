@@ -374,7 +374,9 @@ class FlameLoaderActions(HookBaseClass):
         :rtype: str
         """
 
-        return os.environ.get("SHOTGUN_FLAME_IMPORT_LOCATION", flame.batch.reels[0].name.get_value())
+        return os.environ.get(
+            "SHOTGUN_FLAME_IMPORT_LOCATION", flame.batch.reels[0].name.get_value()
+        )
 
     @property
     def want_write_file_node(self):
