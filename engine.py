@@ -187,13 +187,6 @@ class FlameEngine(sgtk.platform.Engine):
         # maintain the export cache
         self._export_info = None
 
-        if self.has_ui:
-            # tell QT to interpret C strings as utf-8
-            from sgtk.platform.qt import QtCore
-
-            utf8 = QtCore.QTextCodec.codecForName("utf-8")
-            QtCore.QTextCodec.setCodecForCStrings(utf8)
-
         # Assuming we're in a new enough version of Flame (2018.3+) we'll
         # be able to link the Flame project to our SG project. This will
         # ensure that is a use launches Flame's plugin-based Flow Production Tracking
