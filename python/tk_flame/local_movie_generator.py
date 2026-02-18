@@ -60,7 +60,7 @@ class LocalMovieGenerator(object):
         if not self.engine.get_setting("generate_local_movies"):
             return
 
-        (dst_path, job_id, files_to_delete) = self._generate(
+        dst_path, job_id, files_to_delete = self._generate(
             src_path=src_path,
             dst_path=dst_path,
             display_name=display_name,

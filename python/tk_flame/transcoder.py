@@ -106,7 +106,7 @@ class Transcoder(object):
             temporary file created.
         :returns path: String of the path created.
         """
-        (tmp_fd, path) = tempfile.mkstemp(
+        tmp_fd, path = tempfile.mkstemp(
             suffix=extension, dir=self.engine.get_backburner_tmp()
         )
         os.close(tmp_fd)
@@ -132,7 +132,7 @@ class Transcoder(object):
             self.engine.log_error("Cannot create Open clip for non-video assets")
             return None
 
-        (tmp_fd, path) = tempfile.mkstemp(
+        tmp_fd, path = tempfile.mkstemp(
             suffix=".clip", dir=self.engine.get_backburner_tmp()
         )
 
@@ -218,11 +218,7 @@ class Transcoder(object):
                </feeds>
               </track>
              </tracks>
-            </clip>""".format(
-                **metadata
-            ).encode(
-                "utf-8"
-            ),
+            </clip>""".format(**metadata).encode("utf-8"),
         )
         os.close(tmp_fd)
         return path

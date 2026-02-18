@@ -11,6 +11,7 @@
 """
 Hook that handles logic and automation around automatic Flame project setup
 """
+
 import sgtk
 from sgtk import TankError
 from functools import partial

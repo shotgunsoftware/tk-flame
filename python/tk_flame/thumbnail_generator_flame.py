@@ -53,7 +53,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
         if preview_job is None:
             self.engine.log_debug("Create and Upload Preview using Flame exporter")
 
-            (dst_path, job_id, files_to_delete) = self.engine.transcoder.transcode(
+            dst_path, job_id, files_to_delete = self.engine.transcoder.transcode(
                 src_path=path,
                 dst_path=None,
                 extension=".mov",
@@ -105,7 +105,7 @@ class ThumbnailGeneratorFlame(ThumbnailGenerator):
             # FIXME we should use the poster frame index supplied by Flame.
             poster_frame = 1
 
-            (dst_path, job_id, files_to_delete) = self.engine.transcoder.transcode(
+            dst_path, job_id, files_to_delete = self.engine.transcoder.transcode(
                 src_path=path,
                 dst_path=None,
                 extension=".jpg",
