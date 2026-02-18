@@ -275,8 +275,8 @@ class WiretapHandler:
                 # in the pre-DCC launch phase, so need to wrap our modal dialog call
                 # in a helper method which also creates a QApplication.
 
-                (group_name, groups) = self._get_groups()
-                (return_code, widget) = start_qt_app_and_show_modal(
+                group_name, groups = self._get_groups()
+                return_code, widget = start_qt_app_and_show_modal(
                     "Create Flame Project",
                     self._engine,
                     ProjectCreateDialog,

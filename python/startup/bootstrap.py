@@ -113,7 +113,7 @@ def bootstrap(engine_instance_name, context, app_path, app_args):
     app_path = os.path.realpath(app_path)
 
     # do a quick check to ensure that we are running 2015.2 or later
-    (major_ver, minor_ver, patch_ver, version_str) = _get_flame_version(app_path)
+    major_ver, minor_ver, patch_ver, version_str = _get_flame_version(app_path)
 
     if major_ver < 2016:
         raise TankError(

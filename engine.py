@@ -57,7 +57,7 @@ class FlameEngine(sgtk.platform.Engine):
     SGTK_LOG_FILE_SAFE = "/tmp/tk-flame.log"
 
     # define constants for the various modes the engine can execute in
-    (ENGINE_MODE_DCC, ENGINE_MODE_PRELAUNCH, ENGINE_MODE_BACKBURNER) = list(range(3))
+    ENGINE_MODE_DCC, ENGINE_MODE_PRELAUNCH, ENGINE_MODE_BACKBURNER = list(range(3))
 
     @property
     def host_info(self):

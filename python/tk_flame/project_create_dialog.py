@@ -20,7 +20,7 @@ class ProjectCreateDialog(QtGui.QWidget):
     """
 
     # map the tab indices in the UI to constants
-    (TAB_GENERAL, TAB_RESOLUTION, TAB_OLD_PROXY, TAB_NEW_PROXY) = range(4)
+    TAB_GENERAL, TAB_RESOLUTION, TAB_OLD_PROXY, TAB_NEW_PROXY = range(4)
 
     def __init__(
         self,
