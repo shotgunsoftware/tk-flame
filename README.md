@@ -1,3 +1,4 @@
+![Supported Flame versions: 2025 - 2027](https://img.shields.io/badge/Flame-2025_--_2027-blue "Supported Flame versions")
 [![VFX Platform](https://img.shields.io/badge/vfxplatform-2025%20%7C%202024%20%7C%202023%20%7C%202022-blue.svg)](http://www.vfxplatform.com/)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.10%20%7C%203.9-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
