@@ -12,7 +12,7 @@
 import os
 
 
-def getCustomExportProfiles(profiles):
+def getCustomExportProfiles(profiles, *_args, **_kwargs):
     """
     Hook returning the custom export profiles to display to the user in the
     contextual menu.
@@ -33,7 +33,7 @@ def getCustomExportProfiles(profiles):
         profiles[preset_title] = {"sg_preset_title": preset_title}
 
 
-def preCustomExport(info, userData):
+def preCustomExport(info, userData, *_args, **_kwargs):
     """
     Hook called before a custom export begins. The export will be blocked
     until this function returns. This can be used to fill information that would
@@ -83,7 +83,7 @@ def preCustomExport(info, userData):
 preCustomExport.__dict__["waitCursor"] = False
 
 
-def postCustomExport(info, userData):
+def postCustomExport(info, userData, *_args, **_kwargs):
     """
     Hook called after a custom export ends. The export will be blocked
     until this function returns.
@@ -115,7 +115,7 @@ def postCustomExport(info, userData):
             engine.trigger_export_callback("postCustomExport", session_id, info)
 
 
-def preExport(info, userData):
+def preExport(info, userData, *_args, **_kwargs):
     """
     Hook called before an export begins. The export will be blocked
     until this function returns.
@@ -150,7 +150,7 @@ def preExport(info, userData):
             engine.trigger_export_callback("preExport", session_id, info)
 
 
-def postExport(info, userData):
+def postExport(info, userData, *_args, **_kwargs):
     """
     Hook called after an export ends. The export will be blocked
     until this function returns.
@@ -193,7 +193,7 @@ def postExport(info, userData):
 postExport.__dict__["waitCursor"] = False
 
 
-def preExportSequence(info, userData):
+def preExportSequence(info, userData, *_args, **_kwargs):
     """
     Hook called before a sequence export begins. The export will be blocked
     until this function returns.
@@ -232,7 +232,7 @@ def preExportSequence(info, userData):
             engine.trigger_export_callback("preExportSequence", session_id, info)
 
 
-def postExportSequence(info, userData):
+def postExportSequence(info, userData, *_args, **_kwargs):
     """
     Hook called after a sequence export ends. The export will be blocked
     until this function returns.
@@ -266,7 +266,7 @@ def postExportSequence(info, userData):
             engine.trigger_export_callback("postExportSequence", session_id, info)
 
 
-def preExportAsset(info, userData):
+def preExportAsset(info, userData, *_args, **_kwargs):
     """
     Hook called before an asset export starts. The export will be blocked
     until this function returns.
@@ -322,7 +322,7 @@ def preExportAsset(info, userData):
             engine.trigger_export_callback("preExportAsset", session_id, info)
 
 
-def postExportAsset(info, userData):
+def postExportAsset(info, userData, *_args, **_kwargs):
     """
     Hook called after an asset export ends. The export will be blocked
     until this function returns.
@@ -388,7 +388,7 @@ def postExportAsset(info, userData):
             engine.trigger_export_callback("postExportAsset", session_id, info)
 
 
-def useBackburnerPostExportAsset():
+def useBackburnerPostExportAsset(*_args, **_kwargs):
     """
     Use this method to instruct Flame to run all post-export callbacks
     directly, even the ones where the export is happening in a backburner job.

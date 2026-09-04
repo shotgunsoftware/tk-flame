@@ -11,7 +11,7 @@
 import os
 
 
-def appExit(info):
+def appExit(info, *_args, **_kwargs):
     import sgtk
 
     engine = sgtk.platform.current_engine()
@@ -21,7 +21,7 @@ def appExit(info):
         engine.destroy()
 
 
-def getCustomUIActions():
+def getCustomUIActions(*_args, **_kwargs):
     try:
         import flame
 
@@ -43,7 +43,7 @@ def getCustomUIActions():
     return getMainMenuCustomUIActions()
 
 
-def getMainMenuCustomUIActions():
+def getMainMenuCustomUIActions(*_args, **_kwargs):
     """
     Hook returning the custom ui actions to display to the user in the contextual menu.
 
@@ -142,7 +142,7 @@ def getMainMenuCustomUIActions():
     return ({"name": name, "actions": tuple(actions)},)
 
 
-def customUIAction(info, userData):
+def customUIAction(info, userData, *_args, **_kwargs):
     """
     Hook called when a custom action is triggered in the menu
 

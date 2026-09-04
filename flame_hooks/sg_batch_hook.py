@@ -29,7 +29,7 @@ def _show_publisher():
             tk_multi_publish2.show_dialog(publisher)
 
 
-def batchSetupLoaded(setupPath):
+def batchSetupLoaded(setupPath, *_args, **_kwargs):
     """
     Hook called when a batch setup is loaded.
 
@@ -47,7 +47,7 @@ def batchSetupLoaded(setupPath):
     engine.trigger_batch_callback("batchSetupLoaded", {"setupPath": setupPath})
 
 
-def batchSetupSaved(setupPath):
+def batchSetupSaved(setupPath, *_args, **_kwargs):
     """
     Hook called when a batch setup is saved.
 
@@ -65,7 +65,7 @@ def batchSetupSaved(setupPath):
     engine.trigger_batch_callback("batchSetupSaved", {"setupPath": setupPath})
 
 
-def batchRenderBegin(info, userData, *args, **kwargs):
+def batchRenderBegin(info, userData, *_args, **_kwargs):
     """
     Hook called before a render begins. The render will be blocked
     until this function returns.
@@ -92,7 +92,7 @@ def batchRenderBegin(info, userData, *args, **kwargs):
     engine.trigger_batch_callback("batchRenderBegin", info)
 
 
-def batchRenderEnd(info, userData, *args, **kwargs):
+def batchRenderEnd(info, userData, *_args, **_kwargs):
     """
     Hook called before a render ends.
 
@@ -124,7 +124,7 @@ def batchRenderEnd(info, userData, *args, **kwargs):
         _show_publisher()
 
 
-def batch_burn_begin(info, userData, *args, **kwargs):
+def batch_burn_begin(info, userData, *_args, **_kwargs):
     """
     Hook called before a background job to Burn or Background reactor begins.
     The submission will be blocked until this function returns.
@@ -151,7 +151,7 @@ def batch_burn_begin(info, userData, *args, **kwargs):
     engine.trigger_batch_callback("batchBurnBegin", info)
 
 
-def batch_burn_end(info, userData, *args, **kwargs):
+def batch_burn_end(info, userData, *_args, **_kwargs):
     """
     Hook called after a background job has been sent to Burn or Background Reactor.
 
@@ -187,7 +187,7 @@ def batch_burn_end(info, userData, *args, **kwargs):
 batchRenderEnd.__dict__["waitCursor"] = False
 
 
-def batchExportBegin(info, userData):
+def batchExportBegin(info, userData, *_args, **_kwargs):
     """
     Hook called before an export begins. The export will be blocked
     until this function returns.  Note that for stereo export this
@@ -233,7 +233,7 @@ def batchExportBegin(info, userData):
     engine.trigger_batch_callback("batchExportBegin", info)
 
 
-def batchExportEnd(info, userData):
+def batchExportEnd(info, userData, *_args, **_kwargs):
     """
     Hook called when an export ends. Note that for stereo export this
     function will be called twice (for left then right channel)
