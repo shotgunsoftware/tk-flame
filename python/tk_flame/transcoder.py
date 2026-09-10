@@ -71,27 +71,25 @@ class Transcoder(object):
             def __init__(self, user_data_job_key):
                 self._user_data_job_key = user_data_job_key
 
-            def preExport(self, info, userData, *args, **kwargs):
+            def preExport(self, info, userData, *_args, **_kwargs):
                 pass
 
-            def postExport(self, info, userData, *args, **kwargs):
+            def postExport(self, info, userData, *_args, **_kwargs):
                 pass
 
-            def preExportSequence(self, info, userData, *args, **kwargs):
+            def preExportSequence(self, info, userData, *_args, **_kwargs):
                 pass
 
-            def postExportSequence(self, info, userData, *args, **kwargs):
+            def postExportSequence(self, info, userData, *_args, **_kwargs):
                 pass
 
-            def preExportAsset(self, info, userData, *args, **kwargs):
+            def preExportAsset(self, info, userData, *_args, **_kwargs):
                 pass
 
-            def postExportAsset(self, info, userData, *args, **kwargs):
-                del args, kwargs  # Unused necessary parameters
+            def postExportAsset(self, info, userData, *_args, **_kwargs):
                 userData[self._user_data_job_key] = info["backgroundJobId"]
 
-            def exportOverwriteFile(self, path, *args, **kwargs):
-                del path, args, kwargs  # Unused necessary parameters
+            def exportOverwriteFile(self, path, *_args, **_kwargs):
                 return "overwrite"
 
         return PythonHookOverride(user_data_job_key)

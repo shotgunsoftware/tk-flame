@@ -11,7 +11,7 @@
 # Note! This file implements the projectHook interface from Flame 2015.2
 
 
-def appInitialized(projectName):
+def appInitialized(projectName, *_args, **_kwargs):
     """
     Hook called when application is fully initialized.
 

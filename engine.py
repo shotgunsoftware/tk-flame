@@ -100,7 +100,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         return host_info
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *_args, **_kwargs):
         """
         Overridden constructor where we init some things which
         need to be defined very early on in the engine startup.
@@ -165,7 +165,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         self._cmdjob_supports_plugin_name = None
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*_args, **_kwargs)
 
     def pre_app_init(self):
         """
@@ -738,7 +738,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         return has_ui
 
-    def show_panel(self, panel_id, title, bundle, widget_class, *args, **kwargs):
+    def show_panel(self, panel_id, title, bundle, widget_class, *_args, **_kwargs):
         """
         Override the base show_panel to create a non-modal dialog that will stay on
         top of the Flame interface
@@ -754,7 +754,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # create the dialog:
         dialog, widget = self._create_dialog_with_widget(
-            title, bundle, widget_class, *args, **kwargs
+            title, bundle, widget_class, *_args, **_kwargs
         )
         dialog.setWindowFlags(
             dialog.windowFlags()
@@ -780,7 +780,7 @@ class FlameEngine(sgtk.platform.Engine):
         w = self.flame_main_window
         return w if w else super()._get_dialog_parent()
 
-    def show_dialog(self, title, bundle, widget_class, *args, **kwargs):
+    def show_dialog(self, title, bundle, widget_class, *_args, **_kwargs):
         """
         Shows a non-modal dialog window in a way suitable for this engine.
         The engine will attempt to parent the dialog nicely to the host application.
@@ -842,7 +842,7 @@ class FlameEngine(sgtk.platform.Engine):
 
         # create the dialog:
         dialog, widget = self._create_dialog_with_widget(
-            title, bundle, widget_class, *args, **kwargs
+            title, bundle, widget_class, *_args, **_kwargs
         )
 
         dialog.setWindowFlags(
