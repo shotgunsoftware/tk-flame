@@ -77,7 +77,7 @@ configuration:
 
     backburner_job_completion:
         type: str
-        default_value: "delete"
+        default_value: "delete:1"
         description: Action to be done on Backburner job completion.
                      Possible values are default, leaveInQueue, delete[:days], archive[:days].
                      Default will use the manager or application default for the action.
